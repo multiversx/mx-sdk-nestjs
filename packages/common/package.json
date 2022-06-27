@@ -1,5 +1,5 @@
 {
-  "name": "@elrondnetwork/nestjs-microservice/common",
+  "name": "@elrondnetwork/nestjs-microservice-common",
   "version": "0.1.0",
   "description": "NestJS microservice template",
   "main": "lib/src/index.js",
