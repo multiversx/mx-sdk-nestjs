@@ -53,3 +53,6 @@ export * from './common/elastic/entities/range.query';
 export * from './common/elastic/entities/should.query';
 export * from './common/elastic/entities/terms.query';
 export * from './common/elastic/entities/wildcard.query';
+export * from './common/api/api.module';
+export * from './common/api/api.service';
+export * from './common/api/entities/api.settings';
