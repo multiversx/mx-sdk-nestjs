@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ApiService } from "../api/api.service";
 import { PerformanceProfiler } from "../../utils/performance.profiler";
-import { MetricsService } from "src/common/metrics/metrics.service";
+import { MetricsService } from "../../common/metrics/metrics.service";
 import { NestjsApiConfigService } from "../api-config/nestjs.api.config.service";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticMetricType } from "../metrics/entities/elastic.metric.type";
@@ -85,7 +85,6 @@ export class ElasticService {
     const profiler = new PerformanceProfiler();
 
     const result = await this.post(url, elasticQuery.toJson());
-
     profiler.stop();
 
     this.metricsService.setElasticDuration(collection, ElasticMetricType.list, profiler.duration);
@@ -113,6 +112,49 @@ export class ElasticService {
 
       await action(scrollDocuments.map((document: any) => this.formatItem(document, key)));
     }
+  }
+
+  async getCustomValue(collection: string, prefix: string, identifier: string, attribute: string): Promise<any> {
+    const url = `${this.url}/${collection}/_search?q=_id:${encodeURIComponent(identifier)}`;
+
+    const profiler = new PerformanceProfiler();
+    const fullAttribute = prefix + '_' + attribute;
+
+    const payload = {
+      _source: fullAttribute,
+    };
+
+    const result = await this.post(url, payload);
+
+    profiler.stop();
+    this.metricsService.setElasticDuration(collection, ElasticMetricType.item, profiler.duration);
+
+    const hits = result.data?.hits?.hits;
+    if (hits && hits.length > 0) {
+      const document = hits[0];
+
+      return document._source[fullAttribute];
+    }
+
+    return null;
+  }
+
+  async setCustomValue<T>(collection: string, prefix: string, identifier: string, attribute: string, value: T): Promise<void> {
+    const url = `${this.url}/${collection}/_update/${identifier}`;
+
+    const profiler = new PerformanceProfiler();
+    const fullAttribute = prefix + '_' + attribute;
+
+    const payload = {
+      doc: {
+        [fullAttribute]: value,
+      },
+    };
+
+    await this.post(url, payload);
+
+    profiler.stop();
+    this.metricsService.setElasticDuration(collection, ElasticMetricType.item, profiler.duration);
   }
 
   public async get(url: string) {

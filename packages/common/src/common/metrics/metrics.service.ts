@@ -152,10 +152,6 @@ export class MetricsService {
     MetricsService.apiCallsHistogram.labels(endpoint, origin, status.toString()).observe(duration);
   }
 
-  setVmQuery(address: string, func: string, duration: number) {
-    MetricsService.vmQueriesHistogram.labels(address, func).observe(duration);
-  }
-
   setPendingRequestsCount(count: number) {
     MetricsService.pendingRequestsHistogram.set(count);
   }
@@ -168,26 +164,13 @@ export class MetricsService {
     MetricsService.elasticDurationHistogram.labels(type, collection).observe(duration);
   }
 
-  setGatewayDuration(name: string, duration: number) {
-    MetricsService.gatewayDurationHistogram.labels(name).observe(duration);
-  }
-
   setRedisDuration(action: string, duration: number) {
     MetricsService.externalCallsHistogram.labels('redis').observe(duration);
     MetricsService.redisDurationHistogram.labels(action).observe(duration);
   }
 
-  setPersistenceDuration(action: string, duration: number) {
-    MetricsService.externalCallsHistogram.labels('persistence').observe(duration);
-    MetricsService.persistenceDurationHistogram.labels(action).observe(duration);
-  }
-
   static setJobResult(job: string, result: 'success' | 'error', duration: number) {
     MetricsService.jobsHistogram.labels(job, result).observe(duration);
-  }
-
-  setLastProcessedNonce(shardId: number, nonce: number) {
-    MetricsService.lastProcessedNonceGauge.set({ shardId }, nonce);
   }
 
   incrementPendingApiHit(endpoint: string) {

@@ -1,4 +1,4 @@
-import { ApiUtils } from "src/utils/api.utils";
+import { ApiUtils } from "../../../utils/api.utils";
 import { AbstractQuery } from "./abstract.query";
 import { ElasticPagination } from "./elastic.pagination";
 import { ElasticSortProperty } from "./elastic.sort.property";
@@ -19,6 +19,7 @@ function buildElasticIndexerSort(sorts: ElasticSortProperty[]): any[] {
 }
 
 export class ElasticQuery {
+  fields?: string[];
   pagination?: ElasticPagination;
   sort: ElasticSortProperty[] = [];
   filter: AbstractQuery[] = [];
@@ -28,6 +29,12 @@ export class ElasticQuery {
 
   static create(): ElasticQuery {
     return new ElasticQuery();
+  }
+
+  withFields(fields: string[]): ElasticQuery {
+    this.fields = fields;
+
+    return this;
   }
 
   withPagination(pagination: ElasticPagination): ElasticQuery {
@@ -55,7 +62,7 @@ export class ElasticQuery {
       return this;
     }
 
-    return this.withMustCondition(QueryType.Wildcard(key, `*${value}*`));
+    return this.withMustCondition(QueryType.Wildcard(key, `*${value.toLowerCase()}*`));
   }
 
   withMustMultiShouldCondition<T>(values: T[] | undefined, action: (value: T) => MatchQuery) {
@@ -129,8 +136,16 @@ export class ElasticQuery {
     return this;
   }
 
-  withFilter(filter: RangeQuery[]): ElasticQuery {
-    this.filter = filter;
+  withDateRangeFilter(key: string, before: number | undefined, after: number | undefined) {
+    if (!before && !after) {
+      return this;
+    }
+
+    return this.withFilter(QueryType.Range(key, before ?? Date.now(), after ?? 0));
+  }
+
+  withFilter(filter: RangeQuery): ElasticQuery {
+    this.filter.push(filter);
 
     return this;
   }
@@ -145,6 +160,7 @@ export class ElasticQuery {
     const elasticSort = buildElasticIndexerSort(this.sort);
 
     const elasticQuery = {
+      _source: this.fields,
       ...this.pagination,
       sort: elasticSort,
       query: {

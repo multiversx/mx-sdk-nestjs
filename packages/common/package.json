@@ -1,11 +1,12 @@
 {
   "name": "@elrondnetwork/nestjs-microservice-common",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "NestJS microservice template",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "files": [
-    "lib/src/**/*"
+    "lib/src/**/*",
+    "lib/config/**/*"
   ],
   "scripts": {
     "test": "jest test/*",
