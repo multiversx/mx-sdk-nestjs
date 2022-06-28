@@ -5,17 +5,12 @@ import { ElasticMetricType } from "./entities/elastic.metric.type";
 @Injectable()
 export class MetricsService {
   private static apiCallsHistogram: Histogram<string>;
-  private static vmQueriesHistogram: Histogram<string>;
   private static pendingRequestsHistogram: Gauge<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static elasticDurationHistogram: Histogram<string>;
-  private static gatewayDurationHistogram: Histogram<string>;
   private static elasticTookHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
-  private static persistenceDurationHistogram: Histogram<string>;
   private static jobsHistogram: Histogram<string>;
-  private static currentNonceGauge: Gauge<string>;
-  private static lastProcessedNonceGauge: Gauge<string>;
   private static pendingApiHitGauge: Gauge<string>;
   private static cachedApiHitGauge: Gauge<string>;
   private static isDefaultMetricsRegistered: boolean = false;
@@ -26,15 +21,6 @@ export class MetricsService {
         name: 'api',
         help: 'API Calls',
         labelNames: ['endpoint', 'origin', 'code'],
-        buckets: [],
-      });
-    }
-
-    if (!MetricsService.vmQueriesHistogram) {
-      MetricsService.vmQueriesHistogram = new Histogram({
-        name: 'vm_query',
-        help: 'VM Queries',
-        labelNames: ['address', 'function'],
         buckets: [],
       });
     }
@@ -65,15 +51,6 @@ export class MetricsService {
       });
     }
 
-    if (!MetricsService.gatewayDurationHistogram) {
-      MetricsService.gatewayDurationHistogram = new Histogram({
-        name: 'gateway_duration',
-        help: 'Gateway Duration',
-        labelNames: ['endpoint'],
-        buckets: [],
-      });
-    }
-
     if (!MetricsService.elasticTookHistogram) {
       MetricsService.elasticTookHistogram = new Histogram({
         name: 'elastic_took',
@@ -92,37 +69,12 @@ export class MetricsService {
       });
     }
 
-    if (!MetricsService.persistenceDurationHistogram) {
-      MetricsService.persistenceDurationHistogram = new Histogram({
-        name: 'persistence_duration',
-        help: 'Persistence Duration',
-        labelNames: ['action'],
-        buckets: [],
-      });
-    }
-
     if (!MetricsService.jobsHistogram) {
       MetricsService.jobsHistogram = new Histogram({
         name: 'jobs',
         help: 'Jobs',
         labelNames: ['job_identifier', 'result'],
         buckets: [],
-      });
-    }
-
-    if (!MetricsService.currentNonceGauge) {
-      MetricsService.currentNonceGauge = new Gauge({
-        name: 'current_nonce',
-        help: 'Current nonce of the given shard',
-        labelNames: ['shardId'],
-      });
-    }
-
-    if (!MetricsService.lastProcessedNonceGauge) {
-      MetricsService.lastProcessedNonceGauge = new Gauge({
-        name: 'last_processed_nonce',
-        help: 'Last processed nonce of the given shard',
-        labelNames: ['shardId'],
       });
     }
 
