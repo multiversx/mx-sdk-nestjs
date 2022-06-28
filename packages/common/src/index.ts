@@ -56,6 +56,8 @@ export * from './common/elastic/entities/wildcard.query';
 export * from './common/api/api.module';
 export * from './common/api/api.service';
 export * from './common/api/entities/api.settings';
+export * from './common/metrics/metrics.module';
+export * from './common/metrics/metrics.service';
 export * from './interceptors/caching.interceptor';
 export * from './interceptors/cleanup.interceptor';
 export * from './interceptors/extract.interceptor';
