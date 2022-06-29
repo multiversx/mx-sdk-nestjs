@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from "@nestjs/common";
 import { TokenExpiredError, verify } from 'jsonwebtoken';
-import configuration from "../../../config/configuration";
+import configuration from "../../config/configuration";
 
 @Injectable()
 export class JwtAuthenticateGlobalGuard implements CanActivate {
