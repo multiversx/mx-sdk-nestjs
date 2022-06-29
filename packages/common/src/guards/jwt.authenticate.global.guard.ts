@@ -30,7 +30,7 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
     const jwt = authorization.replace('Bearer ', '');
 
     try {
-      const jwtSecret: string = configuration()['security.jwtSecret'];
+      const jwtSecret: string = configuration()?.security?.jwtSecret;
 
       const accessAddress = await new Promise((resolve, reject) => {
         verify(jwt, jwtSecret, (err, decoded) => {
@@ -43,7 +43,9 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
         });
       });
 
-      if (accessAddress !== configuration()['security.accessAddress']) {
+      console.log({ accessAddress });
+
+      if (accessAddress !== configuration()?.security?.accessAddress) {
         return false;
       }
     } catch (error) {
