@@ -43,8 +43,6 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
         });
       });
 
-      console.log({ accessAddress });
-
       if (accessAddress !== configuration()?.security?.accessAddress) {
         return false;
       }
