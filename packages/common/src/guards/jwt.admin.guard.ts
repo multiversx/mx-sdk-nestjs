@@ -1,9 +1,11 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { NESTJS_API_CONFIG_SERVICE } from '../utils/nestjs.microservice.constants';
 import { NestjsApiConfigService } from '../common/api-config/nestjs.api.config.service';
 
 @Injectable()
 export class JwtAdminGuard implements CanActivate {
   constructor(
+    @Inject(NESTJS_API_CONFIG_SERVICE)
     private readonly apiConfigService: NestjsApiConfigService
   ) { }
 

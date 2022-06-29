@@ -1,5 +1,5 @@
 import { DynamicModule, Global, Module, Provider } from "@nestjs/common";
-import { NestjsApiConfigModule } from "../api-config/nestjs.api.config.module";
+import { LoggingModule } from "../logging/logging.module";
 import { MetricsModule } from "../metrics/metrics.module";
 import { CachingService } from "./caching.service";
 import { CachingModuleAsyncOptions } from "./entities/caching.module.async.options";
@@ -10,7 +10,7 @@ import { LocalCacheService } from "./local.cache.service";
 @Module({
   imports: [
     MetricsModule,
-    NestjsApiConfigModule,
+    LoggingModule,
   ],
   providers: [
     CachingService, LocalCacheService,

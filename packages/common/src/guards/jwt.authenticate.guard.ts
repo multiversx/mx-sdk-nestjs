@@ -1,5 +1,6 @@
-import { Injectable, CanActivate, ExecutionContext, Logger } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Logger, Inject } from '@nestjs/common';
 import { TokenExpiredError, verify } from 'jsonwebtoken';
+import { NESTJS_API_CONFIG_SERVICE } from '../utils/nestjs.microservice.constants';
 import { NestjsApiConfigService } from '../common/api-config/nestjs.api.config.service';
 
 @Injectable()
@@ -7,6 +8,7 @@ export class JwtAuthenticateGuard implements CanActivate {
   private readonly logger: Logger;
 
   constructor(
+    @Inject(NESTJS_API_CONFIG_SERVICE)
     private readonly apiConfigService: NestjsApiConfigService
   ) {
     this.logger = new Logger(JwtAuthenticateGuard.name);
