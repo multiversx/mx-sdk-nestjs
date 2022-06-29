@@ -2,26 +2,22 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ApiService } from "../api/api.service";
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { MetricsService } from "../../common/metrics/metrics.service";
-import { NestjsApiConfigService } from "../api-config/nestjs.api.config.service";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticMetricType } from "../metrics/entities/elastic.metric.type";
+import { ElasticModuleOptions } from "./entities/elastic.module.options";
 
 @Injectable()
 export class ElasticService {
-  private readonly url: string;
-
   constructor(
-    private apiConfigService: NestjsApiConfigService,
+    private readonly options: ElasticModuleOptions,
     @Inject(forwardRef(() => ApiService))
     private readonly apiService: ApiService,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService
-  ) {
-    this.url = apiConfigService.getElasticUrl();
-  }
+  ) { }
 
   async getCount(collection: string, elasticQuery: ElasticQuery | undefined = undefined) {
-    const url = `${this.apiConfigService.getElasticUrl()}/${collection}/_count`;
+    const url = `${this.options.url}/${collection}/_count`;
 
     const profiler = new PerformanceProfiler();
 
@@ -37,7 +33,7 @@ export class ElasticService {
   }
 
   async getItem(collection: string, key: string, identifier: string) {
-    const url = `${this.url}/${collection}/_search?q=_id:${identifier}`;
+    const url = `${this.options.url}/${collection}/_search?q=_id:${identifier}`;
 
     const profiler = new PerformanceProfiler();
 
@@ -65,7 +61,7 @@ export class ElasticService {
   }
 
   async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {
-    const url = `${overrideUrl ?? this.url}/${collection}/_search`;
+    const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
 
     const profiler = new PerformanceProfiler();
 
@@ -80,7 +76,7 @@ export class ElasticService {
   }
 
   async getScrollableList(collection: string, key: string, elasticQuery: ElasticQuery, action: (items: any[]) => Promise<void>): Promise<void> {
-    const url = `${this.url}/${collection}/_search?scroll=10m`;
+    const url = `${this.options.url}/${collection}/_search?scroll=10m`;
 
     const profiler = new PerformanceProfiler();
 
@@ -97,7 +93,7 @@ export class ElasticService {
     while (true) {
       const scrollProfiler = new PerformanceProfiler();
 
-      const scrollResult = await this.post(`${this.url}/_search/scroll`, {
+      const scrollResult = await this.post(`${this.options.url}/_search/scroll`, {
         scroll: '20m',
         scroll_id: scrollId,
       });
@@ -114,11 +110,16 @@ export class ElasticService {
     }
   }
 
-  async getCustomValue(collection: string, prefix: string, identifier: string, attribute: string): Promise<any> {
-    const url = `${this.url}/${collection}/_search?q=_id:${encodeURIComponent(identifier)}`;
+  async getCustomValue(collection: string, identifier: string, attribute: string): Promise<any> {
+    const customValuePrefix = this.options.customValuePrefix;
+    if (!customValuePrefix) {
+      throw new Error('Custom value prefix not defined in the elastic service options');
+    }
+
+    const url = `${this.options.url}/${collection}/_search?q=_id:${encodeURIComponent(identifier)}`;
 
     const profiler = new PerformanceProfiler();
-    const fullAttribute = prefix + '_' + attribute;
+    const fullAttribute = customValuePrefix + '_' + attribute;
 
     const payload = {
       _source: fullAttribute,
@@ -139,11 +140,16 @@ export class ElasticService {
     return null;
   }
 
-  async setCustomValue<T>(collection: string, prefix: string, identifier: string, attribute: string, value: T): Promise<void> {
-    const url = `${this.url}/${collection}/_update/${identifier}`;
+  async setCustomValue<T>(collection: string, identifier: string, attribute: string, value: T): Promise<void> {
+    const customValuePrefix = this.options.customValuePrefix;
+    if (!customValuePrefix) {
+      throw new Error('Custom value prefix not defined in the elastic service options');
+    }
+
+    const url = `${this.options.url}/${collection}/_update/${identifier}`;
 
     const profiler = new PerformanceProfiler();
-    const fullAttribute = prefix + '_' + attribute;
+    const fullAttribute = customValuePrefix + '_' + attribute;
 
     const payload = {
       doc: {

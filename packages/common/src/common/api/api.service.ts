@@ -2,9 +2,9 @@ import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import axios, { AxiosRequestConfig } from "axios";
 import Agent from 'agentkeepalive';
 import { MetricsService } from "../../common/metrics/metrics.service";
-import { NestjsApiConfigService } from "../api-config/nestjs.api.config.service";
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
+import { ApiModuleOptions } from "./entities/api.module.options";
 
 @Injectable()
 export class ApiService {
@@ -12,19 +12,19 @@ export class ApiService {
   private keepaliveAgent: Agent | undefined | null = null;
 
   constructor(
-    private readonly apiConfigService: NestjsApiConfigService,
+    private readonly options: ApiModuleOptions,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
   ) { }
 
   private getKeepAliveAgent(): Agent | undefined {
     if (this.keepaliveAgent === null) {
-      if (this.apiConfigService.getUseKeepAliveAgentFlag()) {
+      if (this.options.useKeepAliveAgent) {
         this.keepaliveAgent = new Agent({
           keepAlive: true,
           maxSockets: Infinity,
           maxFreeSockets: 10,
-          timeout: this.apiConfigService.getAxiosTimeout(), // active socket keepalive
+          timeout: this.options.axiosTimeout, // active socket keepalive
           freeSocketTimeout: 30000, // free socket keepalive for 30 seconds
         });
       } else {
@@ -42,7 +42,7 @@ export class ApiService {
 
     const headers = settings.headers ?? {};
 
-    const rateLimiterSecret = this.apiConfigService.getRateLimiterSecret();
+    const rateLimiterSecret = this.options.rateLimiterSecret;
     if (rateLimiterSecret) {
       // @ts-ignore
       headers['x-rate-limiter-secret'] = rateLimiterSecret;

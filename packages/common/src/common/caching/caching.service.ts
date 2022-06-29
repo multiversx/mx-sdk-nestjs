@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
-import { NestjsApiConfigService } from "../api-config/nestjs.api.config.service";
 const { promisify } = require('util');
 import { createClient } from 'redis';
 import asyncPool from 'tiny-async-pool';
@@ -7,10 +6,11 @@ import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { LocalCacheService } from "./local.cache.service";
 import { MetricsService } from "../metrics/metrics.service";
 import { BatchUtils } from "../../utils/batch.utils";
+import { CachingModuleOptions } from "./entities/caching.module.options";
 
 @Injectable()
 export class CachingService {
-  private client = createClient(6379, this.configService.getRedisUrl());
+  private client = createClient(6379, this.options.url);
   private asyncSet = promisify(this.client.set).bind(this.client);
   private asyncGet = promisify(this.client.get).bind(this.client);
   private asyncIncr = promisify(this.client.incr).bind(this.client);
@@ -30,7 +30,7 @@ export class CachingService {
   private readonly logger: Logger;
 
   constructor(
-    private readonly configService: NestjsApiConfigService,
+    private readonly options: CachingModuleOptions,
     private readonly localCacheService: LocalCacheService,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
@@ -189,7 +189,7 @@ export class CachingService {
 
     if (missing.length) {
       values = await asyncPool(
-        this.configService.getPoolLimit(),
+        this.options.poolLimit,
         missing.map((index) => payload[index]),
         handler
       );
@@ -197,7 +197,7 @@ export class CachingService {
       const params = {
         keys: keys.filter((_, index) => missing.includes(index)),
         values,
-        ttls: values.map((value) => (value ? ttl : Math.min(ttl, this.configService.getProcessTtl()))),
+        ttls: values.map((value) => (value ? ttl : Math.min(ttl, this.options.processTtl))),
       };
 
       await this.batchSetCache(params.keys, params.values, params.ttls);
