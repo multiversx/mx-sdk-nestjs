@@ -1,5 +1,5 @@
 {
-  "name": "@elrondnetwork/erdnest-common",
+  "name": "@elrondnetwork/erdnest",
   "version": "0.1.0",
   "description": "NestJS microservice template",
   "main": "lib/src/index.js",
@@ -15,13 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ElrondNetwork/native-auth.git"
+    "url": "git+https://github.com/ElrondNetwork/erdnest.git"
   },
   "keywords": [
     "elrond",
     "nestjs",
     "microservice",
-    "template"
+    "template",
+    "common"
   ],
   "author": "ElrondNetwork",
   "license": "GPL-3.0-or-later",
