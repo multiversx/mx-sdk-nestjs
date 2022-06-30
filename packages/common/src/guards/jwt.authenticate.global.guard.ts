@@ -1,17 +1,17 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, Logger } from "@nestjs/common";
 import { TokenExpiredError, verify } from 'jsonwebtoken';
+import { ErdnestConfigService } from "src/common/config/erdnest.config.service";
 import { NoAuthOptions } from "../decorators/no.auth";
 import { DecoratorUtils } from "../utils/decorator.utils";
-import { NestjsApiConfigService } from "../common/api-config/nestjs.api.config.service";
-import { NESTJS_API_CONFIG_SERVICE } from "../utils/nestjs.microservice.constants";
+import { ERDNEST_CONFIG_SERVICE } from "../utils/erdnest.constants";
 
 @Injectable()
 export class JwtAuthenticateGlobalGuard implements CanActivate {
   private readonly logger: Logger;
 
   constructor(
-    @Inject(NESTJS_API_CONFIG_SERVICE)
-    private readonly apiConfigService: NestjsApiConfigService
+    @Inject(ERDNEST_CONFIG_SERVICE)
+    private readonly erdnestConfigService: ErdnestConfigService
   ) {
     this.logger = new Logger(JwtAuthenticateGlobalGuard.name);
   }
@@ -34,7 +34,7 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
     const jwt = authorization.replace('Bearer ', '');
 
     try {
-      const jwtSecret: string = this.apiConfigService.getJwtSecret();
+      const jwtSecret: string = this.erdnestConfigService.getJwtSecret();
 
       const accessAddress = await new Promise((resolve, reject) => {
         verify(jwt, jwtSecret, (err, decoded) => {
@@ -47,7 +47,7 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
         });
       });
 
-      if (accessAddress !== this.apiConfigService.getAccessAddress()) {
+      if (accessAddress !== this.erdnestConfigService.getAccessAddress()) {
         return false;
       }
     } catch (error) {

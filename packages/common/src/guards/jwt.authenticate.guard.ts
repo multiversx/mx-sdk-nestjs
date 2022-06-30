@@ -1,15 +1,15 @@
 import { Injectable, CanActivate, ExecutionContext, Logger, Inject } from '@nestjs/common';
 import { TokenExpiredError, verify } from 'jsonwebtoken';
-import { NESTJS_API_CONFIG_SERVICE } from '../utils/nestjs.microservice.constants';
-import { NestjsApiConfigService } from '../common/api-config/nestjs.api.config.service';
+import { ErdnestConfigService } from 'src/common/config/erdnest.config.service';
+import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
   private readonly logger: Logger;
 
   constructor(
-    @Inject(NESTJS_API_CONFIG_SERVICE)
-    private readonly apiConfigService: NestjsApiConfigService
+    @Inject(ERDNEST_CONFIG_SERVICE)
+    private readonly erdnestConfigService: ErdnestConfigService
   ) {
     this.logger = new Logger(JwtAuthenticateGuard.name);
   }
@@ -27,7 +27,7 @@ export class JwtAuthenticateGuard implements CanActivate {
     const jwt = authorization.replace('Bearer ', '');
 
     try {
-      const jwtSecret = this.apiConfigService.getJwtSecret();
+      const jwtSecret = this.erdnestConfigService.getJwtSecret();
 
       request.jwt = await new Promise((resolve, reject) => {
         verify(jwt, jwtSecret, (err: any, decoded: any) => {
