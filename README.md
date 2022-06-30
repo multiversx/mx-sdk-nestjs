@@ -1,8 +1,10 @@
-# NestJS Microservice template
+# Elrond NestJS Microservice Utilities
 
-NestJS Microservice template for JavaScript and TypeScript (written in TypeScript).
+This package contains a set of utilities commonly used in the Elrond Microservice ecosystem.
 
-## Distribution
-
-[npm](https://www.npmjs.com/package/@elrondnetwork/nestjs-microservice-template)
+It relies on the following peer dependencies which must be installed in the parent package:
+- @elrondnetwork/erdjs
+- @elrondnetwork/erdjs-walletcore
+- @nestjs/common
+- @nestjs/swagger
 
