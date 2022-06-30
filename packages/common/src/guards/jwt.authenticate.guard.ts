@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, Logger, Inject } from '@nestjs/common';
 import { TokenExpiredError, verify } from 'jsonwebtoken';
-import { ErdnestConfigService } from 'src/common/config/erdnest.config.service';
+import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()

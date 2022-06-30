@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
-import { ErdnestConfigService } from 'src/common/config/erdnest.config.service';
-import { ERDNEST_CONFIG_SERVICE } from 'src/utils/erdnest.constants';
+import { ErdnestConfigService } from '../common/config/erdnest.config.service';
+import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()
 export class JwtAdminGuard implements CanActivate {
