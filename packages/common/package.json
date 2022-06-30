@@ -1,0 +1,66 @@
+{
+  "name": "@elrondnetwork/erdnest",
+  "version": "0.1.8",
+  "description": "NestJS microservice template",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "test": "jest test/*",
+    "build": "tsc",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElrondNetwork/erdnest.git"
+  },
+  "keywords": [
+    "elrond",
+    "nestjs",
+    "microservice",
+    "template",
+    "common"
+  ],
+  "author": "ElrondNetwork",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/axios": "^0.14.0",
+    "@types/jest": "^27.4.1",
+    "@types/js-yaml": "^4.0.5",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/node": "^16.11.10",
+    "@types/tiny-async-pool": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "axios-mock-adapter": "^1.20.0",
+    "babel-jest": "^27.5.1",
+    "eslint": "^8.9.0",
+    "jest": "^27.5.1",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@elrondnetwork/native-auth": "^0.1.20",
+    "@types/redis": "^2.8.32",
+    "agentkeepalive": "^4.2.1",
+    "axios": "^0.27.2",
+    "jsonwebtoken": "^8.5.1",
+    "nest-winston": "^1.6.2",
+    "prom-client": "^14.0.1",
+    "redis": "^3.1.2",
+    "tiny-async-pool": "^1.2.0",
+    "winston": "^3.7.2",
+    "winston-daily-rotate-file": "^4.6.1"
+  },
+  "peerDependencies": {
+    "@elrondnetwork/erdjs": "*",
+    "@elrondnetwork/erdjs-walletcore": "*",
+    "@nestjs/common": "^8.4.5",
+    "@nestjs/swagger": "^5.2.1"
+  }
+}
