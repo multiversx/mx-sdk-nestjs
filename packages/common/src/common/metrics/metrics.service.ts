@@ -8,7 +8,6 @@ export class MetricsService {
   private static pendingRequestsHistogram: Gauge<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static elasticDurationHistogram: Histogram<string>;
-  private static elasticTookHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
   private static jobsHistogram: Histogram<string>;
   private static pendingApiHitGauge: Gauge<string>;
@@ -47,15 +46,6 @@ export class MetricsService {
         name: 'elastic_duration',
         help: 'Elastic Duration',
         labelNames: ['type', 'index'],
-        buckets: [],
-      });
-    }
-
-    if (!MetricsService.elasticTookHistogram) {
-      MetricsService.elasticTookHistogram = new Histogram({
-        name: 'elastic_took',
-        help: 'Elastic Took',
-        labelNames: ['index'],
         buckets: [],
       });
     }

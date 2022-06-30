@@ -5,8 +5,7 @@
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "files": [
-    "lib/src/**/*",
-    "lib/config/**/*"
+    "lib/src/**/*"
   ],
   "scripts": {
     "test": "jest test/*",
@@ -48,12 +47,9 @@
     "@elrondnetwork/erdjs": "^10.2.5",
     "@elrondnetwork/erdjs-walletcore": "^1.0.0",
     "@elrondnetwork/native-auth": "^0.1.20",
-    "@nestjs/config": "^2.0.1",
     "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",
     "axios": "^0.27.2",
-    "bech32": "^2.0.0",
-    "js-yaml": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
     "nest-winston": "^1.6.2",
     "prom-client": "^14.0.1",
