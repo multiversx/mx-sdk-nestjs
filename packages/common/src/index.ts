@@ -3,6 +3,7 @@ export * from './utils/api.utils';
 export * from './utils/batch.utils';
 export * from './utils/binary.utils';
 export * from './utils/constants';
+export * from './utils/date.utils';
 export * from './utils/decorator.utils';
 export * from './utils/file.utils';
 export * from './utils/locker';
