@@ -39,7 +39,7 @@ export class CachingModule {
       exports: [
         CachingService,
       ],
-    }
+    };
   }
 
   static forRootAsync(options: CachingModuleAsyncOptions): DynamicModule {
@@ -61,6 +61,6 @@ export class CachingModule {
       exports: [
         CachingService,
       ],
-    }
+    };
   }
 }
