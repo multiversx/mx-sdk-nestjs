@@ -25,7 +25,7 @@ export class ApiModule {
       exports: [
         ApiService,
       ],
-    }
+    };
   }
 
   static forRootAsync(options: ApiModuleAsyncOptions): DynamicModule {
@@ -47,6 +47,6 @@ export class ApiModule {
       exports: [
         ApiService,
       ],
-    }
+    };
   }
 }

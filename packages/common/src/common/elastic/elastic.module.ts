@@ -28,7 +28,7 @@ export class ElasticModule {
       exports: [
         ElasticService,
       ],
-    }
+    };
   }
 
   static forRootAsync(options: ElasticModuleAsyncOptions): DynamicModule {
@@ -51,6 +51,6 @@ export class ElasticModule {
       exports: [
         ElasticService,
       ],
-    }
+    };
   }
 }

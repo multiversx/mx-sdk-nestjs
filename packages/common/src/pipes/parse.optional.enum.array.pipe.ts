@@ -9,7 +9,7 @@ export class ParseOptionalEnumArrayPipe<T extends { [name: string]: any }> imple
         return resolve(undefined);
       }
 
-      const values = value.split(',');
+      const values = Array.isArray(value) ? value : value.split(',');
 
       const expectedValues = this.getValues(this.type);
       for (const value of values) {

@@ -19,14 +19,14 @@ Date.prototype.startOfHour = function (): Date {
   copy.setUTCMinutes(0, 0, 0);
 
   return copy;
-}
+};
 
 Date.prototype.startOfDay = function (): Date {
   const copy = new Date(this);
   copy.setUTCHours(0, 0, 0, 0);
 
   return copy;
-}
+};
 
 Date.prototype.startOfMonth = function (): Date {
   const copy = new Date(this);
@@ -34,7 +34,7 @@ Date.prototype.startOfMonth = function (): Date {
   copy.setUTCHours(0, 0, 0, 0);
 
   return copy;
-}
+};
 
 Date.prototype.startOfYear = function (): Date {
   const copy = new Date(this);
@@ -42,23 +42,23 @@ Date.prototype.startOfYear = function (): Date {
   copy.setUTCHours(0, 0, 0, 0);
 
   return copy;
-}
+};
 
 Date.prototype.addSeconds = function (seconds: number): Date {
   return new Date(this.getTime() + (seconds * 1000));
-}
+};
 
 Date.prototype.addMinutes = function (minutes: number): Date {
   return new Date(this.getTime() + (minutes * 60 * 1000));
-}
+};
 
 Date.prototype.addHours = function (hours: number): Date {
   return new Date(this.getTime() + (hours * 60 * 60 * 1000));
-}
+};
 
 Date.prototype.addDays = function (days: number): Date {
   return new Date(this.getTime() + (days * 24 * 60 * 60 * 1000));
-}
+};
 
 declare interface Date {
   toISODateString(): string;
