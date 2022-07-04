@@ -4,6 +4,7 @@ import { MatchQuery } from "./match.query";
 import { MustQuery } from "./must.query";
 import { NestedQuery } from "./nested.query";
 import { QueryOperator } from "./query.operator";
+import { QueryRange } from "./query.range";
 import { RangeQuery } from "./range.query";
 import { ShouldQuery } from "./should.query";
 import { WildcardQuery } from "./wildcard.query";
@@ -17,8 +18,8 @@ export class QueryType {
     return new ExistsQuery(key);
   };
 
-  static Range = (key: string, before: number, after: number): RangeQuery => {
-    return new RangeQuery(key, before, after);
+  static Range = (key: string, ...ranges: QueryRange[]): RangeQuery => {
+    return new RangeQuery(key, ranges);
   };
 
   static Wildcard = (key: string, value: string): WildcardQuery => {

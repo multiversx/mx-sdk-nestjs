@@ -1,14 +1,21 @@
 import { AbstractQuery } from "./abstract.query";
+import { QueryRange } from "./query.range";
+
 export class RangeQuery extends AbstractQuery {
   constructor(
     private readonly key: string,
-    private readonly before: number | undefined,
-    private readonly after: number | undefined,
+    private readonly ranges: QueryRange[],
   ) {
     super();
   }
 
   getQuery(): any {
-    return { range: { [this.key]: { lte: this.before, gte: this.after } } };
+    const conditions: Record<string, number> = {};
+
+    for (const range of this.ranges) {
+      conditions[range.key] = range.value;
+    }
+
+    return { range: { [this.key]: conditions } };
   }
 }

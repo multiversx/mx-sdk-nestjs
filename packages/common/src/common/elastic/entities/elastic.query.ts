@@ -6,7 +6,10 @@ import { MatchQuery } from "./match.query";
 import { QueryCondition } from "./query.condition";
 import { QueryConditionOptions } from "./query.condition.options";
 import { QueryOperator } from "./query.operator";
+import { QueryRange } from "./query.range";
 import { QueryType } from "./query.type";
+import { RangeGreaterThanOrEqual } from "./range.greater.than.or.equal";
+import { RangeLowerThanOrEqual } from "./range.lower.than.or.equal";
 import { RangeQuery } from "./range.query";
 import { TermsQuery } from "./terms.query";
 
@@ -136,12 +139,16 @@ export class ElasticQuery {
     return this;
   }
 
-  withDateRangeFilter(key: string, before: number | undefined, after: number | undefined) {
+  withRangeFilter(key: string, ...ranges: QueryRange[]): ElasticQuery {
+    return this.withFilter(QueryType.Range(key, ...ranges));
+  }
+
+  withDateRangeFilter(key: string, before: number | undefined, after: number | undefined): ElasticQuery {
     if (!before && !after) {
       return this;
     }
 
-    return this.withFilter(QueryType.Range(key, before ?? Date.now(), after ?? 0));
+    return this.withFilter(QueryType.Range(key, new RangeGreaterThanOrEqual(after ?? 0), new RangeLowerThanOrEqual(before ?? Date.now())));
   }
 
   withFilter(filter: RangeQuery): ElasticQuery {
