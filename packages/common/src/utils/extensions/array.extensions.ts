@@ -100,11 +100,23 @@ Array.prototype.toRecord = function <TIN, TOUT>(keyPredicate: (item: TIN) => str
   return result;
 };
 
-Array.prototype.sorted = function <T>(predicate?: (item: T) => number): T[] {
+Array.prototype.sorted = function <T>(...predicates: ((item: T) => number)[]): T[] {
   const cloned = [...this];
 
-  if (predicate) {
-    cloned.sort((a, b) => predicate(a) - predicate(b));
+  if (predicates.length > 0) {
+    cloned.sort((a, b) => {
+      for (const predicate of predicates) {
+        const result = predicate(a) - predicate(b);
+        console.log({ a, b, result });
+        if (Math.abs(result) <= 0.0000000000001) {
+          continue;
+        }
+
+        return result;
+      }
+
+      return 0;
+    });
   } else {
     cloned.sort((a, b) => a - b);
   }
@@ -112,8 +124,8 @@ Array.prototype.sorted = function <T>(predicate?: (item: T) => number): T[] {
   return cloned;
 };
 
-Array.prototype.sortedDescending = function <T>(predicate?: (item: T) => number): T[] {
-  const sorted = this.sorted(predicate);
+Array.prototype.sortedDescending = function <T>(...predicates: ((item: T) => number)[]): T[] {
+  const sorted = this.sorted(...predicates);
 
   sorted.reverse();
 
@@ -146,8 +158,8 @@ declare interface Array<T> {
   distinct(): T[];
   distinctBy<TResult>(predicate: (element: T) => TResult): T[];
   all(predicate: (item: T) => boolean): boolean;
-  sorted(predicate?: (element: T) => number): T[];
-  sortedDescending(predicate?: (element: T) => number): T[];
+  sorted(...predicates: ((item: T) => number)[]): T[];
+  sortedDescending(...predicates: ((item: T) => number)[]): T[];
   sum(predicate?: (item: T) => number): number;
   sumBigInt(predicate?: (item: T) => bigint): bigint;
   toRecord<TOUT>(keyPredicate: (item: T) => string, valuePredicate?: (item: T) => TOUT): Record<string, TOUT>;
