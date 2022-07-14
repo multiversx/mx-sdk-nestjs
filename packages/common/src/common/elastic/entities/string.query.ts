@@ -1,6 +1,6 @@
-import {AbstractQuery} from "./abstract.query";
+import { AbstractQuery } from "./abstract.query";
 
-export class QueryStringQuery extends AbstractQuery {
+export class StringQuery extends AbstractQuery {
   constructor(
     private readonly key: string | string[],
     private readonly value: number | undefined,
@@ -9,7 +9,6 @@ export class QueryStringQuery extends AbstractQuery {
   }
 
   getQuery(): any {
-
     if (this.key instanceof Array) {
       return { query_string: { query: this.value, fields: this.key } };
     }
