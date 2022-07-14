@@ -8,6 +8,7 @@ import { QueryRange } from "./query.range";
 import { RangeQuery } from "./range.query";
 import { ShouldQuery } from "./should.query";
 import { WildcardQuery } from "./wildcard.query";
+import {QueryStringQuery} from "./query.string.query";
 
 export class QueryType {
   static Match = (key: string, value: any | undefined, operator: QueryOperator | undefined = undefined): MatchQuery => {
@@ -36,5 +37,9 @@ export class QueryType {
 
   static Must = (queries: AbstractQuery[], mustNotQueries: AbstractQuery[] = []): MustQuery => {
     return new MustQuery(queries, mustNotQueries);
+  };
+
+  static QueryString = (key: string | string[], value: any | undefined): QueryStringQuery => {
+    return new QueryStringQuery(key, value);
   };
 }

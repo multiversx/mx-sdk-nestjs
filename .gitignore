@@ -3,3 +3,4 @@ lib/
 tsconfig.tsbuildinfo
 
 .DS_Store
+.idea/
