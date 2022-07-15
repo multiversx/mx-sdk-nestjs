@@ -36,7 +36,7 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
     try {
       const jwtSecret: string = this.erdnestConfigService.getJwtSecret();
 
-      const accessAddress = await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         verify(jwt, jwtSecret, (err, decoded) => {
           if (err) {
             reject(err);
@@ -46,10 +46,6 @@ export class JwtAuthenticateGlobalGuard implements CanActivate {
           resolve(decoded.accessAddress);
         });
       });
-
-      if (accessAddress !== this.erdnestConfigService.getAccessAddress()) {
-        return false;
-      }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
         return false;
