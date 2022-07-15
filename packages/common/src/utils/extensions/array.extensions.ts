@@ -107,7 +107,6 @@ Array.prototype.sorted = function <T>(...predicates: ((item: T) => number)[]): T
     cloned.sort((a, b) => {
       for (const predicate of predicates) {
         const result = predicate(a) - predicate(b);
-        console.log({ a, b, result });
         if (Math.abs(result) <= 0.0000000000001) {
           continue;
         }
