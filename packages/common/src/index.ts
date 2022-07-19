@@ -11,6 +11,7 @@ export * from './utils/logger.initializer';
 export * from './utils/match.utils';
 export * from './utils/erdnest.constants';
 export * from './utils/number.utils';
+export * from './utils/pending.execution.dictionary';
 export * from './utils/performance.profiler';
 export * from './utils/record.utils';
 export * from './utils/round.utils';
