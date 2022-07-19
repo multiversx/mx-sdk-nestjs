@@ -1,6 +1,6 @@
 import * as crypto from 'crypto-js';
 
-export class PendingExecutionDictionary<TIN, TOUT> {
+export class PendingExecutor<TIN, TOUT> {
   private dictionary: Record<string, Promise<TOUT>> = {};
 
   constructor(
