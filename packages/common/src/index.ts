@@ -84,3 +84,4 @@ export * from './interceptors/log.requests.interceptor';
 export * from './interceptors/logging.interceptor';
 export * from './interceptors/pagination.interceptor';
 export * from './interceptors/query.check.interceptor';
+export * from './common/rabbit';
