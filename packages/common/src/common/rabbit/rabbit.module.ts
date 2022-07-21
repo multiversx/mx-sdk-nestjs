@@ -24,9 +24,7 @@ export class RabbitModule {
       module: RabbitModule,
       imports: [
         RabbitMQModule.forRootAsync(RabbitMQModule, {
-          imports: asyncOptions.imports,
-          useFactory: asyncOptions.useFactory,
-          inject: asyncOptions.inject,
+          ...asyncOptions,
         }),
       ],
       providers: [
