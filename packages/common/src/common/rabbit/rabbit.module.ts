@@ -1,37 +1,40 @@
-import { RabbitMQExchangeConfig, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Module } from '@nestjs/common';
-import { RabbitModuleConfig } from './rabbit-configs';
-import { RabbitPublisherService } from './rabbit.publisher';
+import { RabbitModuleAsyncOptions } from './async-options';
+import { RabbitModuleOptions } from './options';
+import { RabbitPublisherService } from './publisher.service';
 
 @Module({})
 export class RabbitModule {
-  static register(config: RabbitModuleConfig): DynamicModule {
+  static forRoot(options: RabbitModuleOptions): DynamicModule {
     return {
       module: RabbitModule,
       imports: [
-        RabbitMQModule.forRoot(RabbitMQModule, {
-          uri: config.uri,
-          exchanges: this.getExchanges(config.exchanges),
-        }),
+        RabbitMQModule.forRoot(RabbitMQModule, options),
       ],
-      providers: [RabbitPublisherService],
+      providers: [
+        RabbitPublisherService,
+      ],
       exports: [RabbitPublisherService],
     };
   }
 
-  private static getExchanges(
-    exchanges: string[] | undefined,
-  ): RabbitMQExchangeConfig[] | undefined {
-    if (!exchanges) {
-      return;
-    }
-
-    return exchanges.map(exchange => {
-      return {
-        name: exchange,
-        type: 'fanout',
-        options: {},
-      };
-    });
+  static forRootAsync(asyncOptions: RabbitModuleAsyncOptions): DynamicModule {
+    return {
+      module: RabbitModule,
+      imports: [
+        RabbitMQModule.forRootAsync(RabbitMQModule, {
+          imports: asyncOptions.imports,
+          useFactory: asyncOptions.useFactory,
+          inject: asyncOptions.inject,
+        }),
+      ],
+      providers: [
+        RabbitPublisherService,
+      ],
+      exports: [
+        RabbitPublisherService,
+      ],
+    };
   }
 }

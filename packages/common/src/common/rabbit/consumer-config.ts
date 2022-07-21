@@ -3,8 +3,3 @@ export interface RabbitConsumerConfig {
   disable?: boolean;
   queue: string;
 }
-
-export interface RabbitModuleConfig {
-  uri: string;
-  exchanges?: string[] | undefined;
-}

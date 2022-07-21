@@ -1,6 +1,6 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { applyDecorators } from '@nestjs/common';
-import { RabbitConsumerConfig } from './rabbit-configs';
+import { RabbitConsumerConfig } from './consumer-config';
 import * as uuid from 'uuid';
 
 /** Competing Consumer which will be handled by only one instance of the microservice.
