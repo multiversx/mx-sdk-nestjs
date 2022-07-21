@@ -6,7 +6,7 @@ export class RabbitModuleOptions {
 
   constructor(
     uri: string,
-    exchanges: string[] | undefined,
+    exchanges: string[] | undefined = undefined,
   ) {
     this.uri = uri;
     this.exchanges = this.getExchanges(exchanges);
