@@ -1,4 +1,4 @@
-import { NativeAuthServer } from '@elrondnetwork/native-auth';
+import { NativeAuthServer } from '@elrondnetwork/native-auth-server';
 import { Injectable, CanActivate, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
 import { CachingService } from '../common/caching/caching.service';
 
