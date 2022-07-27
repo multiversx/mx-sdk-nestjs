@@ -3,8 +3,12 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { RabbitModuleAsyncOptions } from './async-options';
 import { RabbitModuleOptions } from './options';
 import { RabbitPublisherService } from './publisher.service';
+import { RabbitContextCheckerService } from './rabbit-context-checker.service';
 
-@Module({})
+@Module({
+  providers: [RabbitContextCheckerService],
+  exports: [RabbitContextCheckerService],
+})
 export class RabbitModule {
   static forRoot(options: RabbitModuleOptions): DynamicModule {
     return {
@@ -29,9 +33,11 @@ export class RabbitModule {
       ],
       providers: [
         RabbitPublisherService,
+        RabbitContextCheckerService,
       ],
       exports: [
         RabbitPublisherService,
+        RabbitContextCheckerService,
       ],
     };
   }
