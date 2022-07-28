@@ -1,9 +1,9 @@
-import { ArgumentMetadata, HttpException, HttpStatus, PipeTransform } from "@nestjs/common";
+import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
 export class ParseOptionalEnumArrayPipe<T extends { [name: string]: any }> implements PipeTransform<string | undefined, Promise<string[] | undefined>> {
   constructor(private readonly type: T) { }
 
-  transform(value: string | undefined, _: ArgumentMetadata): Promise<string[] | undefined> {
+  transform(value: string | undefined, metadata: ArgumentMetadata): Promise<string[] | undefined> {
     return new Promise(resolve => {
       if (value === undefined || value === '') {
         return resolve(undefined);
@@ -14,7 +14,7 @@ export class ParseOptionalEnumArrayPipe<T extends { [name: string]: any }> imple
       const expectedValues = this.getValues(this.type);
       for (const value of values) {
         if (!expectedValues.includes(value)) {
-          throw new HttpException(`Validation failed (one of the following values is expected: ${expectedValues.join(', ')})`, HttpStatus.BAD_REQUEST);
+          throw new BadRequestException(`Validation failed for argument '${metadata.data}' (one of the following values is expected: ${expectedValues.join(', ')})`);
         }
       }
 

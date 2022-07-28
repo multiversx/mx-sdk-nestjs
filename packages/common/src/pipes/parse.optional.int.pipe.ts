@@ -1,7 +1,7 @@
-import { ArgumentMetadata, HttpException, HttpStatus, PipeTransform } from "@nestjs/common";
+import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
 export class ParseOptionalIntPipe implements PipeTransform<string | undefined, Promise<number | undefined>> {
-    transform(value: string | undefined, _: ArgumentMetadata): Promise<number | undefined> {
+    transform(value: string | undefined, metadata: ArgumentMetadata): Promise<number | undefined> {
         return new Promise(resolve => {
             if (value === undefined || value === '') {
                 return resolve(undefined);
@@ -11,7 +11,7 @@ export class ParseOptionalIntPipe implements PipeTransform<string | undefined, P
                 return resolve(Number(value));
             }
 
-            throw new HttpException('Validation failed (optional number is expected)', HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(`Validation failed for argument '${metadata.data}' (optional number is expected)`);
         });
     }
 }

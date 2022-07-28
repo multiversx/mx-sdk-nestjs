@@ -1,7 +1,7 @@
-import { ArgumentMetadata, HttpException, HttpStatus, PipeTransform } from "@nestjs/common";
+import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
 export class ParseOptionalBoolPipe implements PipeTransform<string | boolean, Promise<boolean | undefined>> {
-    transform(value: string | boolean, _: ArgumentMetadata): Promise<boolean | undefined> {
+    transform(value: string | boolean, metadata: ArgumentMetadata): Promise<boolean | undefined> {
         return new Promise(resolve => {
             if (value === true || value === 'true') {
                 return resolve(true);
@@ -15,8 +15,7 @@ export class ParseOptionalBoolPipe implements PipeTransform<string | boolean, Pr
                 return resolve(undefined);
             }
 
-            // throw this.exceptionFactory('Validation failed (optional boolean string is expected)');
-            throw new HttpException('Validation failed (optional boolean string is expected)', HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(`Validation failed for argument '${metadata.data}' (optional boolean string is expected)`);
         });
     }
 }

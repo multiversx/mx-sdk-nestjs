@@ -1,5 +1,5 @@
 import { Hash } from "@elrondnetwork/erdjs/out/hash";
-import { ArgumentMetadata, HttpException, HttpStatus, PipeTransform } from "@nestjs/common";
+import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
 export class ParseHashPipe implements PipeTransform<string | string[] | undefined, Promise<string | string[] | undefined>> {
   private entity: string;
@@ -27,7 +27,7 @@ export class ParseHashPipe implements PipeTransform<string | string[] | undefine
 
         return resolve(value);
       } catch (error) {
-        throw new HttpException(`Validation failed (a valid ${this.entity} hash for parameter ${metadata.data} is expected)`, HttpStatus.BAD_REQUEST);
+        throw new BadRequestException(`Validation failed for argument '${metadata.data}' (a valid ${this.entity} hash is expected)`);
       }
     });
   }
