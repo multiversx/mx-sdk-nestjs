@@ -1,4 +1,4 @@
-import { TokenUtils } from "src/utils/token.utils";
+import { TokenUtils } from "../utils/token.utils";
 import { RegexPipe } from "./regex.pipe";
 
 export class ParseCollectionPipe extends RegexPipe {
