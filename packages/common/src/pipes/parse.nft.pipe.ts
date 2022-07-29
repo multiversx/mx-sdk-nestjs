@@ -3,6 +3,6 @@ import { RegexPipe } from "./regex.pipe";
 
 export class ParseNftPipe extends RegexPipe {
   constructor() {
-    super(TokenUtils.tokenValidateRegex, 'Invalid NFT identifier');
+    super(TokenUtils.nftValidateRegex, 'Invalid NFT identifier');
   }
 }
