@@ -1,6 +1,6 @@
 export class TokenUtils {
-  static tokenValidateRegex: RegExp = /^[A-Za-z][A-Za-z0-9]{2,9}-[a-fA-F0-9]{6}$/;
-  static nftValidateRegex: RegExp = /^[A-Za-z][A-Za-z0-9]{2,9}-[a-fA-F0-9]{6}-[a-fA-F0-9]{2,}$/;
+  static tokenValidateRegex: RegExp = /^[A-Za-z0-9]{3,10}-[a-fA-F0-9]{6}$/;
+  static nftValidateRegex: RegExp = /^[A-Za-z0-9]{3,10}-[a-fA-F0-9]{6}-[a-fA-F0-9]{2,}$/;
 
   static isToken(identifier: string): boolean {
     return this.tokenValidateRegex.test(identifier);
