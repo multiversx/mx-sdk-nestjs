@@ -4,7 +4,7 @@ Number.prototype.toRounded = function (digits?: number): number {
 
 Number.prototype.in = function (...elements: number[]): boolean {
   return elements.includes(this.valueOf());
-}
+};
 
 declare interface Number {
   toRounded(digits?: number): number;

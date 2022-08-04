@@ -16,7 +16,7 @@ String.prototype.removeSuffix = function (suffix: string): string {
 
 String.prototype.in = function (...elements: string[]): boolean {
   return elements.includes(this.valueOf());
-}
+};
 
 declare interface String {
   removePrefix(prefix: string): string;
