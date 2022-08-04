@@ -27,20 +27,146 @@ Array.prototype.selectMany = function (predicate: Function) {
 };
 
 Array.prototype.firstOrUndefined = function (predicate?: Function) {
-  if (!predicate) {
-    if (this.length > 0) {
-      return this[0];
-    }
-
+  if (this.length === 0) {
     return undefined;
   }
 
-  const result = this.filter(x => predicate(x));
-  if (result.length > 0) {
-    return result[0];
+  if (!predicate) {
+    return this[0];
+  }
+
+  for (const item of this) {
+    const result = predicate(item);
+    if (result) {
+      return item;
+    }
   }
 
   return undefined;
+};
+
+Array.prototype.first = function (predicate?: Function) {
+  if (this.length === 0) {
+    throw new Error('Sequence contains no elements');
+  }
+
+  if (!predicate) {
+    return this[0];
+  }
+
+  for (const item of this) {
+    if (predicate(item)) {
+      return item;
+    }
+  }
+
+  throw new Error('Sequence contains no elements');
+};
+
+Array.prototype.lastOrUndefined = function (predicate?: Function) {
+  if (this.length === 0) {
+    return undefined;
+  }
+
+  if (!predicate) {
+    return this[this.length - 1];
+  }
+
+  let lastItem = undefined;
+  for (const item of this) {
+    if (predicate(item)) {
+      lastItem = item;
+    }
+  }
+
+  return lastItem;
+};
+
+Array.prototype.single = function (predicate?: Function) {
+  if (this.length === 0) {
+    throw new Error('Invalid sequence size');
+  }
+
+  if (predicate) {
+    let count = 0;
+    let singleItem = undefined;
+    for (const item of this) {
+      if (predicate(item)) {
+        count++;
+        singleItem = item;
+
+        if (count > 1) {
+          throw new Error('Invalid sequence size');
+        }
+      }
+    }
+
+    if (singleItem === undefined) {
+      throw new Error('Invalid sequence size');
+    }
+
+    return singleItem;
+  }
+
+  if (this.length > 1) {
+    throw new Error('Invalid sequence size');
+  }
+
+  return this[0];
+};
+
+Array.prototype.singleOrUndefined = function (predicate?: Function) {
+  if (this.length === 0) {
+    return undefined;
+  }
+
+  if (predicate) {
+    let count = 0;
+    let singleItem = undefined;
+    for (const item of this) {
+      if (predicate(item)) {
+        count++;
+        singleItem = item;
+
+        if (count > 1) {
+          return undefined;
+        }
+      }
+    }
+
+    return singleItem;
+  }
+
+  if (this.length > 1) {
+    return undefined;
+  }
+
+  return this[0];
+};
+
+Array.prototype.last = function (predicate?: Function) {
+  if (this.length === 0) {
+    throw new Error('Sequence contains no elements');
+  }
+
+  if (!predicate) {
+    return this[this.length - 1];
+  }
+
+  let lastItem = undefined;
+  let found = false;
+  for (const item of this) {
+    if (predicate(item)) {
+      lastItem = item;
+      found = true;
+    }
+  }
+
+  if (!found) {
+    throw new Error('Sequence contains no elements');
+  }
+
+  return lastItem;
 };
 
 Array.prototype.zip = function <TSecond, TResult>(second: TSecond[], predicate: Function): TResult[] {
@@ -56,7 +182,7 @@ Array.prototype.remove = function <T>(element: T): number {
   return index;
 };
 
-Array.prototype.findMissingElements = function <T>(second: T[]) {
+Array.prototype.except = function <T>(second: T[]) {
   const missing: T[] = [];
   for (const item of this) {
     if (!second.includes(item)) {
@@ -67,11 +193,11 @@ Array.prototype.findMissingElements = function <T>(second: T[]) {
   return missing;
 };
 
-Array.prototype.distinct = function <T>(): T[] {
-  return [...new Set(this)];
-};
+Array.prototype.distinct = function <TCollection, TResult>(predicate?: (element: TCollection) => TResult): TCollection[] {
+  if (!predicate) {
+    return [...new Set(this)];
+  }
 
-Array.prototype.distinctBy = function <TCollection, TResult>(predicate: (element: TCollection) => TResult): TCollection[] {
   const distinctProjections: TResult[] = [];
   const result: TCollection[] = [];
 
@@ -84,10 +210,6 @@ Array.prototype.distinctBy = function <TCollection, TResult>(predicate: (element
   }
 
   return result;
-};
-
-Array.prototype.all = function <T>(predicate: (item: T) => boolean): boolean {
-  return !this.some(x => !predicate(x));
 };
 
 Array.prototype.toRecord = function <TIN, TOUT>(keyPredicate: (item: TIN) => string, valuePredicate?: (item: TIN) => TOUT): Record<string, TOUT> {
@@ -147,19 +269,31 @@ Array.prototype.sumBigInt = function <T>(predicate?: (item: T) => bigint): bigin
   return this.reduce((a, b) => BigInt(a) + BigInt(b), BigInt(0));
 };
 
+Array.prototype.remove = function <T>(element: T): void {
+  let index = this.indexOf(element);
+  while (index >= 0) {
+    this.splice(index, 1);
+
+    index = this.indexOf(element);
+  }
+};
+
 declare interface Array<T> {
   groupBy(predicate: (item: T) => any): any;
   selectMany<TOUT>(predicate: (item: T) => TOUT[]): TOUT[];
+  first(predicate?: (item: T) => boolean): T | undefined;
   firstOrUndefined(predicate?: (item: T) => boolean): T | undefined;
+  last(predicate?: (item: T) => boolean): T | undefined;
+  lastOrUndefined(predicate?: (item: T) => boolean): T | undefined;
+  single(predicate?: (item: T) => boolean): T | undefined;
+  singleOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   zip<TSecond, TResult>(second: TSecond[], predicate: (first: T, second: TSecond) => TResult): TResult[];
-  remove(element: T): number;
-  findMissingElements<T>(second: T[]): T[];
-  distinct(): T[];
-  distinctBy<TResult>(predicate: (element: T) => TResult): T[];
-  all(predicate: (item: T) => boolean): boolean;
+  except(second: T[]): T[];
+  distinct<TResult>(predicate?: (element: T) => TResult): T[];
   sorted(...predicates: ((item: T) => number)[]): T[];
   sortedDescending(...predicates: ((item: T) => number)[]): T[];
   sum(predicate?: (item: T) => number): number;
   sumBigInt(predicate?: (item: T) => bigint): bigint;
   toRecord<TOUT>(keyPredicate: (item: T) => string, valuePredicate?: (item: T) => TOUT): Record<string, TOUT>;
+  remove(element: T): void;
 }

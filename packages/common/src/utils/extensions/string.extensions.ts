@@ -14,7 +14,12 @@ String.prototype.removeSuffix = function (suffix: string): string {
   return this.toString();
 };
 
+String.prototype.in = function (...elements: string[]): boolean {
+  return elements.includes(this.valueOf());
+}
+
 declare interface String {
   removePrefix(prefix: string): string;
   removeSuffix(suffix: string): string;
+  in(...elements: string[]): boolean;
 }
