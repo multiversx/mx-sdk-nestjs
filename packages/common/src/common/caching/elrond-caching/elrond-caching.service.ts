@@ -6,6 +6,7 @@ import { RedisCacheService } from '../redis-cache/redis-cache.service';
 
 @Injectable()
 export class ElrondCachingService {
+  pendingPromises: { [key: string]: Promise<any> } = {};
   private readonly DEFAULT_TTL = 300;
 
   constructor(
@@ -80,6 +81,10 @@ export class ElrondCachingService {
     return this.redisCacheService.deleteMultiple(keys);
   }
 
+  flushDbRemote(): Promise<void> {
+    return this.redisCacheService.flushDb();
+  }
+
   getOrSetRemote<T>(
     key: string,
     createValueFunc: () => T | Promise<T | undefined> | undefined,
@@ -147,5 +152,20 @@ export class ElrondCachingService {
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
     return this.haCacheService.setOrUpdate<T>(key, createValueFunc, ttl, inMemoryTtl);
+  }
+
+  executeWithPendingPromise<T>(key: string,
+    promise: () => Promise<T>,
+  ): Promise<T> {
+    const pendingPromise = this.pendingPromises[key];
+    if (pendingPromise) {
+      return pendingPromise;
+    }
+
+    try {
+      return this.pendingPromises[key] = promise();
+    } finally {
+      delete this.pendingPromises[key];
+    }
   }
 }

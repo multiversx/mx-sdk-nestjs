@@ -79,6 +79,10 @@ export class RedisCacheService {
     }
   }
 
+  async flushDb(): Promise<void> {
+    await this.redis.flushdb();
+  }
+
   async getOrSet<T>(
     key: string,
     createValueFunc: () => T | Promise<T | undefined> | undefined,
