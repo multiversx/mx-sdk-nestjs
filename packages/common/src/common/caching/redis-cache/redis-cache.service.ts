@@ -32,6 +32,24 @@ export class RedisCacheService {
     return;
   }
 
+  async getMany<T>(
+    keys: string[],
+  ): Promise<(T | null)[]> {
+    try {
+      const items = await this.redis.mget(keys);
+      return items.map(item => item ? JSON.parse(item) : null);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get many keys from redis cache.',
+          {
+            exception: error?.toString(),
+            cacheKeys: keys,
+          });
+      }
+      return [];
+    }
+  }
+
   async set<T>(
     key: string,
     value: T,

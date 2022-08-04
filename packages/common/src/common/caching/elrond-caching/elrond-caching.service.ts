@@ -61,6 +61,12 @@ export class ElrondCachingService {
     return this.redisCacheService.get<T>(key);
   }
 
+  getManyRemote<T>(
+    keys: string[]
+  ): Promise<(T | null)[]> {
+    return this.redisCacheService.getMany(keys);
+  }
+
   setRemote<T>(
     key: string,
     value: T,
