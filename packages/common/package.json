@@ -1,9 +1,9 @@
 {
   "name": "@elrondnetwork/erdnest",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "NestJS microservice template",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "files": [
     "lib/**/*"
   ],
