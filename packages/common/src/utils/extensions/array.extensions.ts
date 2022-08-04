@@ -82,6 +82,68 @@ Array.prototype.lastOrUndefined = function (predicate?: Function) {
   return lastItem;
 };
 
+Array.prototype.single = function (predicate?: Function) {
+  if (this.length === 0) {
+    throw new Error('Invalid sequence size');
+  }
+
+  if (predicate) {
+    let count = 0;
+    let singleItem = undefined;
+    for (const item of this) {
+      if (predicate(item)) {
+        count++;
+        singleItem = item;
+
+        if (count > 1) {
+          throw new Error('Invalid sequence size');
+        }
+      }
+    }
+
+    if (singleItem === undefined) {
+      throw new Error('Invalid sequence size');
+    }
+
+    return singleItem;
+  }
+
+  if (this.length > 1) {
+    throw new Error('Invalid sequence size');
+  }
+
+  return this[0];
+};
+
+Array.prototype.singleOrUndefined = function (predicate?: Function) {
+  if (this.length === 0) {
+    return undefined;
+  }
+
+  if (predicate) {
+    let count = 0;
+    let singleItem = undefined;
+    for (const item of this) {
+      if (predicate(item)) {
+        count++;
+        singleItem = item;
+
+        if (count > 1) {
+          return undefined;
+        }
+      }
+    }
+
+    return singleItem;
+  }
+
+  if (this.length > 1) {
+    return undefined;
+  }
+
+  return this[0];
+};
+
 Array.prototype.last = function (predicate?: Function) {
   if (this.length === 0) {
     throw new Error('Sequence contains no elements');
@@ -223,6 +285,8 @@ declare interface Array<T> {
   firstOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   last(predicate?: (item: T) => boolean): T | undefined;
   lastOrUndefined(predicate?: (item: T) => boolean): T | undefined;
+  single(predicate?: (item: T) => boolean): T | undefined;
+  singleOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   zip<TSecond, TResult>(second: TSecond[], predicate: (first: T, second: TSecond) => TResult): TResult[];
   except(second: T[]): T[];
   distinct<TResult>(predicate?: (element: T) => TResult): T[];

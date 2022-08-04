@@ -161,6 +161,20 @@ describe('Array Extensions', () => {
     });
   });
 
+  describe('Single', () => {
+    expect([1].single()).toEqual(1);
+    expect(() => [1, 2, 3, 4].single()).toThrowError();
+    expect(() => [1, 2, 3, 4].single(x => x > 2)).toThrowError();
+    expect([1, 2, 3, 4].single(x => x > 3)).toEqual(4);
+  });
+
+  describe('Single or undefined', () => {
+    expect([1].singleOrUndefined()).toEqual(1);
+    expect([1, 2, 3, 4].singleOrUndefined()).toBeUndefined();
+    expect([1, 2, 3, 4].singleOrUndefined(x => x > 2)).toBeUndefined();
+    expect([1, 2, 3, 4].singleOrUndefined(x => x > 3)).toEqual(4);
+  });
+
   describe('Select Many', () => {
     const array = [
       {
