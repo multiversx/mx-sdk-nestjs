@@ -22,7 +22,7 @@ export class RegexPipe implements PipeTransform<string | undefined, Promise<stri
 
       for (const regex of this.regexes) {
         if (regex.test(value)) {
-          return;
+          return resolve(value);
         }
       }
 
