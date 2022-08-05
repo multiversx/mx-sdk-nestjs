@@ -38,6 +38,14 @@ export class ElrondCachingService {
     return this.inMemoryCacheService.delete(key);
   }
 
+  async deleteMultipleLocal(
+    keys: string[],
+  ): Promise<void> {
+    await Promise.all(
+      keys.map(key => this.inMemoryCacheService.delete(key)),
+    );
+  }
+
   getOrSetLocal<T>(
     key: string,
     createValueFunc: () => Promise<T | undefined>,
@@ -155,6 +163,13 @@ export class ElrondCachingService {
     key: string,
   ): Promise<void> {
     return this.haCacheService.delete(key);
+  }
+
+  async deleteMultiple(
+    keys: string[],
+  ): Promise<void> {
+    await this.redisCacheService.deleteMultiple(keys);
+    await this.deleteMultipleLocal(keys);
   }
 
   getOrSet<T>(
