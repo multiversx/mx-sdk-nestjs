@@ -8,7 +8,9 @@ import { RedisCacheModuleAsyncOptions, RedisCacheModuleOptions } from '../redis-
 @Global()
 @Module({})
 export class ElrondCachingModule {
-  static forRoot(redisCacheModuleOptions: RedisCacheModuleOptions): DynamicModule {
+  static forRoot(
+    redisCacheModuleOptions: RedisCacheModuleOptions,
+  ): DynamicModule {
     return {
       module: ElrondCachingModule,
       imports: [
@@ -25,7 +27,9 @@ export class ElrondCachingModule {
     };
   }
 
-  static forRootAsync(redisCacheModuleAsyncOptions: RedisCacheModuleAsyncOptions): DynamicModule {
+  static forRootAsync(
+    redisCacheModuleAsyncOptions: RedisCacheModuleAsyncOptions,
+  ): DynamicModule {
     return {
       module: ElrondCachingModule,
       imports: [

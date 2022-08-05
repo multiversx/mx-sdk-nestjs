@@ -14,7 +14,7 @@ export class RedisCacheService {
 
   async get<T>(
     key: string,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     try {
       const data = await this.redis.get(key);
       if (data) {
@@ -28,7 +28,7 @@ export class RedisCacheService {
         });
       }
     }
-    return;
+    return null;
   }
 
   async getMany<T>(
@@ -73,14 +73,23 @@ export class RedisCacheService {
     }
   }
 
+  async setMany<T>(
+    keys: string[],
+    values: T[],
+    ttl: number,
+  ): Promise<void> {
+    const commands = keys.map((key, index) => {
+      return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
+    });
+    await this.redis.multi(commands);
+  }
+
   async expire(
     key: string,
     ttl: number,
   ): Promise<void> {
     await this.redis.expire(key, ttl);
   }
-
-  // TO DO: add expire
 
   async delete(
     key: string,
@@ -97,7 +106,7 @@ export class RedisCacheService {
     }
   }
 
-  async deleteMultiple(keys: string[]): Promise<void> {
+  async deleteMany(keys: string[]): Promise<void> {
     try {
       await this.redis.del(keys);
     } catch (err) {
@@ -111,9 +120,9 @@ export class RedisCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     const cachedData = await this.get<T>(key);
     if (!isNil(cachedData)) {
       return cachedData;
@@ -122,7 +131,7 @@ export class RedisCacheService {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
     if (!value) {
-      return;
+      return null;
     }
     await this.set<T>(key, value, ttl);
     return value;
@@ -130,13 +139,13 @@ export class RedisCacheService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
     if (!value) {
-      return;
+      return null;
     }
     await this.set<T>(key, value, ttl);
     return value;
@@ -162,7 +171,7 @@ export class RedisCacheService {
     try {
       const newValue = await this.redis.incr(key);
       if (ttl) {
-        await this.redis.expire(key, ttl);
+        await this.expire(key, ttl);
       }
       return newValue;
     } catch (error) {
@@ -183,7 +192,7 @@ export class RedisCacheService {
     try {
       const newValue = await this.redis.decr(key);
       if (ttl) {
-        await this.redis.expire(key, ttl);
+        await this.expire(key, ttl);
       }
       return newValue;
     } catch (error) {
@@ -199,8 +208,8 @@ export class RedisCacheService {
 
   private buildInternalCreateValueFunc<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
-  ): () => Promise<T | undefined> {
+    createValueFunc: () => Promise<T | null>,
+  ): () => Promise<T | null> {
     return async () => {
       try {
         return await createValueFunc();
@@ -211,7 +220,7 @@ export class RedisCacheService {
             key,
           });
         }
-        return;
+        return null;
       }
     };
   }

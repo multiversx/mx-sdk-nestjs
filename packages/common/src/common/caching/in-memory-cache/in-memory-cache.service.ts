@@ -16,6 +16,14 @@ export class InMemoryCacheService {
     return this.cache.get<T>(key);
   }
 
+  getMany<T>(
+    keys: string[],
+  ): Promise<(T | undefined)[]> {
+    return Promise.all(
+      keys.map(key => this.get<T>(key)),
+    );
+  }
+
   async set<T>(
     key: string,
     value: T,
@@ -30,6 +38,16 @@ export class InMemoryCacheService {
     });
   }
 
+  async setMany<T>(
+    keys: string[],
+    values: T[],
+    ttl: number,
+  ): Promise<void> {
+    for (const [index, key] of keys.entries()) {
+      await this.set(key, values[index], ttl);
+    }
+  }
+
   async delete(
     key: string,
   ): Promise<void> {
@@ -38,7 +56,7 @@ export class InMemoryCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
   ): Promise<T | undefined> {
     const cachedData = await this.get<T>(key);
@@ -70,8 +88,8 @@ export class InMemoryCacheService {
   }
 
   private buildInternalCreateValueFunc<T>(
-    createValueFunc: () => Promise<T | undefined>,
-  ): () => Promise<T | undefined> {
+    createValueFunc: () => Promise<T | null>,
+  ): () => Promise<T | null> {
     return () => {
       return createValueFunc();
     };

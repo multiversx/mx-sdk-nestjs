@@ -6,7 +6,7 @@ import { RedisCacheService } from '../redis-cache/redis-cache.service';
 
 @Injectable()
 export class ElrondCachingService {
-  pendingPromises: { [key: string]: Promise<any> } = {};
+  private readonly pendingPromises: { [key: string]: Promise<any> } = {};
 
   constructor(
     private readonly inMemoryCacheService: InMemoryCacheService,
@@ -18,6 +18,12 @@ export class ElrondCachingService {
     key: string,
   ): Promise<T | undefined> {
     return this.inMemoryCacheService.get<T>(key);
+  }
+
+  getManyLocal<T>(
+    keys: string[],
+  ): Promise<(T | undefined)[]> {
+    return this.inMemoryCacheService.getMany<T>(keys);
   }
 
   setLocal<T>(
@@ -32,13 +38,21 @@ export class ElrondCachingService {
     return this.inMemoryCacheService.set<T>(key, value, ttl);
   }
 
+  setManyLocal<T>(
+    keys: string[],
+    values: T[],
+    ttl: number,
+  ): Promise<void> {
+    return this.inMemoryCacheService.setMany(keys, values, ttl);
+  }
+
   deleteLocal(
     key: string,
   ): Promise<void> {
     return this.inMemoryCacheService.delete(key);
   }
 
-  async deleteMultipleLocal(
+  async deleteManyLocal(
     keys: string[],
   ): Promise<void> {
     await Promise.all(
@@ -48,7 +62,7 @@ export class ElrondCachingService {
 
   getOrSetLocal<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
   ): Promise<T | undefined> {
     return this.inMemoryCacheService.getOrSet<T>(
@@ -70,7 +84,7 @@ export class ElrondCachingService {
 
   getRemote<T>(
     key: string,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     return this.redisCacheService.get<T>(key);
   }
 
@@ -88,6 +102,14 @@ export class ElrondCachingService {
     return this.redisCacheService.set<T>(key, value, ttl);
   }
 
+  async setManyRemote<T>(
+    keys: string[],
+    values: T[],
+    ttl: number,
+  ): Promise<void> {
+    await this.redisCacheService.setMany(keys, values, ttl);
+  }
+
   setTtlRemote(
     key: string,
     ttl: number,
@@ -101,10 +123,10 @@ export class ElrondCachingService {
     return this.redisCacheService.delete(key);
   }
 
-  deleteMultipleRemote(
+  deleteManyRemote(
     keys: string[],
   ): Promise<void> {
-    return this.redisCacheService.deleteMultiple(keys);
+    return this.redisCacheService.deleteMany(keys);
   }
 
   flushDbRemote(): Promise<void> {
@@ -113,9 +135,9 @@ export class ElrondCachingService {
 
   getOrSetRemote<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     return this.executeWithPendingPromise(
       key,
       () => this.redisCacheService.getOrSet<T>(key, createValueFunc, ttl),
@@ -124,9 +146,9 @@ export class ElrondCachingService {
 
   setOrUpdateRemote<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
   }
 
@@ -146,8 +168,34 @@ export class ElrondCachingService {
 
   get<T>(
     key: string,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     return this.haCacheService.get<T>(key);
+  }
+
+  async getMany<T>(
+    keys: string[],
+  ): Promise<(T | undefined)[]> {
+    const localValues = await this.getManyLocal<T>(keys);
+
+    const missingIndexes: number[] = [];
+    for (const [index, value] of localValues.entries()) {
+      if (!value) {
+        missingIndexes.push(index);
+      }
+    }
+
+    const remoteKeys: string[] = [];
+    for (const missingIndex of missingIndexes) {
+      remoteKeys.push(keys[missingIndex]);
+    }
+    const remoteValues = await this.getManyRemote<T>(remoteKeys);
+
+    for (const [index, missingIndex] of missingIndexes.entries()) {
+      const remoteValue = remoteValues[index];
+      localValues[missingIndex] = remoteValue ? remoteValue : undefined;
+    }
+
+    return localValues;
   }
 
   set<T>(
@@ -159,22 +207,33 @@ export class ElrondCachingService {
     return this.haCacheService.set(key, value, ttl, inMemoryTtl);
   }
 
+  async setMany<T>(
+    keys: string[],
+    values: T[],
+    ttl: number,
+  ): Promise<void> {
+    await Promise.all([
+      this.setManyRemote(keys, values, ttl),
+      this.setManyLocal(keys, values, ttl),
+    ]);
+  }
+
   delete(
     key: string,
   ): Promise<void> {
     return this.haCacheService.delete(key);
   }
 
-  async deleteMultiple(
+  async deleteMany(
     keys: string[],
   ): Promise<void> {
-    await this.redisCacheService.deleteMultiple(keys);
-    await this.deleteMultipleLocal(keys);
+    await this.redisCacheService.deleteMany(keys);
+    await this.deleteManyLocal(keys);
   }
 
   getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {

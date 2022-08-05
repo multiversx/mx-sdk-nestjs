@@ -15,7 +15,7 @@ export class HACacheService {
 
   async get<T>(
     key: string,
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     const inMemoryCacheValue = await this.inMemoryCacheService.get<T>(key);
     if (inMemoryCacheValue) {
       return inMemoryCacheValue;
@@ -42,11 +42,11 @@ export class HACacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
-    const getOrAddFromRedisFunc = async (): Promise<T | undefined> => {
+    const getOrAddFromRedisFunc = async (): Promise<T | null> => {
       return await this.redisCacheService.getOrSet<T>(key, createValueFunc, ttl);
     };
 
