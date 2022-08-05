@@ -8,6 +8,7 @@ import { InMemoryCacheService } from './in-memory-cache.service';
   imports: [
     CacheModule.register({
       store: 'memory',
+      shouldCloneBeforeSet: false,
     }),
   ],
   exports: [
