@@ -4,7 +4,6 @@ import { RedisCacheService } from '../redis-cache';
 
 @Injectable()
 export class HACacheService {
-  private readonly DEFAULT_CACHE = 300;
   private readonly logger: Logger;
 
   constructor(
@@ -28,7 +27,7 @@ export class HACacheService {
   set<T>(
     key: string,
     value: T,
-    ttl: number = this.DEFAULT_CACHE,
+    ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<void> {
     return this.setValue(key, value, ttl, inMemoryTtl);
@@ -43,8 +42,8 @@ export class HACacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_CACHE,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
     const getOrAddFromRedisFunc = async (): Promise<T | undefined> => {
@@ -56,8 +55,8 @@ export class HACacheService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => T | Promise<T>,
-    ttl: number = this.DEFAULT_CACHE,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
@@ -85,15 +84,11 @@ export class HACacheService {
 
   private buildInternalCreateValueFunc<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
+    createValueFunc: () => Promise<T | undefined>,
   ): () => Promise<T | undefined> {
     return async () => {
       try {
-        let data = createValueFunc();
-        if (data instanceof Promise) {
-          data = await data;
-        }
-        return data;
+        return await createValueFunc();
       } catch (error) {
         if (error instanceof Error) {
           this.logger.error('HACache - An error occurred while trying to load value.', {

@@ -6,8 +6,6 @@ import { Cache } from 'cache-manager';
 
 @Injectable()
 export class InMemoryCacheService {
-  private readonly DEFAULT_TTL = 300;
-
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) { }
@@ -21,7 +19,7 @@ export class InMemoryCacheService {
   async set<T>(
     key: string,
     value: T,
-    ttl: number = this.DEFAULT_TTL,
+    ttl: number,
   ): Promise<void> {
     if (isNil(value)) {
       return;
@@ -40,8 +38,8 @@ export class InMemoryCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined>,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
     const cachedData = await this.get<T>(key);
     if (!isNil(cachedData)) {
@@ -59,8 +57,8 @@ export class InMemoryCacheService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(createValueFunc);
     const value = await internalCreateValueFunc();
@@ -72,14 +70,10 @@ export class InMemoryCacheService {
   }
 
   private buildInternalCreateValueFunc<T>(
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
+    createValueFunc: () => Promise<T | undefined>,
   ): () => Promise<T | undefined> {
-    return async () => {
-      let data = createValueFunc();
-      if (data instanceof Promise) {
-        data = await data;
-      }
-      return data;
+    return () => {
+      return createValueFunc();
     };
   }
 }

@@ -4,7 +4,6 @@ import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class RedisCacheService {
-  private readonly DEFAULT_TTL = 300;
   private readonly logger: Logger;
 
   constructor(
@@ -53,7 +52,7 @@ export class RedisCacheService {
   async set<T>(
     key: string,
     value: T,
-    ttl: number | null = null,
+    ttl: number | null,
   ): Promise<void> {
     if (isNil(value)) {
       return;
@@ -73,6 +72,15 @@ export class RedisCacheService {
       }
     }
   }
+
+  async expire(
+    key: string,
+    ttl: number,
+  ): Promise<void> {
+    await this.redis.expire(key, ttl);
+  }
+
+  // TO DO: add expire
 
   async delete(
     key: string,
@@ -103,8 +111,8 @@ export class RedisCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
     const cachedData = await this.get<T>(key);
     if (!isNil(cachedData)) {
@@ -122,8 +130,8 @@ export class RedisCacheService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
@@ -191,15 +199,11 @@ export class RedisCacheService {
 
   private buildInternalCreateValueFunc<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
+    createValueFunc: () => Promise<T | undefined>,
   ): () => Promise<T | undefined> {
     return async () => {
       try {
-        let data = createValueFunc();
-        if (data instanceof Promise) {
-          data = await data;
-        }
-        return data;
+        return await createValueFunc();
       } catch (error) {
         if (error instanceof Error) {
           this.logger.error('RedisCache - An error occurred while trying to load value.', {

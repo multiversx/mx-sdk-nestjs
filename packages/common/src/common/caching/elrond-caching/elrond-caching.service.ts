@@ -7,7 +7,6 @@ import { RedisCacheService } from '../redis-cache/redis-cache.service';
 @Injectable()
 export class ElrondCachingService {
   pendingPromises: { [key: string]: Promise<any> } = {};
-  private readonly DEFAULT_TTL = 300;
 
   constructor(
     private readonly inMemoryCacheService: InMemoryCacheService,
@@ -24,7 +23,7 @@ export class ElrondCachingService {
   setLocal<T>(
     key: string,
     value: T,
-    ttl: number = this.DEFAULT_TTL,
+    ttl: number,
   ): Promise<void> {
     if (isNil(value)) {
       return Promise.resolve();
@@ -41,16 +40,22 @@ export class ElrondCachingService {
 
   getOrSetLocal<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined>,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
-    return this.inMemoryCacheService.getOrSet<T>(key, createValueFunc, ttl);
+    return this.inMemoryCacheService.getOrSet<T>(
+      key,
+      () => {
+        return this.executeWithPendingPromise(key, createValueFunc);
+      },
+      ttl,
+    );
   }
 
   setOrUpdateLocal<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
     return this.inMemoryCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
   }
@@ -70,9 +75,16 @@ export class ElrondCachingService {
   setRemote<T>(
     key: string,
     value: T,
-    ttl: number | null = null,
+    ttl: number | null,
   ): Promise<void> {
     return this.redisCacheService.set<T>(key, value, ttl);
+  }
+
+  setTtlRemote(
+    key: string,
+    ttl: number,
+  ): Promise<void> {
+    return this.redisCacheService.expire(key, ttl);
   }
 
   deleteRemote(
@@ -93,30 +105,33 @@ export class ElrondCachingService {
 
   getOrSetRemote<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
-    return this.redisCacheService.getOrSet<T>(key, createValueFunc, ttl);
+    return this.executeWithPendingPromise(
+      key,
+      () => this.redisCacheService.getOrSet<T>(key, createValueFunc, ttl),
+    );
   }
 
   setOrUpdateRemote<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
   ): Promise<T | undefined> {
     return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
   }
 
   incrementRemote(
     key: string,
-    ttl: number | null = null,
+    ttl: number | null,
   ): Promise<number> {
     return this.redisCacheService.increment(key, ttl);
   }
 
   decrementRemote(
     key: string,
-    ttl: number | null = null,
+    ttl: number | null,
   ): Promise<number> {
     return this.redisCacheService.decrement(key, ttl);
   }
@@ -130,7 +145,7 @@ export class ElrondCachingService {
   set<T>(
     key: string,
     value: T,
-    ttl: number = this.DEFAULT_TTL,
+    ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<void> {
     return this.haCacheService.set(key, value, ttl, inMemoryTtl);
@@ -144,23 +159,27 @@ export class ElrondCachingService {
 
   getOrSet<T>(
     key: string,
-    createValueFunc: () => T | Promise<T | undefined> | undefined,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
-    return this.haCacheService.getOrSet<T>(key, createValueFunc, ttl, inMemoryTtl);
+    return this.executeWithPendingPromise(
+      key,
+      () => this.haCacheService.getOrSet<T>(key, createValueFunc, ttl, inMemoryTtl),
+    );
   }
 
   setOrUpdate<T>(
     key: string,
-    createValueFunc: () => T | Promise<T>,
-    ttl: number = this.DEFAULT_TTL,
+    createValueFunc: () => Promise<T | undefined>,
+    ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
     return this.haCacheService.setOrUpdate<T>(key, createValueFunc, ttl, inMemoryTtl);
   }
 
-  executeWithPendingPromise<T>(key: string,
+  executeWithPendingPromise<T>(
+    key: string,
     promise: () => Promise<T>,
   ): Promise<T> {
     const pendingPromise = this.pendingPromises[key];
