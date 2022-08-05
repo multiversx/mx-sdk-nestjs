@@ -175,27 +175,28 @@ export class ElrondCachingService {
   async getMany<T>(
     keys: string[],
   ): Promise<(T | undefined)[]> {
-    const localValues = await this.getManyLocal<T>(keys);
+    const values = await this.getManyLocal<T>(keys);
 
     const missingIndexes: number[] = [];
-    for (const [index, value] of localValues.entries()) {
+    values.forEach((value, index) => {
       if (!value) {
         missingIndexes.push(index);
       }
+    });
+
+    const missingKeys: string[] = [];
+    for (const missingIndex of missingIndexes) {
+      missingKeys.push(keys[missingIndex]);
     }
 
-    const remoteKeys: string[] = [];
-    for (const missingIndex of missingIndexes) {
-      remoteKeys.push(keys[missingIndex]);
-    }
-    const remoteValues = await this.getManyRemote<T>(remoteKeys);
+    const remoteValues = await this.getManyRemote<T>(missingKeys);
 
     for (const [index, missingIndex] of missingIndexes.entries()) {
       const remoteValue = remoteValues[index];
-      localValues[missingIndex] = remoteValue ? remoteValue : undefined;
+      values[missingIndex] = remoteValue ? remoteValue : undefined;
     }
 
-    return localValues;
+    return values;
   }
 
   set<T>(
