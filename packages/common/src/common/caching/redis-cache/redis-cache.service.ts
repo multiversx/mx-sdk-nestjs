@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
+import { MetricsService } from 'src/common/metrics/metrics.service';
+import { PerformanceProfiler } from 'src/utils/performance.profiler';
 
 @Injectable()
 export class RedisCacheService {
@@ -8,6 +10,7 @@ export class RedisCacheService {
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
+    private readonly metricsService: MetricsService,
   ) {
     this.logger = new Logger(RedisCacheService.name);
   }
@@ -15,6 +18,7 @@ export class RedisCacheService {
   async get<T>(
     key: string,
   ): Promise<T | null> {
+    const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.get(key);
       if (data) {
@@ -27,6 +31,9 @@ export class RedisCacheService {
           cacheKey: key,
         });
       }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('GET', performanceProfiler.duration);
     }
     return null;
   }
@@ -34,6 +41,7 @@ export class RedisCacheService {
   async getMany<T>(
     keys: string[],
   ): Promise<(T | null)[]> {
+    const performanceProfiler = new PerformanceProfiler();
     try {
       const items = await this.redis.mget(keys);
       return items.map(item => item ? JSON.parse(item) : null);
@@ -46,6 +54,9 @@ export class RedisCacheService {
           });
       }
       return [];
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('MGET', performanceProfiler.duration);
     }
   }
 
@@ -57,6 +68,7 @@ export class RedisCacheService {
     if (isNil(value)) {
       return;
     }
+    const performanceProfiler = new PerformanceProfiler();
     try {
       if (!ttl) {
         await this.redis.set(key, JSON.stringify(value));
@@ -70,6 +82,9 @@ export class RedisCacheService {
           cacheKey: key,
         });
       }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SET', performanceProfiler.duration);
     }
   }
 
@@ -78,10 +93,23 @@ export class RedisCacheService {
     values: T[],
     ttl: number,
   ): Promise<void> {
-    const commands = keys.map((key, index) => {
-      return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
-    });
-    await this.redis.multi(commands);
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const commands = keys.map((key, index) => {
+        return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
+      });
+      await this.redis.multi(commands);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('RedisCache - An error occurred while trying to set many in redis cache.', {
+          error: error?.toString(),
+          cacheKey: keys,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SETMANY', performanceProfiler.duration);
+    }
   }
 
   async expire(
@@ -94,6 +122,7 @@ export class RedisCacheService {
   async delete(
     key: string,
   ): Promise<void> {
+    const performanceProfiler = new PerformanceProfiler();
     try {
       await this.redis.del(key);
     } catch (error) {
@@ -103,19 +132,42 @@ export class RedisCacheService {
           cacheKey: key,
         });
       }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('DEL', performanceProfiler.duration);
     }
   }
 
   async deleteMany(keys: string[]): Promise<void> {
+    const performanceProfiler = new PerformanceProfiler();
     try {
       await this.redis.del(keys);
-    } catch (err) {
-      this.logger.error('An error occurred while trying to delete multiple keys from redis cache.');
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to delete multiple keys from redis cache.', {
+          error: error?.toString(),
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('DELMANY', performanceProfiler.duration);
     }
   }
 
   async flushDb(): Promise<void> {
-    await this.redis.flushdb();
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      await this.redis.flushdb();
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to delete multiple keys from redis cache.', {
+          error: error?.toString(),
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('FLUSHDB', performanceProfiler.duration);
+    }
   }
 
   async getOrSet<T>(
@@ -168,6 +220,7 @@ export class RedisCacheService {
     key: string,
     ttl: number | null = null,
   ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
     try {
       const newValue = await this.redis.incr(key);
       if (ttl) {
@@ -182,6 +235,9 @@ export class RedisCacheService {
         });
       }
       throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('INCR', performanceProfiler.duration);
     }
   }
 
@@ -189,6 +245,7 @@ export class RedisCacheService {
     key: string,
     ttl: number | null = null,
   ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
     try {
       const newValue = await this.redis.decr(key);
       if (ttl) {
@@ -203,6 +260,9 @@ export class RedisCacheService {
         });
       }
       throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('DECR', performanceProfiler.duration);
     }
   }
 
