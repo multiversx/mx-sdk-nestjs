@@ -60,6 +60,29 @@ export class RedisCacheService {
     }
   }
 
+  async setnx<T>(
+    key: string,
+    value: T,
+  ): Promise<void> {
+    if (isNil(value)) {
+      return;
+    }
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      await this.redis.setnx(key, JSON.stringify(value));
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('RedisCache - An error occurred while trying to setnx in redis cache.', {
+          error: error?.toString(),
+          cacheKey: key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SETNX', performanceProfiler.duration);
+    }
+  }
+
   async set<T>(
     key: string,
     value: T,
@@ -117,6 +140,13 @@ export class RedisCacheService {
     ttl: number,
   ): Promise<void> {
     await this.redis.expire(key, ttl);
+  }
+
+  async pexpire(
+    key: string,
+    ttl: number,
+  ): Promise<void> {
+    await this.redis.pexpire(key, ttl);
   }
 
   async delete(
