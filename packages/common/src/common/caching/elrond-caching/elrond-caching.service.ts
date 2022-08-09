@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 import { PendingExecuter } from 'src/utils/pending.executer';
-import { HACacheService } from '../ha-cache/ha-cache.service';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
 
 @Injectable()
 export class ElrondCachingService {
   private readonly pendingExecuter: PendingExecuter;
+  private readonly logger: Logger;
+
   constructor(
     private readonly inMemoryCacheService: InMemoryCacheService,
     private readonly redisCacheService: RedisCacheService,
-    private readonly haCacheService: HACacheService,
   ) {
+    this.logger = new Logger(ElrondCachingService.name);
     this.pendingExecuter = new PendingExecuter();
   }
 
@@ -171,10 +172,15 @@ export class ElrondCachingService {
     return this.redisCacheService.decrement(key, ttl);
   }
 
-  get<T>(
+  async get<T>(
     key: string,
   ): Promise<T | null> {
-    return this.haCacheService.get<T>(key);
+    const inMemoryCacheValue = await this.inMemoryCacheService.get<T>(key);
+    if (inMemoryCacheValue) {
+      return inMemoryCacheValue;
+    }
+
+    return await this.redisCacheService.get<T>(key);
   }
 
   async getMany<T>(
@@ -204,13 +210,16 @@ export class ElrondCachingService {
     return values;
   }
 
-  set<T>(
+  async set<T>(
     key: string,
     value: T,
     ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<void> {
-    return this.haCacheService.set(key, value, ttl, inMemoryTtl);
+    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl);
+    const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl);
+
+    await Promise.all([setInMemoryCachePromise, setRedisCachePromise]);
   }
 
   async setMany<T>(
@@ -224,42 +233,49 @@ export class ElrondCachingService {
     ]);
   }
 
-  delete(
+  async delete(
     key: string,
   ): Promise<void> {
-    return this.haCacheService.delete(key);
+    await this.redisCacheService.delete(key);
+    await this.inMemoryCacheService.delete(key);
   }
 
   async deleteMany(
     keys: string[],
   ): Promise<void> {
-    await this.redisCacheService.deleteMany(keys);
+    await this.deleteManyRemote(keys);
     await this.deleteManyLocal(keys);
   }
 
-  getOrSet<T>(
+  async getOrSet<T>(
     key: string,
     createValueFunc: () => Promise<T | null>,
     ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
-    return this.haCacheService.getOrSet<T>(
-      key,
-      () => {
-        return this.executeWithPendingPromise(key, createValueFunc);
-      },
-      ttl,
-      inMemoryTtl,
-    );
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
+    const getOrAddFromRedisFunc = async (): Promise<T | null> => {
+      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl);
+    };
+
+    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl);
   }
 
-  setOrUpdate<T>(
+  async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null>,
     ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
-    return this.haCacheService.setOrUpdate<T>(key, createValueFunc, ttl, inMemoryTtl);
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
+    const value = await internalCreateValueFunc();
+    if (!value) {
+      return;
+    }
+
+    await this.set<T>(key, value, ttl, inMemoryTtl);
+
+    return value;
   }
 
   private executeWithPendingPromise<T>(
@@ -267,5 +283,24 @@ export class ElrondCachingService {
     promise: () => Promise<T>,
   ): Promise<T> {
     return this.pendingExecuter.execute(key, promise);
+  }
+
+  private buildInternalCreateValueFunc<T>(
+    key: string,
+    createValueFunc: () => Promise<T | null>,
+  ): () => Promise<T | null> {
+    return async () => {
+      try {
+        return await this.executeWithPendingPromise(key, createValueFunc);
+      } catch (error) {
+        if (error instanceof Error) {
+          this.logger.error('ElrondCaching - An error occurred while trying to load value.', {
+            error: error?.toString(),
+            key,
+          });
+        }
+        return null;
+      }
+    };
   }
 }

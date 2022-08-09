@@ -1,6 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ElrondCachingService } from './elrond-caching.service';
-import { HACacheModule } from '../ha-cache/ha-cache.module';
 import { InMemoryCacheModule } from '../in-memory-cache/in-memory-cache.module';
 import { RedisCacheModule } from '../redis-cache/redis-cache.module';
 import { RedisCacheModuleAsyncOptions, RedisCacheModuleOptions } from '../redis-cache/options';
@@ -15,7 +14,6 @@ export class ElrondCachingModule {
       imports: [
         InMemoryCacheModule,
         RedisCacheModule.forRoot(redisCacheModuleOptions),
-        HACacheModule.forRoot(redisCacheModuleOptions),
       ],
       providers: [
         ElrondCachingService,
@@ -34,7 +32,6 @@ export class ElrondCachingModule {
       imports: [
         InMemoryCacheModule,
         RedisCacheModule.forRootAsync(redisCacheModuleAsyncOptions),
-        HACacheModule.forRootAsync(redisCacheModuleAsyncOptions),
       ],
       providers: [
         ElrondCachingService,
