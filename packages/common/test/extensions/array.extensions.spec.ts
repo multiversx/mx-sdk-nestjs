@@ -1,4 +1,4 @@
-import '../src/utils/extensions/array.extensions';
+import '../../src/utils/extensions/array.extensions';
 
 describe('Array Extensions', () => {
   describe('Distinct', () => {
