@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
+import { PendingExecuter } from 'src/utils/pending.executer';
 import { HACacheService } from '../ha-cache/ha-cache.service';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
 
 @Injectable()
 export class ElrondCachingService {
-  private readonly pendingPromises: { [key: string]: Promise<any> } = {};
-
+  private readonly pendingExecuter: PendingExecuter;
   constructor(
     private readonly inMemoryCacheService: InMemoryCacheService,
     private readonly redisCacheService: RedisCacheService,
     private readonly haCacheService: HACacheService,
-  ) { }
+  ) {
+    this.pendingExecuter = new PendingExecuter();
+  }
 
   getLocal<T>(
     key: string,
@@ -253,19 +255,10 @@ export class ElrondCachingService {
     return this.haCacheService.setOrUpdate<T>(key, createValueFunc, ttl, inMemoryTtl);
   }
 
-  executeWithPendingPromise<T>(
+  private executeWithPendingPromise<T>(
     key: string,
     promise: () => Promise<T>,
   ): Promise<T> {
-    const pendingPromise = this.pendingPromises[key];
-    if (pendingPromise) {
-      return pendingPromise;
-    }
-
-    try {
-      return this.pendingPromises[key] = promise();
-    } finally {
-      delete this.pendingPromises[key];
-    }
+    return this.pendingExecuter.execute(key, promise);
   }
 }
