@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-import { PendingExecuter } from 'src/utils/pending.executer';
+import { PendingExecuter } from '../../../utils/pending.executer';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
 

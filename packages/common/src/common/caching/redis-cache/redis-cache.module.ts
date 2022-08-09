@@ -2,7 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { RedisCacheService } from './redis-cache.service';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { RedisCacheModuleOptions, RedisCacheModuleAsyncOptions } from './options';
-import { MetricsModule } from 'src/common/metrics/metrics.module';
+import { MetricsModule } from '../../../common/metrics/metrics.module';
 
 @Module({})
 export class RedisCacheModule {
