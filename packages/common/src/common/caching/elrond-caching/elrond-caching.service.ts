@@ -140,9 +140,12 @@ export class ElrondCachingService {
     createValueFunc: () => Promise<T | null>,
     ttl: number,
   ): Promise<T | null> {
-    return this.executeWithPendingPromise(
+    return this.redisCacheService.getOrSet<T>(
       key,
-      () => this.redisCacheService.getOrSet<T>(key, createValueFunc, ttl),
+      () => {
+        return this.executeWithPendingPromise(key, createValueFunc);
+      },
+      ttl,
     );
   }
 
@@ -240,9 +243,13 @@ export class ElrondCachingService {
     ttl: number,
     inMemoryTtl: number = ttl,
   ): Promise<T | undefined> {
-    return this.executeWithPendingPromise(
+    return this.haCacheService.getOrSet<T>(
       key,
-      () => this.haCacheService.getOrSet<T>(key, createValueFunc, ttl, inMemoryTtl),
+      () => {
+        return this.executeWithPendingPromise(key, createValueFunc);
+      },
+      ttl,
+      inMemoryTtl,
     );
   }
 

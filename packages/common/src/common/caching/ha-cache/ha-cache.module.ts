@@ -1,10 +1,9 @@
-import { DynamicModule, Global, Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { HACacheService } from './ha-cache.service';
 import { InMemoryCacheModule } from '../in-memory-cache';
 import { RedisCacheModule } from '../redis-cache';
 import { RedisCacheModuleAsyncOptions, RedisCacheModuleOptions } from '../redis-cache/options';
 
-@Global()
 @Module({})
 export class HACacheModule {
   static forRoot(redisCacheModuleOptions: RedisCacheModuleOptions): DynamicModule {

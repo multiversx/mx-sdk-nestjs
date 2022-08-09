@@ -7,7 +7,7 @@ export class RedisCacheModuleOptions {
 
   constructor(
     host: string,
-    port: number
+    port: number,
   ) {
     this.config = {
       url: `redis://${host}:${port}`,

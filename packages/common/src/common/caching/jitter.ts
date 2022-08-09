@@ -3,7 +3,8 @@
  * @param slidingPercentage sliding percentage for example 10% is 0.1
  * @returns jitter in seconds.
  */
-export const jitter = (ttlSeconds: number,
+export const jitter = (
+  ttlSeconds: number,
   slidingPercentage = 0.1,
 ): number => {
   if (!ttlSeconds) {

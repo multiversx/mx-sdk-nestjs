@@ -1,9 +1,8 @@
 import {
-  CacheModule, Global, Module,
+  CacheModule, Module,
 } from '@nestjs/common';
 import { InMemoryCacheService } from './in-memory-cache.service';
 
-@Global()
 @Module({
   imports: [
     CacheModule.register({
