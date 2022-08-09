@@ -27,6 +27,7 @@ export class RedisCacheModule {
       module: RedisCacheModule,
       imports: [
         RedisModule.forRootAsync(asyncOptions),
+        MetricsModule,
       ],
       providers: [
         RedisCacheService,
