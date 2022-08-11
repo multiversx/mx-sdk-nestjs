@@ -32,7 +32,6 @@ export * from './pipes/parse.hash.pipe';
 export * from './pipes/parse.bool.pipe';
 export * from './pipes/parse.enum.pipe';
 export * from './pipes/parse.enum.array.pipe';
-export * from './pipes/parse.int.pipe';
 export * from './pipes/parse.nft.pipe';
 export * from './pipes/parse.token.pipe';
 export * from './pipes/parse.token.or.nft.pipe';
