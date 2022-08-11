@@ -1,5 +1,5 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
-import { AddressUtils } from "src/utils/address.utils";
+import { AddressUtils } from "../utils/address.utils";
 
 export class ParseAddressArrayPipe implements PipeTransform<string | undefined, Promise<string[] | undefined>> {
   transform(value: string | undefined, metadata: ArgumentMetadata): Promise<string[] | undefined> {
