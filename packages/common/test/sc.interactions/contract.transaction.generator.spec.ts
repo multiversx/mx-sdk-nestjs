@@ -1,6 +1,6 @@
 import { AccountOnNetwork, ApiNetworkProvider, NetworkConfig } from "@elrondnetwork/erdjs-network-providers/out";
 import { Address, ContractFunction, IAddress, Interaction, SmartContract } from "@elrondnetwork/erdjs/out";
-import { ContractTransactionGenerator } from "src/sc.interactions/contract.transaction.generator";
+import { ContractTransactionGenerator } from "../../src/sc.interactions/contract.transaction.generator";
 
 const TEST_ADDRESS = "erd1wtm3yl58vcnj089lqy3tatkdpwklffh4pjnf27zwsa2znjyk355sutafqh";
 describe("Contract transaction generator", () => {
