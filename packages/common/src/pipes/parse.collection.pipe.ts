@@ -1,7 +1,7 @@
 import { TokenUtils } from "../utils/token.utils";
-import { RegexPipe } from "./regex.pipe";
+import { ParseRegexPipe } from "./parse.regex.pipe";
 
-export class ParseCollectionPipe extends RegexPipe {
+export class ParseCollectionPipe extends ParseRegexPipe {
   constructor() {
     super(TokenUtils.tokenValidateRegex, 'Invalid collection identifier');
   }
