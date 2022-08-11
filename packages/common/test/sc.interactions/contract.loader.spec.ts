@@ -1,5 +1,5 @@
 import { Address, SmartContract } from "@elrondnetwork/erdjs/out";
-import { ContractLoader } from "src/sc.interactions/contract.loader";
+import { ContractLoader } from "../../src/sc.interactions/contract.loader";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";

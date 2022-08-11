@@ -1,7 +1,7 @@
 import { TokenUtils } from "../utils/token.utils";
-import { RegexPipe } from "./regex.pipe";
+import { ParseRegexPipe } from "./parse.regex.pipe";
 
-export class ParseTokenOrNftPipe extends RegexPipe {
+export class ParseTokenOrNftPipe extends ParseRegexPipe {
   constructor() {
     super([TokenUtils.tokenValidateRegex, TokenUtils.nftValidateRegex], 'Invalid token / NFT identifier');
   }

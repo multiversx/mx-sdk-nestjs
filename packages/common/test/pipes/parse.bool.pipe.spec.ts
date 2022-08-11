@@ -1,11 +1,11 @@
 import { ArgumentMetadata } from "@nestjs/common";
-import { ParseOptionalBoolPipe } from "../../src/pipes/parse.optional.bool.pipe";
+import { ParseBoolPipe } from "../../src/pipes/parse.bool.pipe";
 
 describe('ParseOptionalBoolPipe', () => {
-  let target: ParseOptionalBoolPipe;
+  let target: ParseBoolPipe;
 
   beforeEach(() => {
-    target = new ParseOptionalBoolPipe;
+    target = new ParseBoolPipe;
   });
 
   describe('transform', () => {
