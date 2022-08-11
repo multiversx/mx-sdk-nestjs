@@ -1,6 +1,6 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
-export class ParseOptionalBoolPipe implements PipeTransform<string | boolean, Promise<boolean | undefined>> {
+export class ParseBoolPipe implements PipeTransform<string | boolean, Promise<boolean | undefined>> {
   transform(value: string | boolean, metadata: ArgumentMetadata): Promise<boolean | undefined> {
     return new Promise(resolve => {
       if (value === true || value === 'true') {

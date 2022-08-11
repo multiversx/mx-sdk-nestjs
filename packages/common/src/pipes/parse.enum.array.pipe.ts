@@ -1,6 +1,6 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
-export class ParseOptionalEnumArrayPipe<T extends { [name: string]: any }> implements PipeTransform<string | undefined, Promise<string[] | undefined>> {
+export class ParseEnumArrayPipe<T extends { [name: string]: any }> implements PipeTransform<string | undefined, Promise<string[] | undefined>> {
   constructor(private readonly type: T) { }
 
   transform(value: string | undefined, metadata: ArgumentMetadata): Promise<string[] | undefined> {

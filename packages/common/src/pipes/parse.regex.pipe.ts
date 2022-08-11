@@ -1,6 +1,6 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
-export class RegexPipe implements PipeTransform<string | undefined, Promise<string | undefined>> {
+export class ParseRegexPipe implements PipeTransform<string | undefined, Promise<string | undefined>> {
   private readonly regexes: RegExp[];
 
   constructor(

@@ -1,11 +1,11 @@
 import { ArgumentMetadata } from "@nestjs/common";
-import { ParseOptionalIntPipe } from "../../src/pipes/parse.optional.int.pipe";
+import { ParseIntPipe } from "../../src/pipes/parse.int.pipe";
 
 describe('ParseOptionalIntPipe', () => {
-  let target: ParseOptionalIntPipe;
+  let target: ParseIntPipe;
 
   beforeEach(() => {
-    target = new ParseOptionalIntPipe;
+    target = new ParseIntPipe;
   });
 
   describe('transform', () => {
