@@ -44,4 +44,15 @@ describe("Contract loader", () => {
 
     await expect(cLoader.getContract(CONTRACT_ADDRESS)).rejects.toThrow(Error);
   });
+
+  it('should retrieve multiple contracts with same abi', async () => {
+    const cLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE);
+
+    const c1 = await cLoader.getContract(CONTRACT_ADDRESS);
+
+    expect(c1.getAddress().bech32()).toStrictEqual(CONTRACT_ADDRESS);
+
+    const c2 = await cLoader.getContract('erd1qqqqqqqqqqqqqpgq50dge6rrpcra4tp9hl57jl0893a4r2r72jpsk39rjj');
+    expect(c2.getAddress().bech32()).toStrictEqual('erd1qqqqqqqqqqqqqpgq50dge6rrpcra4tp9hl57jl0893a4r2r72jpsk39rjj');
+  })
 });
