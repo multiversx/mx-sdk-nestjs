@@ -3,9 +3,13 @@ import { ContractLoader } from "../../src/sc.interactions/contract.loader";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";
-  const ABI_PATH: string = 'src/abis/metabonding.abi.json';
+  const ABI_PATH: string = 'test/sc.interactions/test.abi.json';
   const CONTRACT_INTERFACE: string = 'Metabonding';
   const contractLoader: ContractLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE, CONTRACT_ADDRESS);
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  })
 
   it('Should load metabonding contract', async () => {
     const contract: SmartContract = await contractLoader.getContract();
@@ -34,9 +38,5 @@ describe("Contract loader", () => {
     const cLoader = new ContractLoader("./invalid-path", CONTRACT_INTERFACE, CONTRACT_ADDRESS);
 
     await expect(cLoader.getContract()).rejects.toThrow(Error);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 });
