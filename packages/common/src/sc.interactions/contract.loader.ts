@@ -6,16 +6,18 @@ export class ContractLoader {
   private readonly logger: Logger;
   private readonly abiPath: string;
   private readonly contractInterface: string;
+  private readonly contractAddress: string;
   private contract: SmartContract | undefined = undefined;
 
-  constructor(abiPath: string, contractInterface: string) {
+  constructor(abiPath: string, contractInterface: string, contractAddres: string) {
     this.abiPath = abiPath;
     this.contractInterface = contractInterface;
+    this.contractAddress = contractAddres;
 
     this.logger = new Logger(ContractLoader.name);
   }
 
-  private async load(contractAddress: string): Promise<SmartContract> {
+  private async load(): Promise<SmartContract> {
     try {
       const jsonContent: string = await fs.promises.readFile(this.abiPath, { encoding: "utf8" });
       const json = JSON.parse(jsonContent);
@@ -25,7 +27,7 @@ export class ContractLoader {
       const abi = new SmartContractAbi(abiRegistry, [this.contractInterface]);
 
       return new SmartContract({
-        address: new Address(contractAddress),
+        address: new Address(this.contractAddress),
         abi: abi,
       });
     } catch (error) {
@@ -36,9 +38,9 @@ export class ContractLoader {
     }
   }
 
-  async getContract(contractAddress: string): Promise<SmartContract> {
+  async getContract(): Promise<SmartContract> {
     if (!this.contract) {
-      this.contract = await this.load(contractAddress);
+      this.contract = await this.load();
     }
 
     return this.contract;
