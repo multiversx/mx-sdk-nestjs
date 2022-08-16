@@ -100,7 +100,7 @@ export class ElrondCachingService {
   setRemote<T>(
     key: string,
     value: T,
-    ttl: number | null,
+    ttl: number | null = null,
   ): Promise<void> {
     return this.redisCacheService.set<T>(key, value, ttl);
   }
@@ -160,14 +160,14 @@ export class ElrondCachingService {
 
   incrementRemote(
     key: string,
-    ttl: number | null,
+    ttl: number | null = null,
   ): Promise<number> {
     return this.redisCacheService.increment(key, ttl);
   }
 
   decrementRemote(
     key: string,
-    ttl: number | null,
+    ttl: number | null = null,
   ): Promise<number> {
     return this.redisCacheService.decrement(key, ttl);
   }

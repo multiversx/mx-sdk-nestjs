@@ -86,7 +86,7 @@ export class RedisCacheService {
   async set<T>(
     key: string,
     value: T,
-    ttl: number | null,
+    ttl: number | null = null,
   ): Promise<void> {
     if (isNil(value)) {
       return;
