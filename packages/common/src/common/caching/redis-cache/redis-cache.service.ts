@@ -202,9 +202,9 @@ export class RedisCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | null>,
+    createValueFunc: () => Promise<T | null | undefined>,
     ttl: number,
-  ): Promise<T | null> {
+  ): Promise<T | null | undefined> {
     const cachedData = await this.get<T>(key);
     if (!isNil(cachedData)) {
       return cachedData;
@@ -212,24 +212,22 @@ export class RedisCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (!value) {
-      return null;
+    if (value != null) {
+      await this.set<T>(key, value, ttl);
     }
-    await this.set<T>(key, value, ttl);
     return value;
   }
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | null>,
+    createValueFunc: () => Promise<T | null | undefined>,
     ttl: number,
-  ): Promise<T | null> {
+  ): Promise<T | null | undefined> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (!value) {
-      return null;
+    if (value != null) {
+      await this.set<T>(key, value, ttl);
     }
-    await this.set<T>(key, value, ttl);
     return value;
   }
 
@@ -298,8 +296,8 @@ export class RedisCacheService {
 
   private buildInternalCreateValueFunc<T>(
     key: string,
-    createValueFunc: () => Promise<T | null>,
-  ): () => Promise<T | null> {
+    createValueFunc: () => Promise<T | null | undefined>,
+  ): () => Promise<T | null | undefined> {
     return async () => {
       try {
         return await createValueFunc();
