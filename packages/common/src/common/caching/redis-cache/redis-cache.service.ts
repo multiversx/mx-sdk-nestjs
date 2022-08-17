@@ -63,20 +63,11 @@ export class RedisCacheService {
   async setnx<T>(
     key: string,
     value: T,
-  ): Promise<void> {
-    if (isNil(value)) {
-      return;
-    }
+  ): Promise<boolean> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      await this.redis.setnx(key, JSON.stringify(value));
-    } catch (error) {
-      if (error instanceof Error) {
-        this.logger.error('RedisCache - An error occurred while trying to setnx in redis cache.', {
-          error: error?.toString(),
-          cacheKey: key,
-        });
-      }
+      const result = await this.redis.setnx(key, JSON.stringify(value));
+      return result === 1;
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('SETNX', performanceProfiler.duration);
