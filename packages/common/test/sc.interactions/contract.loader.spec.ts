@@ -1,6 +1,6 @@
 import { AbiRegistry, SmartContract, SmartContractAbi } from "@elrondnetwork/erdjs/out";
 import { ContractLoader } from "../../src/sc.interactions/contract.loader";
-import * as fs from "fs"
+import * as fs from "fs";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";
@@ -10,7 +10,7 @@ describe("Contract loader", () => {
 
   beforeEach(() => {
     jest.restoreAllMocks();
-  })
+  });
 
   it('Should load metabonding contract', async () => {
     const contract: SmartContract = await contractLoader.getContract(CONTRACT_ADDRESS);
@@ -54,5 +54,5 @@ describe("Contract loader", () => {
 
     const c2 = await cLoader.getContract('erd1qqqqqqqqqqqqqpgq50dge6rrpcra4tp9hl57jl0893a4r2r72jpsk39rjj');
     expect(c2.getAddress().bech32()).toStrictEqual('erd1qqqqqqqqqqqqqpgq50dge6rrpcra4tp9hl57jl0893a4r2r72jpsk39rjj');
-  })
+  });
 });

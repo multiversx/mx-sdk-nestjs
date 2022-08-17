@@ -40,7 +40,7 @@ export class ContractLoader {
 
     return new SmartContract({
       address: new Address(contractAddress),
-      abi: this.abi
+      abi: this.abi,
     });
   }
 }
