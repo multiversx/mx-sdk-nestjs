@@ -56,9 +56,9 @@ export class InMemoryCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | null>,
+    createValueFunc: () => Promise<T | null | undefined>,
     ttl: number,
-  ): Promise<T | undefined> {
+  ): Promise<T | null | undefined> {
     const cachedData = await this.get<T>(key);
     if (!isNil(cachedData)) {
       return cachedData;
@@ -66,30 +66,28 @@ export class InMemoryCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(createValueFunc);
     const value = await internalCreateValueFunc();
-    if (!value) {
-      return;
+    if (value != null) {
+      await this.set<T>(key, value, ttl);
     }
-    await this.set<T>(key, value, ttl);
     return value;
   }
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | undefined>,
+    createValueFunc: () => Promise<T | null | undefined>,
     ttl: number,
-  ): Promise<T | undefined> {
+  ): Promise<T | null | undefined> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(createValueFunc);
     const value = await internalCreateValueFunc();
-    if (!value) {
-      return;
+    if (value != null) {
+      await this.set<T>(key, value, ttl);
     }
-    await this.set<T>(key, value, ttl);
     return value;
   }
 
   private buildInternalCreateValueFunc<T>(
-    createValueFunc: () => Promise<T | null>,
-  ): () => Promise<T | null> {
+    createValueFunc: () => Promise<T | null | undefined>,
+  ): () => Promise<T | null | undefined> {
     return () => {
       return createValueFunc();
     };
