@@ -2,9 +2,10 @@ import { Hash } from "@elrondnetwork/erdjs/out/hash";
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 import { BinaryUtils } from "src/utils/binary.utils";
 
-export class ParseHashPipe implements PipeTransform<string | string[] | undefined, Promise<string | string[] | undefined>> {
+export class ParseHashArrayPipe implements PipeTransform<string | string[] | undefined, Promise<string | string[] | undefined>> {
   private entity: string;
   private length: number;
+
   constructor(entity: string, length: number) {
     this.entity = entity;
     this.length = length;
@@ -16,19 +17,19 @@ export class ParseHashPipe implements PipeTransform<string | string[] | undefine
         return resolve(undefined);
       }
 
-      const values = Array.isArray(value) ? value : [value];
+      const hashes = Array.isArray(value) ? value : value.split(',');
 
-      for (const _value of values) {
-        if (!BinaryUtils.isHash(_value)) {
+      for (const hash of hashes) {
+        if (!BinaryUtils.isHash(hash)) {
           throw new BadRequestException(`Validation failed for ${this.entity} hash '${metadata.data}'. Value does not represent a hash`);
         }
 
-        if (_value.length !== this.length) {
+        if (hash.length !== this.length) {
           throw new BadRequestException(`Validation failed for ${this.entity} hash '${metadata.data}'. Length should be ${this.length}.`);
         }
       }
 
-      return resolve(value);
+      return resolve(hashes);
     });
   }
 }

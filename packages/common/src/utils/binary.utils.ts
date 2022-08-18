@@ -1,3 +1,4 @@
+import { Hash } from "@elrondnetwork/erdjs/out/hash";
 import { AddressUtils } from "./address.utils";
 
 function base64DecodeBinary(str: string): Buffer {
@@ -71,5 +72,14 @@ export class BinaryUtils {
 
   static padHex(value: string): string {
     return (value.length % 2 ? '0' + value : value);
+  }
+
+  static isHash(value: string): boolean {
+    try {
+      new Hash(value);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
