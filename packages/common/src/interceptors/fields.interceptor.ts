@@ -5,6 +5,12 @@ import { tap } from 'rxjs/operators';
 @Injectable()
 export class FieldsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const contextType: string = context.getType();
+
+    if (!["http", "https"].includes(contextType)) {
+      return next.handle();
+    }
+
     const request = context.getArgByIndex(0);
 
     return next

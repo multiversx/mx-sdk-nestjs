@@ -10,19 +10,20 @@ export class ComplexityInterceptor implements NestInterceptor {
   private readonly complexityThreshold: number = 10000;
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const contextType: string = context.getType();
+
+    if (!["http", "https"].includes(contextType)) {
+      return next.handle();
+    }
+
     const complexityMetadata = DecoratorUtils.getMethodDecorator<ApplyComplexityOptions>(ApplyComplexityOptions, context.getHandler());
     if (!complexityMetadata) {
       return next.handle();
     }
 
-    const contextType: string = context.getType();
+    this.handleHttpRequest(complexityMetadata.target, context);
 
-    if (["http", "https"].includes(contextType)) {
-      this.handleHttpRequest(complexityMetadata.target, context);
-    }
-
-    return next
-      .handle();
+    return next.handle();
   }
 
   private handleHttpRequest(target: any, context: ExecutionContext) {
