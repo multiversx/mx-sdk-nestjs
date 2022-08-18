@@ -5,6 +5,7 @@ import { BinaryUtils } from "src/utils/binary.utils";
 export class ParseHashPipe implements PipeTransform<string | string[] | undefined, Promise<string | string[] | undefined>> {
   private entity: string;
   private length: number;
+
   constructor(entity: string, length: number) {
     this.entity = entity;
     this.length = length;
