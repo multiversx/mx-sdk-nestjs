@@ -1,6 +1,6 @@
 {
   "name": "@elrondnetwork/erdnest",
-  "version": "0.1.46",
+  "version": "0.1.47",
   "description": "NestJS microservice template",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
@@ -69,8 +69,8 @@
   },
   "peerDependencies": {
     "@elrondnetwork/erdjs": "*",
-    "@elrondnetwork/erdjs-walletcore": "*",
     "@elrondnetwork/erdjs-network-providers": "*",
+    "@elrondnetwork/erdjs-walletcore": "*",
     "@nestjs/common": "^8.4.5",
     "@nestjs/swagger": "^5.2.1"
   }
