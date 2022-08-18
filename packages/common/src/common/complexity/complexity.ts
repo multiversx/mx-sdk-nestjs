@@ -2,6 +2,8 @@ import "reflect-metadata";
 import { DecoratorUtils } from "../../utils/decorator.utils";
 
 export class ComplexityOptions {
+  parent?: string;
+  target?: string;
   estimations?: { [field: string]: number | any };
 }
 
