@@ -13,13 +13,6 @@ export class ComplexityUtils {
       if (fields.find((item: any) => item === field)) {
         // @ts-ignore
         complexityTree.addChildNode(field, estimation.value, target.name, estimation.group);
-
-        // if (configuration.parent === undefined) {
-        //   // @ts-ignore
-        // } else {
-        //   // @ts-ignore
-        //   complexityTree.addChildNode(field, estimation.value * size, configuration.parent, estimation.group);
-        // }
       }
     }
 
