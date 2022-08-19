@@ -1,4 +1,4 @@
-import { DynamicModule, Module, Provider } from "@nestjs/common";
+import { DynamicModule, Global, Module, Provider } from "@nestjs/common";
 import { LoggingModule } from "../logging/logging.module";
 import { MetricsModule } from "../metrics/metrics.module";
 import { CachingService } from "./caching.service";
@@ -6,6 +6,7 @@ import { CachingModuleAsyncOptions } from "./entities/caching.module.async.optio
 import { CachingModuleOptions } from "./entities/caching.module.options";
 import { LocalCacheService } from "./local.cache.service";
 
+@Global()
 @Module({
   imports: [
     MetricsModule,
@@ -62,7 +63,7 @@ export class CachingModule {
       module: CachingModule,
       imports: [
         MetricsModule,
-        ...imps
+        ...references
       ],
       providers,
       exports: [
