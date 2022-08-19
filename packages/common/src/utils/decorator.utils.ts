@@ -31,8 +31,6 @@ export class DecoratorUtils {
       existingMetadata[key] = metadata;
 
       Reflect.defineMetadata(type.name, existingMetadata, target.constructor);
-
-      return target;
     };
   }
 

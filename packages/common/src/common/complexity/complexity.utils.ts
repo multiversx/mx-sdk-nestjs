@@ -1,5 +1,6 @@
 import { DecoratorUtils } from "../../utils/decorator.utils";
-import { ComplexityEstimationOptions, ComplexityOptions } from "./complexity";
+import { ComplexityOptions } from "./complexity";
+import { ComplexityEstimationOptions } from "./complexity.estimation";
 import { ComplexityTree } from "./complexity.tree";
 
 export class ComplexityUtils {
