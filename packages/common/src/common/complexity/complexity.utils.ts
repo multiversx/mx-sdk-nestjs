@@ -30,14 +30,27 @@ export class ComplexityUtils {
   }
 
   static getComplexityConfiguration(target: any): { [field: string]: number | any } {
-    const options = DecoratorUtils.getClassDecorator(ComplexityOptions, target);
+    let configuration: {[key: string]: any} = {
+      estimations: {
+      }
+    };
 
-    const properties = DecoratorUtils.getPropertyDecorators(ComplexityEstimationOptions, target);
+    const classConfiguration = DecoratorUtils.getClassDecorator(ComplexityOptions, target);
+    if (classConfiguration) {
+      Object.assign(configuration, classConfiguration);
+    }
 
-    // TODO: 💪🔥🔥🔥
+    const propertyConfiguration = DecoratorUtils.getPropertyDecorators(ComplexityEstimationOptions, target);
+    if (propertyConfiguration) {
+      for (const [field, estimation] of Object.entries(propertyConfiguration)) {
+        configuration.estimations[field] = estimation;
 
-    console.log({ properties, options });
+        for (const alternative of estimation.alternatives ?? []) {
+          configuration.estimations[alternative] = estimation;
+        }
+      }
+    }
 
-    return options ?? {};
+    return configuration;
   }
 }
