@@ -1,12 +1,11 @@
 import { DynamicModule, Provider } from "@nestjs/common";
 import { MetricsModule } from "../../common/metrics/metrics.module";
-import { Global, Module } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { ApiModule } from "../api/api.module";
 import { ElasticService } from "./elastic.service";
 import { ElasticModuleOptions } from "./entities/elastic.module.options";
 import { ElasticModuleAsyncOptions } from "./entities/elastic.module.async.options";
 
-@Global()
 @Module({})
 export class ElasticModule {
   static forRoot(options: ElasticModuleOptions): DynamicModule {
@@ -41,11 +40,19 @@ export class ElasticModule {
       ElasticService,
     ];
 
+    let references = []
+    if (options.imports) {
+      for (const ref of options.imports) {
+        references.push(ref);
+      }
+    }
+
     return {
       module: ElasticModule,
       imports: [
         ApiModule,
         MetricsModule,
+        ...imps
       ],
       providers,
       exports: [
