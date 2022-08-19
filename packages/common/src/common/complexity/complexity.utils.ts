@@ -1,5 +1,5 @@
 import { DecoratorUtils } from "../../utils/decorator.utils";
-import { ComplexityOptions } from "./complexity";
+import { ComplexityEstimationOptions, ComplexityOptions } from "./complexity";
 import { ComplexityTree } from "./complexity.tree";
 
 export class ComplexityUtils {
@@ -30,6 +30,12 @@ export class ComplexityUtils {
 
   static getComplexityConfiguration(target: any): { [field: string]: number | any } {
     const options = DecoratorUtils.getClassDecorator(ComplexityOptions, target);
+
+    const properties = DecoratorUtils.getPropertyDecorators(ComplexityEstimationOptions, target);
+
+    // TODO: 💪🔥🔥🔥
+
+    console.log({ properties, options });
 
     return options ?? {};
   }

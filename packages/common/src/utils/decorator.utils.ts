@@ -18,6 +18,24 @@ export class DecoratorUtils {
     };
   }
 
+  static registerPropertyDecorator<T>(
+    type: Type,
+    metadata: T
+  ): PropertyDecorator {
+    return (target, key) => {
+      let existingMetadata = Reflect.getMetadata(type.name, target.constructor);
+      if (!existingMetadata) {
+        existingMetadata = {};
+      }
+
+      existingMetadata[key] = metadata;
+
+      Reflect.defineMetadata(type.name, existingMetadata, target.constructor);
+
+      return target;
+    };
+  }
+
   static getMethodDecorator<T>(type: Type<T>, target: Function): T | undefined {
     const metadata = Reflect.getOwnMetadata(type.name, target);
     if (!metadata) {
@@ -33,5 +51,9 @@ export class DecoratorUtils {
 
   static getClassDecorator<TClass, TResult>(type: Type<TResult>, target: Type<TClass>): TResult | undefined {
     return Reflect.getOwnMetadata(type.name, target);
+  }
+
+  static getPropertyDecorators<T>(type: Type<T>, target: Type): Record<string, T> {
+    return Reflect.getMetadata(type.name, target);
   }
 }

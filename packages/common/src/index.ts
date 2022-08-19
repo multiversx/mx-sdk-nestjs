@@ -81,6 +81,7 @@ export * from './common/metrics/metrics.module';
 export * from './common/metrics/metrics.service';
 export * from './common/complexity/apply.complexity';
 export * from './common/complexity/complexity';
+export * from './common/complexity/complexity.estimation';
 export * from './common/complexity/complexity.utils';
 export * from './common/complexity/exceptions/complexity.exceeded.exception';
 export * from './decorators/jwt';
