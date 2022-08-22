@@ -17,7 +17,7 @@ export class ComplexityTree {
       queue.shift();
 
       if (currentNode.identifier === parent) {
-        currentNode.addChild(identifier, complexity, group);
+        currentNode.addChild(identifier, complexity, `${parent}|${group}`);
         return;
       }
 
