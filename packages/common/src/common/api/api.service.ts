@@ -5,11 +5,13 @@ import { MetricsService } from "../../common/metrics/metrics.service";
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
+import { NativeAuthSigner } from "../../utils/native.auth.signer";
 
 @Injectable()
 export class ApiService {
   private readonly defaultTimeout: number = 30000;
   private keepaliveAgent: Agent | undefined | null = null;
+  private nativeAuthToken: { accessToken: string, expiryDate: Date } | null = null;
 
   constructor(
     private readonly options: ApiModuleOptions,
@@ -48,11 +50,15 @@ export class ApiService {
       headers['x-rate-limiter-secret'] = rateLimiterSecret;
     }
 
-    if(settings.signerPrivateKeyPath) {
-      // TODO
-      const jwt = '';
+    if(settings.nativeAuth) {
+      const currentDate = new Date();
+      if(this.nativeAuthToken === null || currentDate >= this.nativeAuthToken?.expiryDate) {
+        const nativeAuthSigner = new NativeAuthSigner(settings.nativeAuth);
+        this.nativeAuthToken = await nativeAuthSigner.getToken();
+      }
+      
       // @ts-ignore
-      headers['authorization'] = `Bearer ${jwt}`;
+      headers['authorization'] = `Bearer ${this.nativeAuthToken.accessToken}`;
     }
 
     return {

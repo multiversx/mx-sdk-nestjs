@@ -50,6 +50,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@elrondnetwork/native-auth-client": "^0.1.0",
     "@elrondnetwork/native-auth-server": "^0.1.1",
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
     "@nestjs-modules/ioredis": "^1.0.1",
@@ -69,8 +70,8 @@
   },
   "peerDependencies": {
     "@elrondnetwork/erdjs": "*",
-    "@elrondnetwork/erdjs-walletcore": "*",
     "@elrondnetwork/erdjs-network-providers": "*",
+    "@elrondnetwork/erdjs-walletcore": "*",
     "@nestjs/common": "^8.4.5",
     "@nestjs/swagger": "^5.2.1"
   }
