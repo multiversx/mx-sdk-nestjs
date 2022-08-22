@@ -1,6 +1,5 @@
-import { Hash } from "@elrondnetwork/erdjs/out/hash";
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
-import { BinaryUtils } from "src/utils/binary.utils";
+import { BinaryUtils } from "../utils/binary.utils";
 
 export class ParseHashArrayPipe implements PipeTransform<string | string[] | undefined, Promise<string | string[] | undefined>> {
   private entity: string;

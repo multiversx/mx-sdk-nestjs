@@ -3,4 +3,5 @@ export class ApiSettings {
   skipRedirects?: boolean;
   responseType?: 'arraybuffer' | 'json';
   headers?: Record<string, string>;
+  signerPrivateKeyPath?: string;
 }
