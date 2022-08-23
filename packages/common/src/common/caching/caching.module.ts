@@ -52,10 +52,18 @@ export class CachingModule {
       CachingService,
     ];
 
+    let references = []
+    if (options.imports) {
+      for (const ref of options.imports) {
+        references.push(ref);
+      }
+    }
+
     return {
       module: CachingModule,
       imports: [
         MetricsModule,
+        ...references
       ],
       providers,
       exports: [
