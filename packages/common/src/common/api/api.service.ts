@@ -5,11 +5,13 @@ import { MetricsService } from "../../common/metrics/metrics.service";
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
+import { NativeAuthSigner } from "../../utils/native.auth.signer";
 
 @Injectable()
 export class ApiService {
   private readonly defaultTimeout: number = 30000;
   private keepaliveAgent: Agent | undefined | null = null;
+  private nativeAuthToken: { accessToken: string, expiryDate: Date } | null = null;
 
   constructor(
     private readonly options: ApiModuleOptions,
@@ -36,7 +38,7 @@ export class ApiService {
   }
 
 
-  private getConfig(settings: ApiSettings): AxiosRequestConfig {
+  private async getConfig(settings: ApiSettings): Promise<AxiosRequestConfig> {
     const timeout = settings.timeout || this.defaultTimeout;
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
 
@@ -46,6 +48,17 @@ export class ApiService {
     if (rateLimiterSecret) {
       // @ts-ignore
       headers['x-rate-limiter-secret'] = rateLimiterSecret;
+    }
+
+    if (settings.nativeAuth) {
+      const currentDate = new Date();
+      if (this.nativeAuthToken === null || currentDate >= this.nativeAuthToken?.expiryDate) {
+        const nativeAuthSigner = new NativeAuthSigner(settings.nativeAuth);
+        this.nativeAuthToken = await nativeAuthSigner.getToken();
+      }
+
+      // @ts-ignore
+      headers['authorization'] = `Bearer ${this.nativeAuthToken.accessToken}`;
     }
 
     return {
@@ -70,7 +83,10 @@ export class ApiService {
     const profiler = new PerformanceProfiler();
 
     try {
-      return await axios.get(url, this.getConfig(settings));
+      const config = await this.getConfig(settings);
+
+      const response = await axios.get(url, config);
+      return response;
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -78,16 +94,9 @@ export class ApiService {
       }
 
       if (!handled) {
-        const logger = new Logger(ApiService.name);
-        const customError = {
-          method: 'GET',
-          url,
-          response: error.response?.data,
-          status: error.response?.status,
-          message: error.message,
-          name: error.name,
-        };
+        const customError = this.getCustomError('GET', url, null, error);
 
+        const logger = new Logger(ApiService.name);
         logger.error(customError);
 
         throw customError;
@@ -102,7 +111,9 @@ export class ApiService {
     const profiler = new PerformanceProfiler();
 
     try {
-      return await axios.put(url, data, this.getConfig(settings));
+      const config = await this.getConfig(settings);
+
+      return await axios.put(url, data, config);
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -132,9 +143,11 @@ export class ApiService {
 
   async post(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
-
     try {
-      return await axios.post(url, data, this.getConfig(settings));
+      const config = await this.getConfig(settings);
+
+      const response = await axios.post(url, data, config);
+      return response;
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -142,15 +155,7 @@ export class ApiService {
       }
 
       if (!handled) {
-        const customError = {
-          method: 'POST',
-          url,
-          body: data,
-          response: error.response?.data,
-          status: error.response?.status,
-          message: error.message,
-          name: error.name,
-        };
+        const customError = this.getCustomError('POST', url, data, error);
 
         const logger = new Logger(ApiService.name);
         logger.error(customError);
@@ -167,7 +172,10 @@ export class ApiService {
     const profiler = new PerformanceProfiler();
 
     try {
-      return await axios.head(url, this.getConfig(settings));
+      const config = await this.getConfig(settings);
+
+      const response = await axios.head(url, config);
+      return response;
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -175,14 +183,7 @@ export class ApiService {
       }
 
       if (!handled) {
-        const customError = {
-          method: 'HEAD',
-          url,
-          response: error.response?.data,
-          status: error.response?.status,
-          message: error.message,
-          name: error.name,
-        };
+        const customError = this.getCustomError('HEAD', url, null, error);
 
         const logger = new Logger(ApiService.name);
         logger.error(customError);
@@ -197,5 +198,17 @@ export class ApiService {
 
   private getHostname(url: string): string {
     return new URL(url).hostname;
+  }
+
+  private getCustomError(method: string, url: string, data: any, error: any): any {
+    return {
+      method,
+      url,
+      body: data,
+      response: error.response?.data,
+      status: error.response?.status,
+      message: error.message,
+      name: error.name,
+    };
   }
 }
