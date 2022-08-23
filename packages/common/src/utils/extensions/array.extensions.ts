@@ -222,6 +222,18 @@ Array.prototype.toRecord = function <TIN, TOUT>(keyPredicate: (item: TIN) => str
   return result;
 };
 
+Array.prototype.toRecordAsync = async function <TIN, TOUT>(keyPredicate: (item: TIN) => string, valuePredicate: (item: TIN) => Promise<TOUT>): Promise<Record<string, TOUT>> {
+  const result: Record<string, TOUT> = {};
+
+  const values = await Promise.all(this.map(x => valuePredicate(x)));
+
+  for (const [index, item] of this.entries()) {
+    result[keyPredicate(item)] = values[index];
+  }
+
+  return result;
+};
+
 Array.prototype.sorted = function <T>(...predicates: ((item: T) => number)[]): T[] {
   const cloned = [...this];
 
@@ -295,5 +307,6 @@ declare interface Array<T> {
   sum(predicate?: (item: T) => number): number;
   sumBigInt(predicate?: (item: T) => bigint): bigint;
   toRecord<TOUT>(keyPredicate: (item: T) => string, valuePredicate?: (item: T) => TOUT): Record<string, TOUT>;
+  toRecordAsync<TOUT>(keyPredicate: (item: T) => string, valuePredicate: (item: T) => Promise<TOUT>): Promise<Record<string, TOUT>>;
   remove(element: T): void;
 }

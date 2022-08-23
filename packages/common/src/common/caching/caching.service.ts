@@ -333,6 +333,24 @@ export class CachingService {
     return result;
   }
 
+  async batchApplyAll<TIN, TOUT>(
+    elements: TIN[],
+    cacheKeyFunc: (element: TIN) => string,
+    getter: (element: TIN) => Promise<TOUT>,
+    setter: (element: TIN, value: TOUT) => void,
+    ttl: number,
+    chunkSize: number = 100,
+  ): Promise<void> {
+    await this.batchApply(
+      elements,
+      cacheKeyFunc,
+      elements => elements.toRecordAsync(element => cacheKeyFunc(element), element => getter(element)),
+      setter,
+      ttl,
+      chunkSize,
+    );
+  }
+
   async batchApply<TIN, TOUT>(
     elements: TIN[],
     cacheKeyFunc: (element: TIN) => string,
@@ -369,12 +387,28 @@ export class CachingService {
     }
   }
 
+  async batchGetAll<TIN, TOUT>(
+    elements: TIN[],
+    cacheKeyFunc: (element: TIN) => string,
+    getter: (element: TIN) => Promise<TOUT>,
+    ttl: number,
+    chunkSize: number = 100,
+  ): Promise<{ [key: string]: TOUT }> {
+    return await this.batchGet(
+      elements,
+      cacheKeyFunc,
+      elements => elements.toRecordAsync(element => cacheKeyFunc(element), element => getter(element)),
+      ttl,
+      chunkSize,
+    );
+  }
+
   async batchGet<TIN, TOUT>(
     elements: TIN[],
     cacheKeyFunc: (element: TIN) => string,
     getter: (elements: TIN[]) => Promise<{ [key: string]: TOUT }>,
     ttl: number,
-    chunkSize: number,
+    chunkSize: number = 100,
   ): Promise<{ [key: string]: TOUT }> {
     return await BatchUtils.batchGet<TIN, TOUT>(
       elements,

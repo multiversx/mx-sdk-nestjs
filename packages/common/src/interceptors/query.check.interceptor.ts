@@ -8,6 +8,12 @@ export class QueryCheckInterceptor implements NestInterceptor {
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const contextType: string = context.getType();
+
+    if (!["http", "https"].includes(contextType)) {
+      return next.handle();
+    }
+
     const httpAdapter = this.httpAdapterHost.httpAdapter;
 
     const request = context.getArgByIndex(0);

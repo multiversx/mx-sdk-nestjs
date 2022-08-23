@@ -38,10 +38,16 @@ export class ApiModule {
       ApiService,
     ];
 
+    let references = []
+    if (options.imports) {
+      for (const ref of options.imports) {
+        references.push(ref);
+      }
+    }
     return {
       module: ApiModule,
       imports: [
-        MetricsModule,
+        MetricsModule, ...references
       ],
       providers,
       exports: [

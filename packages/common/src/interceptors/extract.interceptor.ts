@@ -5,6 +5,12 @@ import { map } from 'rxjs/operators';
 @Injectable()
 export class ExtractInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const contextType: string = context.getType();
+
+    if (!["http", "https"].includes(contextType)) {
+      return next.handle();
+    }
+
     const request = context.getArgByIndex(0);
 
     return next
