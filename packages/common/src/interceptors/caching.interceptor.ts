@@ -19,6 +19,12 @@ export class CachingInterceptor implements NestInterceptor {
   ) { }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    const contextType: string = context.getType();
+
+    if (!["http", "https"].includes(contextType)) {
+      return next.handle();
+    }
+
     const apiFunction = context.getClass().name + '.' + context.getHandler().name;
 
     const cachingMetadata = DecoratorUtils.getMethodDecorator(NoCacheOptions, context.getHandler());
