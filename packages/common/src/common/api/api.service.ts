@@ -50,13 +50,13 @@ export class ApiService {
       headers['x-rate-limiter-secret'] = rateLimiterSecret;
     }
 
-    if(settings.nativeAuth) {
+    if (settings.nativeAuth) {
       const currentDate = new Date();
-      if(this.nativeAuthToken === null || currentDate >= this.nativeAuthToken?.expiryDate) {
+      if (this.nativeAuthToken === null || currentDate >= this.nativeAuthToken?.expiryDate) {
         const nativeAuthSigner = new NativeAuthSigner(settings.nativeAuth);
         this.nativeAuthToken = await nativeAuthSigner.getToken();
       }
-      
+
       // @ts-ignore
       headers['authorization'] = `Bearer ${this.nativeAuthToken.accessToken}`;
     }
@@ -111,7 +111,9 @@ export class ApiService {
     const profiler = new PerformanceProfiler();
 
     try {
-      return await axios.put(url, data, this.getConfig(settings));
+      const config = await this.getConfig(settings);
+
+      return await axios.put(url, data, config);
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -182,7 +184,7 @@ export class ApiService {
 
       if (!handled) {
         const customError = this.getCustomError('HEAD', url, null, error);
-        
+
         const logger = new Logger(ApiService.name);
         logger.error(customError);
 
@@ -208,5 +210,5 @@ export class ApiService {
       message: error.message,
       name: error.name,
     };
-  } 
+  }
 }
