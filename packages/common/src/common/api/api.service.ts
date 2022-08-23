@@ -79,14 +79,24 @@ export class ApiService {
     };
   }
 
+  private pendingRequestsDictionary: { [key: string]: Promise<any> } = {};
+
   async get(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
 
-    try {
-      const config = await this.getConfig(settings);
+    const config = await this.getConfig(settings);
 
-      const response = await axios.get(url, config);
-      return response;
+    let request = axios.get(url, config);
+    if (settings.pendingRequests) {
+      if (!Object.keys(this.pendingRequestsDictionary).includes(url)) {
+        this.pendingRequestsDictionary[url] = request;
+      }
+
+      request = this.pendingRequestsDictionary[url];
+    }
+
+    try {
+      return await request;
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -104,6 +114,8 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+
+      delete this.pendingRequestsDictionary[url];
     }
   }
 

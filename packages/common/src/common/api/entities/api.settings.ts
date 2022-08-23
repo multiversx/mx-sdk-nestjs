@@ -6,4 +6,5 @@ export class ApiSettings {
   responseType?: 'arraybuffer' | 'json';
   headers?: Record<string, string>;
   nativeAuth?: NativeAuthSignerConfig;
+  pendingRequests?: boolean = true;
 }
