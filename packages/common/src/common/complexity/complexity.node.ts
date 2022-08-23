@@ -5,7 +5,7 @@ export class ComplexityNode {
 
   children: { [identifier: string]: ComplexityNode; };
 
-  constructor(identifier: string, complexity: number, group?: string) {
+  constructor(identifier: string, complexity: number, group: string) {
     this.identifier = identifier;
     this.complexity = complexity;
     this.group = group;
@@ -13,7 +13,7 @@ export class ComplexityNode {
     this.children = {};
   }
 
-  public addChild(identifier: string, complexity: number, group?: string) {
+  public addChild(identifier: string, complexity: number, group: string) {
     this.children[identifier] = new ComplexityNode(identifier, complexity, group);
   }
 }
