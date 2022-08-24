@@ -6,6 +6,7 @@ import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
 import { NativeAuthSigner } from "../../utils/native.auth.signer";
+import { PendingExecuter } from "src";
 
 @Injectable()
 export class ApiService {
@@ -79,23 +80,20 @@ export class ApiService {
     };
   }
 
-  private pendingRequestsDictionary: { [key: string]: Promise<any> } = {};
+  private requestsExecuter = new PendingExecuter();
 
   async get(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
 
     const config = await this.getConfig(settings);
 
-    let request = axios.get(url, config);
-    if (settings.pendingRequests) {
-      if (!Object.keys(this.pendingRequestsDictionary).includes(url)) {
-        this.pendingRequestsDictionary[url] = request;
-      }
-
-      request = this.pendingRequestsDictionary[url];
-    }
+    const request = axios.get(url, config);
 
     try {
+      if (settings.pendingRequests) {
+        return await this.requestsExecuter.execute(url, async () => await request);
+      }
+
       return await request;
     } catch (error: any) {
       let handled = false;
@@ -114,8 +112,6 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-
-      delete this.pendingRequestsDictionary[url];
     }
   }
 
