@@ -9,9 +9,5 @@ export class ApiModuleOptions {
 
   serverTimeout: number = 60000;
 
-  maxContentLength: number = 2000;
-
-  maxBodyLength: number = 2000;
-
   rateLimiterSecret?: string;
 }

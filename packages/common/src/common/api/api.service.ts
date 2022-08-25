@@ -6,6 +6,7 @@ import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
 import { NativeAuthSigner } from "../../utils/native.auth.signer";
+import { PendingExecuter } from "src";
 
 @Injectable()
 export class ApiService {
@@ -67,8 +68,6 @@ export class ApiService {
       httpAgent: this.getKeepAliveAgent(),
       responseType: settings.responseType,
       headers,
-      maxContentLength: this.options.maxContentLength,
-      maxBodyLength: this.options.maxBodyLength,
       transformResponse: [
         (data) => {
           try {
@@ -81,14 +80,15 @@ export class ApiService {
     };
   }
 
+  private requestsExecuter = new PendingExecuter();
+
   async get(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
 
-    try {
-      const config = await this.getConfig(settings);
+    const config = await this.getConfig(settings);
 
-      const response = await axios.get(url, config);
-      return response;
+    try {
+      return await this.requestsExecuter.execute(url, async () => await axios.get(url, config));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
