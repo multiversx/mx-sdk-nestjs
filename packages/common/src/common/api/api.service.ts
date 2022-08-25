@@ -87,14 +87,8 @@ export class ApiService {
 
     const config = await this.getConfig(settings);
 
-    const request = axios.get(url, config);
-
     try {
-      if (settings.pendingRequests) {
-        return await this.requestsExecuter.execute(url, async () => await request);
-      }
-
-      return await request;
+      return await this.requestsExecuter.execute(url, async () => await axios.get(url, config));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
