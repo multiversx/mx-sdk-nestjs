@@ -14,6 +14,4 @@ export class ApiModuleOptions {
   maxBodyLength: number = 2000;
 
   rateLimiterSecret?: string;
-
-  maxContentLength: number = 2000;
 }
