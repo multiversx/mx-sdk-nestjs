@@ -68,6 +68,7 @@ export class ApiService {
       responseType: settings.responseType,
       headers,
       maxContentLength: this.options.maxContentLength,
+      maxBodyLength: this.options.maxBodyLength,
       transformResponse: [
         (data) => {
           try {
