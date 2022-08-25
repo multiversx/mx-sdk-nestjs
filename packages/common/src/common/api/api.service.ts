@@ -67,6 +67,7 @@ export class ApiService {
       httpAgent: this.getKeepAliveAgent(),
       responseType: settings.responseType,
       headers,
+      maxContentLength: this.options.maxContentLength,
       transformResponse: [
         (data) => {
           try {
