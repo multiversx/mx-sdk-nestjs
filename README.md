@@ -34,9 +34,9 @@ In this section we will provide some code examples of how these packages can be 
 
 These examples requires basic knowledge of NestJS framework, if you are not familiar with some of the key concepts like (Modules, Providers, Guards, Incerceptors, etc.) please make sure to check their documentation before proceeding with these examples. [NestJS Docs](https://docs.nestjs.com/#introduction)
 
-As a rule of thumb, we recommend to import these modules in the modules which need that specific provider, do not try to import them just once in the application root module.
+As a rule of thumb, we recommend to import these modules everytime you use them, do not try to import them just once in the application root module.
 
-Also, if you discover a feature that is missing and might be useful, we would appreciate if you open a PR with it.
+Also, if you discover a feature that is missing and might be useful, we would appreciate if you open a PR to integrate it.
 
 ### Caching
 
