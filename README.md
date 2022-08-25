@@ -115,6 +115,45 @@ const value = await this.cachingService.getOrSetCache(
 These are the most used features of the CachingModule, there are some more advanced features related to batch processing.
 If you need something else please make sure to check our [CachingService](packages/common/src/common/caching/caching.service.ts).
 
+### Smart Contract Interactions
+
+This package is for dApps that interacts with smart contracts
+
+#### Contract Loader
+
+Uses Singleton pattern and load a [SmartContract](https://github.com/ElrondNetwork/elrond-sdk-erdjs/blob/main/src/smartcontracts/smartContract.ts) from an abi path.
+You can also load multiple contracts with same abi.
+
+```
+const cLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE);
+
+const sc = await cLoader.getContract(CONTRACT_ADDRESS);
+```
+
+#### Contract Query Runner
+
+Execute contract queries using an elrond proxy provider (api/gateway).
+
+```
+const cRunner = new ContractQueryRunner(new ApiNetworkProvider(this.apiConfigService.getApiUrl()));
+
+const contract = await this.contractLoader.getContract(CONTRACT_ADDRESS);
+
+const interaction: Interaction = contract.methodsExplicit.getTotalLockedAssetSupply([]);
+
+const queryResponse = await cRunner.runQuery(contract, interaction);
+```
+
+#### Contract Transaction Generator
+
+Create transactions from smart contract interactions using and elrond proxy provider (api/gateway).
+
+```
+const txGenerator = new ContractTransactionGenerator(provider);
+
+const tx = await this.transactionGenerator.createTransaction(interaction, signer.getAddress());
+```
+
 
 
 
