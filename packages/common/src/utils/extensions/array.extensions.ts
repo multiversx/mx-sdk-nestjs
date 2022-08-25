@@ -63,6 +63,12 @@ Array.prototype.first = function (predicate?: Function) {
   throw new Error('Sequence contains no elements');
 };
 
+Array.prototype.mapIndexed = function <TOUT> (items: TOUT[], predicate: Function): (TOUT | undefined)[] {
+  const records = items.toRecord<TOUT>(item => predicate(item));
+
+  return this.map(item => records[item]);
+};
+
 Array.prototype.lastOrUndefined = function (predicate?: Function) {
   if (this.length === 0) {
     return undefined;
@@ -294,6 +300,7 @@ declare interface Array<T> {
   groupBy(predicate: (item: T) => any): any;
   selectMany<TOUT>(predicate: (item: T) => TOUT[]): TOUT[];
   first(predicate?: (item: T) => boolean): T | undefined;
+  mapIndexed<TOUT>(items: TOUT[], predicate: (item: TOUT) => T): (TOUT | undefined)[];
   firstOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   last(predicate?: (item: T) => boolean): T | undefined;
   lastOrUndefined(predicate?: (item: T) => boolean): T | undefined;
