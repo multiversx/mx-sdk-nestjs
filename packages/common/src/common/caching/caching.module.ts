@@ -52,7 +52,7 @@ export class CachingModule {
       CachingService,
     ];
 
-    let references = []
+    const references = [];
     if (options.imports) {
       for (const ref of options.imports) {
         references.push(ref);
@@ -63,7 +63,7 @@ export class CachingModule {
       module: CachingModule,
       imports: [
         MetricsModule,
-        ...references
+        ...references,
       ],
       providers,
       exports: [
