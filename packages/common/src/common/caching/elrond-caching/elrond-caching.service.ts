@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { OriginLogger } from '../../../utils/origin.logger';
 import { PendingExecuter } from '../../../utils/pending.executer';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
@@ -6,13 +7,12 @@ import { RedisCacheService } from '../redis-cache/redis-cache.service';
 @Injectable()
 export class ElrondCachingService {
   private readonly pendingExecuter: PendingExecuter;
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(ElrondCachingService.name);
 
   constructor(
     private readonly inMemoryCacheService: InMemoryCacheService,
     private readonly redisCacheService: RedisCacheService,
   ) {
-    this.logger = new Logger(ElrondCachingService.name);
     this.pendingExecuter = new PendingExecuter();
   }
 

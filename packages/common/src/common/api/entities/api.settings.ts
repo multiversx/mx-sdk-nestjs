@@ -1,4 +1,4 @@
-import { NativeAuthSignerConfig } from "src/utils/native.auth.signer";
+import { NativeAuthSignerConfig } from "../../../utils/native.auth.signer";
 
 export class ApiSettings {
   timeout?: number;

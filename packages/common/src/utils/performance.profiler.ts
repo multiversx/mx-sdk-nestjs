@@ -12,7 +12,7 @@ export class PerformanceProfiler {
     this.description = description;
   }
 
-  stop(description: string | null = null, log: boolean = false) {
+  stop(description: string | null = null, log: boolean = false): number {
     this.stopped = this.now();
     this.duration = this.stopped - this.started;
 
@@ -21,6 +21,8 @@ export class PerformanceProfiler {
 
       logger.log(`${description ?? this.description}: ${this.duration.toFixed(3)}ms`);
     }
+
+    return this.duration;
   }
 
   private now() {
