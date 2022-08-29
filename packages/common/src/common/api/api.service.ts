@@ -6,7 +6,7 @@ import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
 import { NativeAuthSigner } from "../../utils/native.auth.signer";
-import { PendingExecuter } from "src";
+import { PendingExecuter } from "../../utils/pending.executer";
 
 @Injectable()
 export class ApiService {
@@ -211,6 +211,7 @@ export class ApiService {
       status: error.response?.status,
       message: error.message,
       name: error.name,
+      stack: error.stack,
     };
   }
 }

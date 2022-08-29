@@ -1,14 +1,14 @@
 import { NativeAuthServer } from '@elrondnetwork/native-auth-server';
-import { Injectable, CanActivate, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { OriginLogger } from '../utils/origin.logger';
 import { CachingService } from '../common/caching/caching.service';
 
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(NativeAuthGuard.name);
   private readonly authServer: NativeAuthServer;
 
   constructor(cachingService: CachingService) {
-    this.logger = new Logger(NativeAuthGuard.name);
     this.authServer = new NativeAuthServer({
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {

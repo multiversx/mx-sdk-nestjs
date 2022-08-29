@@ -1,15 +1,14 @@
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { OriginLogger } from '../../utils/origin.logger';
 
 @Injectable()
 export class RabbitPublisherService {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(RabbitPublisherService.name);
 
   constructor(
     private readonly amqpConnection: AmqpConnection,
-  ) {
-    this.logger = new Logger(RabbitPublisherService.name);
-  }
+  ) { }
 
   /** Will publish the input to the exchange. */
   async publish(exchange: string, input: unknown): Promise<void> {

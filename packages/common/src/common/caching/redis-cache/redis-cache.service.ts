@@ -1,19 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { MetricsService } from '../../../common/metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
+import { OriginLogger } from '../../../utils/origin.logger';
 
 @Injectable()
 export class RedisCacheService {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(RedisCacheService.name);
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly metricsService: MetricsService,
-  ) {
-    this.logger = new Logger(RedisCacheService.name);
-  }
+  ) { }
 
   async get<T>(
     key: string,
