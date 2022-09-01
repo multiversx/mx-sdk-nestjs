@@ -55,17 +55,15 @@ export class NativeAuthSigner {
       return this.userSigner;
     }
 
-    if (!this.config.privateKey || !this.config.signerPrivateKeyPath) {
-      throw new Error('Missing PrivateKey and SignerPrivateKeyPath in NativeAuthSigner.');
-    }
-
     if (this.config.privateKey) {
       return this.userSigner = UserSigner.fromPem(this.config.privateKey);
-    } else {
+    } else if (this.config.signerPrivateKeyPath) {
       const pemFile = await FileUtils.readFile(this.config.signerPrivateKeyPath);
       const pemKey = pemFile.toString();
       return this.userSigner = UserSigner.fromPem(pemKey);
     }
+
+    throw new Error('Missing PrivateKey and SignerPrivateKeyPath in NativeAuthSigner.');
   }
 
   private getSignableToken(): Promise<string> {
