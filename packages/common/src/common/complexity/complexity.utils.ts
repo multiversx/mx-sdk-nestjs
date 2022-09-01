@@ -20,9 +20,8 @@ export class ComplexityUtils {
   }
 
   static getComplexityConfiguration(target: any): { [field: string]: number | any } {
-    let configuration: {[key: string]: any} = {
-      estimations: {
-      }
+    const configuration: { [key: string]: any } = {
+      estimations: {},
     };
 
     const propertyConfiguration = DecoratorUtils.getPropertyDecorators(ComplexityEstimationOptions, target);
