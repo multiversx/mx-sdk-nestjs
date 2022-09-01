@@ -41,7 +41,7 @@ export class ElasticModule {
       ElasticService,
     ];
 
-    let references = []
+    const references = [];
     if (options.imports) {
       for (const ref of options.imports) {
         references.push(ref);
@@ -53,7 +53,7 @@ export class ElasticModule {
       imports: [
         ApiModule,
         MetricsModule,
-        ...references
+        ...references,
       ],
       providers,
       exports: [

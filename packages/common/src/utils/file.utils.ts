@@ -23,6 +23,10 @@ export class FileUtils {
     await writeFile(path, buffer);
   }
 
+  static readFileSync(path: string): Buffer {
+    return readFileSync(path);
+  }
+
   static async readFile(path: string): Promise<Buffer> {
     return await readFile(path);
   }
