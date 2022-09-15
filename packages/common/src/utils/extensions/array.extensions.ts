@@ -63,7 +63,7 @@ Array.prototype.first = function (predicate?: Function) {
   throw new Error('Sequence contains no elements');
 };
 
-Array.prototype.mapIndexed = function <TOUT> (items: TOUT[], predicate: Function): (TOUT | undefined)[] {
+Array.prototype.mapIndexed = function <TOUT>(items: TOUT[], predicate: Function): (TOUT | undefined)[] {
   const records = items.toRecord<TOUT>(item => predicate(item));
 
   return this.map(item => records[item]);
@@ -302,7 +302,7 @@ declare interface Array<T> {
   first(predicate?: (item: T) => boolean): T | undefined;
   mapIndexed<TOUT>(items: TOUT[], predicate: (item: TOUT) => T): (TOUT | undefined)[];
   firstOrUndefined(predicate?: (item: T) => boolean): T | undefined;
-  last(predicate?: (item: T) => boolean): T | undefined;
+  last(predicate?: (item: T) => boolean): T
   lastOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   single(predicate?: (item: T) => boolean): T | undefined;
   singleOrUndefined(predicate?: (item: T) => boolean): T | undefined;
