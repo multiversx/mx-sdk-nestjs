@@ -1,15 +1,18 @@
-import { RabbitMQExchangeConfig } from '@golevelup/nestjs-rabbitmq';
+import { ConnectionInitOptions, RabbitMQExchangeConfig } from '@golevelup/nestjs-rabbitmq';
 
 export class RabbitModuleOptions {
   uri: string = '';
+  connectionInitOptions?: ConnectionInitOptions | undefined;
   exchanges?: RabbitMQExchangeConfig[] | undefined;
 
   constructor(
     uri: string,
     exchanges: string[] | undefined = undefined,
+    connectionInitOptions: ConnectionInitOptions | undefined = undefined,
   ) {
     this.uri = uri;
     this.exchanges = this.getExchanges(exchanges);
+    this.connectionInitOptions = connectionInitOptions;
   }
 
   private getExchanges(
