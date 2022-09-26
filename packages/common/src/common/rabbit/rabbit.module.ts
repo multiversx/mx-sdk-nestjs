@@ -14,7 +14,11 @@ export class RabbitModule {
     return {
       module: RabbitModule,
       imports: [
-        RabbitMQModule.forRoot(RabbitMQModule, options),
+        RabbitMQModule.forRootAsync(RabbitMQModule, {
+          useFactory: () => {
+            return options;
+          }
+        }),
       ],
       providers: [
         RabbitPublisherService,

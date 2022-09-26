@@ -1,16 +1,14 @@
 import { Interaction, ResultsParser, SmartContract, TypedOutcomeBundle } from "@elrondnetwork/erdjs/out";
-import { Logger } from "@nestjs/common";
 import { INetworkProvider } from "@elrondnetwork/erdjs-network-providers/out/interface";
 import { ContractQueryResponse } from "@elrondnetwork/erdjs-network-providers/out";
+import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractQueryRunner {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(ContractQueryRunner.name);
   private readonly proxy: INetworkProvider;
   private readonly parser: ResultsParser = new ResultsParser();
 
   constructor(proxy: INetworkProvider) {
-    this.logger = new Logger(ContractQueryRunner.name);
-
     this.proxy = proxy;
   }
 

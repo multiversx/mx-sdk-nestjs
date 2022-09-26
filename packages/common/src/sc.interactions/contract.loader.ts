@@ -1,9 +1,9 @@
 import { AbiRegistry, Address, SmartContract, SmartContractAbi } from "@elrondnetwork/erdjs/out";
-import { Logger } from "@nestjs/common";
 import * as fs from "fs";
+import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractLoader {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(ContractLoader.name);
   private readonly abiPath: string;
   private readonly contractInterface: string;
   private abi: SmartContractAbi | undefined = undefined;
@@ -11,8 +11,6 @@ export class ContractLoader {
   constructor(abiPath: string, contractInterface: string) {
     this.abiPath = abiPath;
     this.contractInterface = contractInterface;
-
-    this.logger = new Logger(ContractLoader.name);
   }
 
   private async load(): Promise<SmartContractAbi> {

@@ -1,5 +1,6 @@
-import { CanActivate, ExecutionContext, Inject, Injectable, Logger } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Inject, Injectable } from "@nestjs/common";
 import { TokenExpiredError, verify } from 'jsonwebtoken';
+import { OriginLogger } from "../utils/origin.logger";
 import { ErdnestConfigService } from "../common/config/erdnest.config.service";
 import { NoAuthOptions } from "../decorators/no.auth";
 import { DecoratorUtils } from "../utils/decorator.utils";
@@ -7,14 +8,12 @@ import { ERDNEST_CONFIG_SERVICE } from "../utils/erdnest.constants";
 
 @Injectable()
 export class JwtAuthenticateGlobalGuard implements CanActivate {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(JwtAuthenticateGlobalGuard.name);
 
   constructor(
     @Inject(ERDNEST_CONFIG_SERVICE)
     private readonly erdnestConfigService: ErdnestConfigService
-  ) {
-    this.logger = new Logger(JwtAuthenticateGlobalGuard.name);
-  }
+  ) { }
 
   async canActivate(
     context: ExecutionContext,

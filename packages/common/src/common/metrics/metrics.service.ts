@@ -4,6 +4,7 @@ import { ElasticMetricType } from "./entities/elastic.metric.type";
 
 @Injectable()
 export class MetricsService {
+  private static apiCpuTimeHistogram: Histogram<string>;
   private static apiCallsHistogram: Histogram<string>;
   private static pendingRequestsHistogram: Gauge<string>;
   private static externalCallsHistogram: Histogram<string>;
@@ -15,6 +16,15 @@ export class MetricsService {
   private static isDefaultMetricsRegistered: boolean = false;
 
   constructor() {
+    if (!MetricsService.apiCpuTimeHistogram) {
+      MetricsService.apiCpuTimeHistogram = new Histogram({
+        name: 'api_cpu_time',
+        help: 'API CPU time',
+        labelNames: ['endpoint'],
+        buckets: [],
+      });
+    }
+
     if (!MetricsService.apiCallsHistogram) {
       MetricsService.apiCallsHistogram = new Histogram({
         name: 'api',
@@ -88,6 +98,10 @@ export class MetricsService {
       MetricsService.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
     }
+  }
+
+  setApiCpuTime(endpoint: string, duration: number) {
+    MetricsService.apiCpuTimeHistogram.labels(endpoint).observe(duration);
   }
 
   setApiCall(endpoint: string, origin: string, status: number, duration: number) {

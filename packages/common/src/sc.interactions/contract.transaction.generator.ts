@@ -1,16 +1,14 @@
 import { NetworkConfig } from "@elrondnetwork/erdjs-network-providers/out";
 import { INetworkProvider } from "@elrondnetwork/erdjs-network-providers/out/interface";
 import { IAddress, Interaction, Transaction } from "@elrondnetwork/erdjs/out";
-import { Logger } from "@nestjs/common";
+import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractTransactionGenerator {
-  private readonly logger: Logger;
+  private readonly logger = new OriginLogger(ContractTransactionGenerator.name);
   private readonly proxy: INetworkProvider;
   private networkConfig: NetworkConfig | undefined = undefined;
 
   constructor(proxy: INetworkProvider) {
-    this.logger = new Logger(ContractTransactionGenerator.name);
-
     this.proxy = proxy;
   }
 

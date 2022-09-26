@@ -12,7 +12,6 @@ import { PendingExecuter } from "../../utils/pending.executer";
 export class ApiService {
   private readonly defaultTimeout: number = 30000;
   private keepaliveAgent: Agent | undefined | null = null;
-  private nativeAuthToken: { accessToken: string, expiryDate: Date } | null = null;
 
   constructor(
     private readonly options: ApiModuleOptions,
@@ -47,19 +46,12 @@ export class ApiService {
 
     const rateLimiterSecret = this.options.rateLimiterSecret;
     if (rateLimiterSecret) {
-      // @ts-ignore
       headers['x-rate-limiter-secret'] = rateLimiterSecret;
     }
 
-    if (settings.nativeAuth) {
-      const currentDate = new Date();
-      if (this.nativeAuthToken === null || currentDate >= this.nativeAuthToken?.expiryDate) {
-        const nativeAuthSigner = new NativeAuthSigner(settings.nativeAuth);
-        this.nativeAuthToken = await nativeAuthSigner.getToken();
-      }
-
-      // @ts-ignore
-      headers['authorization'] = `Bearer ${this.nativeAuthToken.accessToken}`;
+    if (settings.nativeAuthSigner) {
+      const accessTokenInfo = await settings.nativeAuthSigner.getToken();
+      headers['authorization'] = `Bearer ${accessTokenInfo.token}`;
     }
 
     return {
@@ -211,6 +203,7 @@ export class ApiService {
       status: error.response?.status,
       message: error.message,
       name: error.name,
+      stack: error.stack,
     };
   }
 }
