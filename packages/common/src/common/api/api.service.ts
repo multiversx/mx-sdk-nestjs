@@ -5,7 +5,6 @@ import { MetricsService } from "../../common/metrics/metrics.service";
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
-import { NativeAuthSigner } from "../../utils/native.auth.signer";
 import { PendingExecuter } from "../../utils/pending.executer";
 
 @Injectable()
