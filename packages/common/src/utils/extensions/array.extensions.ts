@@ -296,6 +296,25 @@ Array.prototype.remove = function <T>(element: T): void {
   }
 };
 
+Array.prototype.shuffle = function <T>(): T[] {
+  let currentIndex = this.length, randomIndex;
+  const array = [...this];
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+};
+
 declare interface Array<T> {
   groupBy(predicate: (item: T) => any): any;
   selectMany<TOUT>(predicate: (item: T) => TOUT[]): TOUT[];
@@ -316,4 +335,5 @@ declare interface Array<T> {
   toRecord<TOUT>(keyPredicate: (item: T) => string, valuePredicate?: (item: T) => TOUT): Record<string, TOUT>;
   toRecordAsync<TOUT>(keyPredicate: (item: T) => string, valuePredicate: (item: T) => Promise<TOUT>): Promise<Record<string, TOUT>>;
   remove(element: T): void;
+  shuffle(): T[];
 }
