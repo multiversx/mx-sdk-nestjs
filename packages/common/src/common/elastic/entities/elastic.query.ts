@@ -148,7 +148,7 @@ export class ElasticQuery {
       return this;
     }
 
-    return this.withFilter(QueryType.Range(key, new RangeGreaterThanOrEqual(after ?? 0), new RangeLowerThanOrEqual(before ?? Date.now())));
+    return this.withFilter(QueryType.Range(key, new RangeGreaterThanOrEqual(before ?? 0), new RangeLowerThanOrEqual(after ?? Date.now())));
   }
 
   withFilter(filter: RangeQuery): ElasticQuery {
