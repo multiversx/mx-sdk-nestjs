@@ -5,6 +5,8 @@ export class CachingModuleOptions {
 
   url: string = '';
 
+  port: number = 6379;
+
   poolLimit: number = 100;
 
   processTtl: number = 60;
