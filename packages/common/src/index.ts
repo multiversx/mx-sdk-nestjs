@@ -27,7 +27,7 @@ export * from './guards/jwt.authenticate.global.guard';
 export * from './guards/native.auth.guard';
 export * from './pipes/parse.address.pipe';
 export * from './pipes/parse.address.array.pipe';
-export * from './pipes/parse.address.metachain.pipe';
+export * from './pipes/parse.address.and.metachain.pipe';
 export * from './pipes/parse.array.pipe';
 export * from './pipes/parse.block.hash.pipe';
 export * from './pipes/parse.bls.hash.pipe';
