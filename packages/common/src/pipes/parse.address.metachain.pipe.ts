@@ -17,7 +17,7 @@ export class AddressAndMetachainValidationPipe implements PipeTransform<string |
           return resolve(value);
         }
       } catch (error) {
-        throw new BadRequestException(`Validation failed for argument '${metadata.data}'. Address or metachain '${value}' is not valid`);
+        throw new BadRequestException(`Validation failed for argument '${metadata.data}'. Address '${value}' is not valid`);
       }
     });
   }
