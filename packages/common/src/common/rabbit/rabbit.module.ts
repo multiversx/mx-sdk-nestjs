@@ -17,7 +17,7 @@ export class RabbitModule {
         RabbitMQModule.forRootAsync(RabbitMQModule, {
           useFactory: () => {
             return options;
-          }
+          },
         }),
       ],
       providers: [
