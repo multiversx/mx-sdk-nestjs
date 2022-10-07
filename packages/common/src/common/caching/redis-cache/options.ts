@@ -1,25 +1,22 @@
 import { ModuleMetadata } from '@nestjs/common';
 
 export class RedisCacheModuleOptions {
-  host?: string | undefined;
-  port?: number | undefined;
-  username?: string | undefined;
-  password?: string | undefined;
-  sentinelUsername?: string | undefined;
-  sentinelPassword?: string | undefined;
-  sentinels?: Array<{ host: string; port: number }> | undefined;
-  connectTimeout?: number | undefined;
   config: {
-    url: string,
+    host?: string | undefined;
+    port?: number | undefined;
+    username?: string | undefined;
+    password?: string | undefined;
+    sentinelUsername?: string | undefined;
+    sentinelPassword?: string | undefined;
+    sentinels?: Array<{ host: string; port: number }> | undefined;
+    connectTimeout?: number | undefined;
   };
 
   constructor(
-    options: Omit<RedisCacheModuleOptions, 'config'>,
+    options: Pick<RedisCacheModuleOptions, 'config'>,
   ) {
-    Object.assign(this, options);
-    this.config = {
-      url: '',
-    };
+    this.config = {};
+    Object.assign(this.config, options);
   }
 }
 
