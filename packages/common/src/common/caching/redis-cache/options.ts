@@ -10,6 +10,7 @@ export class RedisCacheModuleOptions {
     sentinelPassword?: string | undefined;
     sentinels?: Array<{ host: string; port: number }> | undefined;
     connectTimeout?: number | undefined;
+    name?: string | undefined;
   };
 
   constructor(
