@@ -1,8 +1,8 @@
 import { ModuleMetadata } from '@nestjs/common';
 
 export class RedisCacheModuleOptions {
-  host: string = '';
-  port: number = 0;
+  host?: string | undefined;
+  port?: number | undefined;
   username?: string | undefined;
   password?: string | undefined;
   sentinels?: Array<{ host: string; port: number }> | undefined;
