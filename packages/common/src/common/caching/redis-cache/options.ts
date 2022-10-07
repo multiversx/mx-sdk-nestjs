@@ -13,7 +13,7 @@ export class RedisCacheModuleOptions {
   };
 
   constructor(
-    options: Pick<RedisCacheModuleOptions, 'config'>,
+    options: RedisCacheModuleOptions['config'],
   ) {
     this.config = {};
     Object.assign(this.config, options);
