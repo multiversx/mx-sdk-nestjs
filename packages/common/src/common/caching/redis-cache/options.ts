@@ -1,18 +1,15 @@
 import { ModuleMetadata } from '@nestjs/common';
 
 export class RedisCacheModuleOptions {
-  config: {
-    url: string,
+  host: string = '';
+  port: number = 0;
+  username?: string | undefined;
+  password?: string | undefined;
+  sentinels?: Array<{ host: string; port: number }> | undefined;
+  connectTimeout?: number | undefined;
+  config = {
+    url: '',
   };
-
-  constructor(
-    host: string,
-    port: number,
-  ) {
-    this.config = {
-      url: `redis://${host}:${port}`,
-    };
-  }
 }
 
 export interface RedisCacheModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
