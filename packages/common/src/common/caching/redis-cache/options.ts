@@ -16,14 +16,7 @@ export class RedisCacheModuleOptions {
   constructor(
     options: Omit<RedisCacheModuleOptions, 'config'>,
   ) {
-    this.host = options.host;
-    this.port = options.port;
-    this.username = options.username;
-    this.password = options.password;
-    this.sentinelUsername = options.sentinelUsername;
-    this.sentinelPassword = options.sentinelPassword;
-    this.sentinels = options.sentinels;
-    this.connectTimeout = options.connectTimeout;
+    Object.assign(this, options);
     this.config = {
       url: '',
     };
