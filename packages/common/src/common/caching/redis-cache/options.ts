@@ -10,10 +10,11 @@ export class RedisCacheModuleOptions {
     sentinelPassword?: string | undefined;
     sentinels?: Array<{ host: string; port: number }> | undefined;
     connectTimeout?: number | undefined;
+    name?: string | undefined;
   };
 
   constructor(
-    options: Pick<RedisCacheModuleOptions, 'config'>,
+    options: RedisCacheModuleOptions['config'],
   ) {
     this.config = {};
     Object.assign(this.config, options);
