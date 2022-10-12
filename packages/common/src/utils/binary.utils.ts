@@ -82,4 +82,8 @@ export class BinaryUtils {
       return false;
     }
   }
+
+  static numberToHex(value: number): string {
+    return value.toString(16);
+  }
 }
