@@ -17,8 +17,8 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@octocat'
+          cache: 'npm'
+          cache-dependency-path: ./packages/common/package-lock.json
       - run: npm run build
       - run: npm publish
         env:
