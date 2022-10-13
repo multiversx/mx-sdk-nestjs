@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  build:
+  common:
     runs-on: ubuntu-latest
     defaults:
       run:

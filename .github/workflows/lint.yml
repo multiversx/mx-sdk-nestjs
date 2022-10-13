@@ -7,7 +7,7 @@ on:
   push:
 
 jobs:
-  build-common:
+  common:
     runs-on: ubuntu-latest
     defaults:
       run:
