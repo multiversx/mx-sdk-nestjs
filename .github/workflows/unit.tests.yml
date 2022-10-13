@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+        working-directory: ./packages/common
       - run: npm ci
       - run: npm run build
       - run: npm test
