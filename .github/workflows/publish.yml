@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/common
     steps:
       - uses: actions/checkout@v3
       # Setup .npmrc file to publish to npm
