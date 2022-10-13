@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/common
 
     strategy:
       matrix:
@@ -22,6 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          cache-dependency-path: ./packages/common/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npm test
