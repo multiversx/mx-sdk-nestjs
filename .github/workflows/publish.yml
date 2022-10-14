@@ -1,38 +1,40 @@
 name: Publish
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
-    contents: write
+  contents: write
 
 jobs:
-    common:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./packages/common
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v1
-              with:
-                  node-version: 16
-                  registry-url: https://registry.npmjs.org/
-                  cache-dependency-path: ./packages/common/package-lock.json
+  common:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/common
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+          cache-dependency-path: ./packages/common/package-lock.json
 
-            - run: npm ci
+      - run: npm ci
 
-            - name: Create release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  echo " - [npmjs](https://www.npmjs.com/package/@elrondnetwork/erdnest)" >> notes.txt
-                  echo "" >> notes.txt
+      - run: npm build
 
-                  RELEASE_TAG=v$(node -p "require('./package.json').version")
-                  gh release create $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes --notes-file=notes.txt
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo " - [npmjs](https://www.npmjs.com/package/@elrondnetwork/erdnest)" >> notes.txt
+          echo "" >> notes.txt
 
-            - name: Publish to npmjs
-              env:
-                  NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-              run: npm publish --access=public
+          RELEASE_TAG=v$(node -p "require('./package.json').version")
+          gh release create $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes --notes-file=notes.txt
+
+      - name: Publish to npmjs
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        run: npm publish --access=public
