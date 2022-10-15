@@ -11,7 +11,7 @@ import { OriginLogger } from "../../utils/origin.logger";
 
 @Injectable()
 export class CachingService {
-  protected client = createClient(this.options.port, this.options.url);
+  protected client = createClient(this.options.port, this.options.url, { auth_pass: this.options.password });
   private asyncSet = promisify(this.client.set).bind(this.client);
   private asyncGet = promisify(this.client.get).bind(this.client);
   private asyncIncr = promisify(this.client.incr).bind(this.client);
