@@ -15,11 +15,7 @@ export class RabbitModule {
       module: RabbitModule,
       global: true,
       imports: [
-        RabbitMQModule.forRootAsync(RabbitMQModule, {
-          useFactory: () => {
-            return options;
-          },
-        }),
+        RabbitMQModule.forRoot(RabbitMQModule, options),
       ],
       providers: [
         RabbitPublisherService,
@@ -31,6 +27,7 @@ export class RabbitModule {
   static forRootAsync(asyncOptions: RabbitModuleAsyncOptions): DynamicModule {
     return {
       module: RabbitModule,
+      global: true,
       imports: [
         RabbitMQModule.forRootAsync(RabbitMQModule, {
           ...asyncOptions,
