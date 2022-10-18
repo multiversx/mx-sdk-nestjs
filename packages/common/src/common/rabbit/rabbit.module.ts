@@ -13,6 +13,7 @@ export class RabbitModule {
   static forRoot(options: RabbitModuleOptions): DynamicModule {
     return {
       module: RabbitModule,
+      global: true,
       imports: [
         RabbitMQModule.forRootAsync(RabbitMQModule, {
           useFactory: () => {
