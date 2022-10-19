@@ -50,6 +50,7 @@ export class CachingModule {
         inject: options.inject,
       },
       CachingService,
+      LocalCacheService,
     ];
 
     const references = [];
