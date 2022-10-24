@@ -3,7 +3,7 @@ import { Type } from "@nestjs/common";
 export class DecoratorUtils {
   static registerMethodDecorator<T>(type: Type<T>): (options?: T) => MethodDecorator {
     return (options?: T): MethodDecorator => (_, __, descriptor: any) => {
-      Reflect.defineMetadata(type.name, Object.assign(new type(), options), descriptor.value);
+      Reflect.defineMetadata(type.name, options, descriptor.value);
       return descriptor;
     };
   }
