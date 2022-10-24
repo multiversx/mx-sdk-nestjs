@@ -16,7 +16,7 @@ export class RedisCacheModule {
       providers: [
         {
           provide: REDIS_CLIENT_TOKEN,
-          useValue: new Redis(options.config)
+          useValue: new Redis(options.config),
         },
         RedisCacheService,
       ],
