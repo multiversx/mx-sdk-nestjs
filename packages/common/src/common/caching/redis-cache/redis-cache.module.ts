@@ -31,6 +31,7 @@ export class RedisCacheModule {
       module: RedisCacheModule,
       imports: [
         MetricsModule,
+        ...(asyncOptions.imports || []),
       ],
       providers: [
         {
