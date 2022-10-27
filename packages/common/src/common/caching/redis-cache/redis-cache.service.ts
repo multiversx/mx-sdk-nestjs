@@ -284,6 +284,179 @@ export class RedisCacheService {
     }
   }
 
+  async hget<T>(
+    hash: string,
+    field: string,
+  ): Promise<T | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const data = await this.redis.hget(hash, field);
+      if (data) {
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hget from redis.', {
+          exception: error?.toString(),
+          hash, field,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HGET', performanceProfiler.duration);
+    }
+    return null;
+  }
+
+  async hgetall<T>(
+    hash: string,
+  ): Promise<Record<string, T> | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const data = await this.redis.hgetall(hash);
+      if (!data) {
+        return null;
+      }
+
+      const response: Record<string, T> = {};
+      for (const key of Object.keys(data)) {
+        response[key] = JSON.parse(data[key]);
+      }
+
+      return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hgetall from redis.', {
+          exception: error?.toString(),
+          hash,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HGETALL', performanceProfiler.duration);
+    }
+    return null;
+  }
+
+  async hset<T>(
+    hash: string,
+    field: string,
+    value: T,
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.hset(hash, field, JSON.stringify(value));
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hset in redis.', {
+          exception: error?.toString(),
+          hash, field, value,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HSET', performanceProfiler.duration);
+    }
+  }
+
+  async zadd(
+    setName: string,
+    value: number,
+    key: string,
+    options: string[] = [],
+  ): Promise<string | number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zadd(key, [...options, setName, value]);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to zadd in redis.', {
+          exception: error?.toString(),
+          setName,
+          value,
+          key,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZADD', performanceProfiler.duration);
+    }
+  }
+
+  async zincrby(
+    setName: string,
+    increment: number,
+    key: string,
+  ): Promise<string> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zincrby(key, increment, key);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to zincrby in redis.', {
+          exception: error?.toString(),
+          setName,
+          increment,
+          key,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZINCRBY', performanceProfiler.duration);
+    }
+  }
+
+  async zrevrange(
+    setName: string,
+    start: number,
+    stop: number,
+    withScores?: 'WITHSCORES'
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zrevrange(setName, start, stop, withScores);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to zrevrange in redis.', {
+          exception: error?.toString(),
+          setName,
+          start,
+          stop,
+          withScores,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZREVRANGE', performanceProfiler.duration);
+    }
+  }
+
+  async zmscore(
+    setName: string,
+    ...args: string[]
+  ): Promise<(string | null)[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zmscore(setName, args);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to zmscore in redis.', {
+          exception: error?.toString(),
+          setName,
+          args,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZMSCORE', performanceProfiler.duration);
+    }
+  }
+
   private buildInternalCreateValueFunc<T>(
     key: string,
     createValueFunc: () => Promise<T | null | undefined>,
