@@ -369,7 +369,7 @@ export class RedisCacheService {
   ): Promise<string | number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zadd(key, [...options, setName, value]);
+      return await this.redis.zadd(key, ...[...options, setName, value]);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zadd in redis.', {
@@ -414,11 +414,14 @@ export class RedisCacheService {
     setName: string,
     start: number,
     stop: number,
-    withScores?: 'WITHSCORES'
+    withScores: boolean = false,
   ): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zrevrange(setName, start, stop, withScores);
+      if (withScores) {
+        return await this.redis.zrevrange(setName, start, stop, 'WITHSCORES');
+      }
+      return await this.redis.zrevrange(setName, start, stop);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zrevrange in redis.', {
