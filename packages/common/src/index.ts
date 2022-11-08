@@ -92,6 +92,7 @@ export * from './decorators/jwt';
 export * from './decorators/native.auth';
 export * from './decorators/no.auth';
 export * from './decorators/no.cache';
+export * from './decorators/error.logger';
 export * from './interceptors/caching.interceptor';
 export * from './interceptors/cleanup.interceptor';
 export * from './interceptors/complexity.interceptor';
