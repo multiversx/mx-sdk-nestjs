@@ -52,6 +52,7 @@
     "@elrondnetwork/native-auth-client": "^0.1.0",
     "@elrondnetwork/native-auth-server": "^0.1.1",
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
+    "@nestjs/event-emitter": "^1.3.1",
     "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",
     "axios": "^0.27.2",
