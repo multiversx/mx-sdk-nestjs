@@ -4,7 +4,7 @@ import { isNil } from '@nestjs/common/utils/shared.utils';
 import { MetricsService } from '../../../common/metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
 import { OriginLogger } from '../../../utils/origin.logger';
-import { REDIS_CLIENT_TOKEN } from './entities/common.constants';
+import { REDIS_CLIENT_TOKEN } from '../../redis/entities/common.constants';
 
 @Injectable()
 export class RedisCacheService {

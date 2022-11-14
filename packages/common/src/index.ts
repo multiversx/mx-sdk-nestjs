@@ -47,6 +47,8 @@ export * from './common/config/erdnest.config.service';
 export * from './common/caching/caching.module';
 export * from './common/caching/caching.service';
 export * from './common/caching/local.cache.service';
+export * from './common/redis/redis.module';
+export * from './common/redis/entities/common.constants';
 export * from './common/caching/entities/caching.module.options';
 export * from './common/caching/entities/caching.module.async.options';
 export * from './common/caching/entities/local.cache.value';
