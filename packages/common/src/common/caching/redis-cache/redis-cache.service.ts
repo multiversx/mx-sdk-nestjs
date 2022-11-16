@@ -432,6 +432,28 @@ export class RedisCacheService {
     }
   }
 
+  async zrevrank(
+    key: string,
+    member: string,
+  ): Promise<number | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zrevrank(key, member);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get zrevrank from redis.', {
+          exception: error?.toString(),
+          key,
+          member,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZREVRANK', performanceProfiler.duration);
+    }
+  }
+
   async zrevrange(
     setName: string,
     start: number,
