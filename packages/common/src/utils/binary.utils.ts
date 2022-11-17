@@ -62,6 +62,10 @@ export class BinaryUtils {
     return parseInt(hex, 16);
   }
 
+  static hexToBase64(hex: string): string {
+    return Buffer.from(hex, 'hex').toString('base64');
+  }
+
   static hexToBigInt(hex: string): BigInt {
     if (!hex) {
       return BigInt(0);
