@@ -1,7 +1,6 @@
 import {
   Injectable, Inject, CACHE_MANAGER,
 } from '@nestjs/common';
-import { isNil } from '@nestjs/common/utils/shared.utils';
 import { Cache } from 'cache-manager';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class InMemoryCacheService {
     value: T,
     ttl: number,
   ): Promise<void> {
-    if (isNil(value)) {
+    if (value === undefined) {
       return;
     }
 
@@ -56,17 +55,17 @@ export class InMemoryCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     const cachedData = await this.get<T>(key);
-    if (!isNil(cachedData)) {
+    if (cachedData !== undefined) {
       return cachedData;
     }
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value != null) {
+    if (value !== undefined) {
       await this.set<T>(key, value, ttl);
     }
     return value;
@@ -74,20 +73,20 @@ export class InMemoryCacheService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value != null) {
+    if (value !== undefined) {
       await this.set<T>(key, value, ttl);
     }
     return value;
   }
 
   private buildInternalCreateValueFunc<T>(
-    createValueFunc: () => Promise<T | null | undefined>,
-  ): () => Promise<T | null | undefined> {
+    createValueFunc: () => Promise<T>,
+  ): () => Promise<T> {
     return () => {
       return createValueFunc();
     };

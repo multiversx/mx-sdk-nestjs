@@ -1,6 +1,5 @@
 import Redis from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
-import { isNil } from '@nestjs/common/utils/shared.utils';
 import { MetricsService } from '../../../common/metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
 import { OriginLogger } from '../../../utils/origin.logger';
@@ -17,7 +16,7 @@ export class RedisCacheService {
 
   async get<T>(
     key: string,
-  ): Promise<T | null> {
+  ): Promise<T | undefined> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.get(key);
@@ -35,16 +34,17 @@ export class RedisCacheService {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('GET', performanceProfiler.duration);
     }
-    return null;
+    return undefined;
   }
 
   async getMany<T>(
     keys: string[],
-  ): Promise<(T | null)[]> {
+  ): Promise<(T | undefined)[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const items = await this.redis.mget(keys);
-      return items.map(item => item ? JSON.parse(item) : null);
+      const values = items.map(item => item ? JSON.parse(item) as T : undefined);
+      return values;
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to get many keys from redis cache.',
@@ -79,7 +79,7 @@ export class RedisCacheService {
     value: T,
     ttl: number | null = null,
   ): Promise<void> {
-    if (isNil(value)) {
+    if (value === undefined) {
       return;
     }
     const performanceProfiler = new PerformanceProfiler();
@@ -193,17 +193,17 @@ export class RedisCacheService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     const cachedData = await this.get<T>(key);
-    if (!isNil(cachedData)) {
+    if (cachedData !== undefined) {
       return cachedData;
     }
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value != null) {
+    if (value !== undefined) {
       await this.set<T>(key, value, ttl);
     }
     return value;
@@ -211,12 +211,12 @@ export class RedisCacheService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value != null) {
+    if (value !== undefined) {
       await this.set<T>(key, value, ttl);
     }
     return value;
@@ -507,8 +507,8 @@ export class RedisCacheService {
 
   private buildInternalCreateValueFunc<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
-  ): () => Promise<T | null | undefined> {
+    createValueFunc: () => Promise<T>,
+  ): () => Promise<T> {
     return async () => {
       try {
         return await createValueFunc();
@@ -519,7 +519,7 @@ export class RedisCacheService {
             key,
           });
         }
-        return null;
+        throw error;
       }
     };
   }
