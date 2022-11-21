@@ -222,6 +222,24 @@ export class RedisCacheService {
     return value;
   }
 
+  async getKeys(pattern: string): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.keys(pattern);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('RedisCache - An error occurred while trying to get redis keys.', {
+          error: error?.toString(),
+          cacheKey: pattern,
+        });
+      }
+      return [];
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('KEYS', performanceProfiler.duration);
+    }
+  }
+
   async scan(pattern: string): Promise<string[]> {
     const found: string[] = [];
     let cursor = '0';
