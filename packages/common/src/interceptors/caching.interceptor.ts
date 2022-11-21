@@ -7,13 +7,14 @@ import { CachingService } from "../common/caching/caching.service";
 import { NoCacheOptions } from "../decorators/no.cache";
 import { DecoratorUtils } from "../utils/decorator.utils";
 import { Constants } from "../utils/constants";
+import { ElrondCachingService } from "src/common";
 
 @Injectable()
 export class CachingInterceptor implements NestInterceptor {
   private pendingRequestsDictionary: { [key: string]: any; } = {};
 
   constructor(
-    private readonly cachingService: CachingService,
+    private readonly cachingService: CachingService | ElrondCachingService,
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly metricsService: MetricsService,
   ) { }
@@ -48,7 +49,9 @@ export class CachingInterceptor implements NestInterceptor {
         }
       }
 
-      const cachedValue = await this.cachingService.getCacheLocal(cacheKey);
+      const cachedValue = this.cachingService instanceof ElrondCachingService
+        ? await this.cachingService.getLocal(cacheKey)
+        : await this.cachingService.getCacheLocal(cacheKey);
       if (cachedValue) {
         this.metricsService.incrementCachedApiHit(apiFunction);
         return of(cachedValue);
@@ -68,7 +71,9 @@ export class CachingInterceptor implements NestInterceptor {
             pendingRequestResolver(result);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
-            await this.cachingService.setCacheLocal(cacheKey ?? '', result, Constants.oneSecond() * 3);
+            this.cachingService instanceof ElrondCachingService
+              ? await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * 3)
+              : await this.cachingService.setCacheLocal(cacheKey ?? '', result, Constants.oneSecond() * 3);
           }),
           catchError((err) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];
