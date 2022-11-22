@@ -7,7 +7,7 @@ import { CachingService } from "../common/caching/caching.service";
 import { NoCacheOptions } from "../decorators/no.cache";
 import { DecoratorUtils } from "../utils/decorator.utils";
 import { Constants } from "../utils/constants";
-import { ElrondCachingService } from "src/common";
+import { ElrondCachingService } from "../common";
 
 @Injectable()
 export class CachingInterceptor implements NestInterceptor {
