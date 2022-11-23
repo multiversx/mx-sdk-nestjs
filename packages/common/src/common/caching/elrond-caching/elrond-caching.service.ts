@@ -270,10 +270,6 @@ export class ElrondCachingService {
     return value;
   }
 
-  async getKeys(pattern: string): Promise<string[]> {
-    return await this.redisCacheService.getKeys(pattern);
-  }
-
   private executeWithPendingPromise<T>(
     key: string,
     promise: () => Promise<T>,
