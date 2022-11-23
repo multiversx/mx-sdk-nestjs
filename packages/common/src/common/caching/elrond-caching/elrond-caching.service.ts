@@ -60,9 +60,9 @@ export class ElrondCachingService {
 
   getOrSetLocal<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     return this.inMemoryCacheService.getOrSet<T>(
       key,
       () => {
@@ -74,21 +74,21 @@ export class ElrondCachingService {
 
   setOrUpdateLocal<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     return this.inMemoryCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
   }
 
   getRemote<T>(
     key: string,
-  ): Promise<T | null> {
+  ): Promise<T | undefined> {
     return this.redisCacheService.get<T>(key);
   }
 
   getManyRemote<T>(
     keys: string[]
-  ): Promise<(T | null)[]> {
+  ): Promise<(T | undefined)[]> {
     return this.redisCacheService.getMany(keys);
   }
 
@@ -133,9 +133,9 @@ export class ElrondCachingService {
 
   getOrSetRemote<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     return this.redisCacheService.getOrSet<T>(
       key,
       () => {
@@ -147,9 +147,9 @@ export class ElrondCachingService {
 
   setOrUpdateRemote<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
   }
 
@@ -169,7 +169,7 @@ export class ElrondCachingService {
 
   async get<T>(
     key: string,
-  ): Promise<T | null> {
+  ): Promise<T | undefined> {
     const inMemoryCacheValue = await this.inMemoryCacheService.get<T>(key);
     if (inMemoryCacheValue) {
       return inMemoryCacheValue;
@@ -244,12 +244,12 @@ export class ElrondCachingService {
 
   async getOrSet<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
     inMemoryTtl: number = ttl,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
-    const getOrAddFromRedisFunc = async (): Promise<T | null | undefined> => {
+    const getOrAddFromRedisFunc = async (): Promise<T> => {
       return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl);
     };
 
@@ -258,13 +258,13 @@ export class ElrondCachingService {
 
   async setOrUpdate<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
+    createValueFunc: () => Promise<T>,
     ttl: number,
     inMemoryTtl: number = ttl,
-  ): Promise<T | null | undefined> {
+  ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value != null) {
+    if (value !== undefined) {
       await this.set<T>(key, value, ttl, inMemoryTtl);
     }
     return value;
@@ -279,8 +279,8 @@ export class ElrondCachingService {
 
   private buildInternalCreateValueFunc<T>(
     key: string,
-    createValueFunc: () => Promise<T | null | undefined>,
-  ): () => Promise<T | null | undefined> {
+    createValueFunc: () => Promise<T>,
+  ): () => Promise<T> {
     return async () => {
       try {
         return await this.executeWithPendingPromise(key, createValueFunc);
@@ -291,7 +291,7 @@ export class ElrondCachingService {
             key,
           });
         }
-        return null;
+        throw error;
       }
     };
   }
