@@ -203,9 +203,7 @@ export class RedisCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value !== undefined) {
-      await this.set<T>(key, value, ttl);
-    }
+    await this.set<T>(key, value, ttl);
     return value;
   }
 
@@ -216,9 +214,7 @@ export class RedisCacheService {
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value !== undefined) {
-      await this.set<T>(key, value, ttl);
-    }
+    await this.set<T>(key, value, ttl);
     return value;
   }
 

@@ -65,9 +65,7 @@ export class InMemoryCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value !== undefined) {
-      await this.set<T>(key, value, ttl);
-    }
+    await this.set<T>(key, value, ttl);
     return value;
   }
 
@@ -78,9 +76,7 @@ export class InMemoryCacheService {
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(createValueFunc);
     const value = await internalCreateValueFunc();
-    if (value !== undefined) {
-      await this.set<T>(key, value, ttl);
-    }
+    await this.set<T>(key, value, ttl);
     return value;
   }
 
