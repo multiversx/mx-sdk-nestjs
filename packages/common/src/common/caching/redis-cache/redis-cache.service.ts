@@ -449,7 +449,7 @@ export class RedisCacheService {
       this.metricsService.setRedisDuration('ZREVRANK', performanceProfiler.duration);
     }
   }
-  
+
   /**
    * @deprecated As of Redis version 6.2.0, this command is regarded as deprecated. It can be replaced by ZRANGE with the REV argument when migrating or writing new code.
    */
@@ -493,16 +493,15 @@ export class RedisCacheService {
   ): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      if(options?.order === 'REV' && options?.withScores) {
-        return await this.redis.zrange(setName, start, stop, 'REV', 'WITHSCORES');
+      if (options?.order === 'REV') {
+        if (options?.withScores) {
+          return await this.redis.zrange(setName, start, stop, 'REV', 'WITHSCORES');
+        }
+        return await this.redis.zrange(setName, start, stop, 'REV');
       }
 
-      if(options?.order === 'REV') {
-        return await this.redis.zrange(setName, start, stop,  'REV');
-      }
-
-      if(options?.withScores) {
-        return await this.redis.zrange(setName, start, stop,  'WITHSCORES');
+      if (options?.withScores) {
+        return await this.redis.zrange(setName, start, stop, 'WITHSCORES');
       }
 
       return await this.redis.zrange(setName, start, stop);
