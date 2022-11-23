@@ -449,7 +449,10 @@ export class RedisCacheService {
       this.metricsService.setRedisDuration('ZREVRANK', performanceProfiler.duration);
     }
   }
-
+  
+  /**
+   * @deprecated As of Redis version 6.2.0, this command is regarded as deprecated. It can be replaced by ZRANGE with the REV argument when migrating or writing new code.
+   */
   async zrevrange(
     setName: string,
     start: number,
