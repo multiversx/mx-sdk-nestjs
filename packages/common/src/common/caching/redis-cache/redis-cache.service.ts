@@ -479,6 +479,47 @@ export class RedisCacheService {
     }
   }
 
+  async zrange(
+    setName: string,
+    start: number,
+    stop: number,
+    options?: {
+      order?: 'REV' | undefined,
+      withScores?: boolean,
+    }
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if(options?.order === 'REV' && options?.withScores) {
+        return await this.redis.zrange(setName, start, stop, 'REV', 'WITHSCORES');
+      }
+
+      if(options?.order === 'REV') {
+        return await this.redis.zrange(setName, start, stop,  'REV');
+      }
+
+      if(options?.withScores) {
+        return await this.redis.zrange(setName, start, stop,  'WITHSCORES');
+      }
+
+      return await this.redis.zrange(setName, start, stop);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get zrange in redis.', {
+          exception: error?.toString(),
+          setName,
+          start,
+          stop,
+          options,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZRANGE', performanceProfiler.duration);
+    }
+  }
+
   async zmscore(
     setName: string,
     ...args: string[]
