@@ -365,7 +365,7 @@ export class RedisCacheService {
   ): Promise<string | number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zadd(key, ...[...options, setName, value]);
+      return await this.redis.zadd(key, ...[...options, value, setName]);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zadd in redis.', {
