@@ -450,6 +450,9 @@ export class RedisCacheService {
     }
   }
 
+  /**
+   * @deprecated As of Redis version 6.2.0, this command is regarded as deprecated. It can be replaced by ZRANGE with the REV argument when migrating or writing new code.
+   */
   async zrevrange(
     setName: string,
     start: number,
@@ -476,6 +479,46 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('ZREVRANGE', performanceProfiler.duration);
+    }
+  }
+
+  async zrange(
+    setName: string,
+    start: number,
+    stop: number,
+    options?: {
+      order?: 'REV' | undefined,
+      withScores?: boolean,
+    }
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if (options?.order === 'REV') {
+        if (options?.withScores) {
+          return await this.redis.zrange(setName, start, stop, 'REV', 'WITHSCORES');
+        }
+        return await this.redis.zrange(setName, start, stop, 'REV');
+      }
+
+      if (options?.withScores) {
+        return await this.redis.zrange(setName, start, stop, 'WITHSCORES');
+      }
+
+      return await this.redis.zrange(setName, start, stop);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get zrange in redis.', {
+          exception: error?.toString(),
+          setName,
+          start,
+          stop,
+          options,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZRANGE', performanceProfiler.duration);
     }
   }
 
