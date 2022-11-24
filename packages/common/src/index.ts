@@ -91,6 +91,7 @@ export * from './common/complexity/complexity.estimation';
 export * from './common/complexity/complexity.utils';
 export * from './common/complexity/exceptions/complexity.exceeded.exception';
 export * from './decorators/jwt';
+export * from './decorators/lock';
 export * from './decorators/native.auth';
 export * from './decorators/no.auth';
 export * from './decorators/no.cache';
