@@ -14,6 +14,10 @@ export class RedisCacheService {
     private readonly metricsService: MetricsService,
   ) { }
 
+  public getRedis(): Redis {
+    return this.redis;
+  }
+
   async get<T>(
     key: string,
   ): Promise<T | undefined> {
