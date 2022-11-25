@@ -544,6 +544,30 @@ export class RedisCacheService {
     }
   }
 
+  async zcount(
+    key: string,
+    min: number | '-inf',
+    max: number | '+inf',
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zcount(key, min, max);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get zcount in redis.', {
+          exception: error?.toString(),
+          key,
+          min,
+          max,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZCOUNT', performanceProfiler.duration);
+    }
+  }
+
   private buildInternalCreateValueFunc<T>(
     key: string,
     createValueFunc: () => Promise<T>,
