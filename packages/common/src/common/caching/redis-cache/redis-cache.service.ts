@@ -14,10 +14,6 @@ export class RedisCacheService {
     private readonly metricsService: MetricsService,
   ) { }
 
-  public getRedis(): Redis {
-    return this.redis;
-  }
-
   async get<T>(
     key: string,
   ): Promise<T | undefined> {
@@ -569,6 +565,52 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('ZCOUNT', performanceProfiler.duration);
+    }
+  }
+
+  public defineCommand(
+    name: string,
+    definition: {
+      lua: string;
+      numberOfKeys?: number;
+      readOnly?: boolean;
+    }
+  ): void {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return this.redis.defineCommand(name, definition);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to define command in redis.', {
+          exception: error?.toString(),
+          name,
+          definition,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('DEFINECOMMAND', performanceProfiler.duration);
+    }
+  }
+
+  public async executeCommand(name: string, ...args: (string | Buffer | number)[]): Promise<unknown> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      // @ts-ignore
+      return await this.redis[name](args);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to execute custom command in redis.', {
+          exception: error?.toString(),
+          name,
+          args,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration(name, performanceProfiler.duration);
     }
   }
 
