@@ -544,6 +544,76 @@ export class RedisCacheService {
     }
   }
 
+  async zcount(
+    key: string,
+    min: number | '-inf',
+    max: number | '+inf',
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.zcount(key, min, max);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get zcount in redis.', {
+          exception: error?.toString(),
+          key,
+          min,
+          max,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZCOUNT', performanceProfiler.duration);
+    }
+  }
+
+  public defineCommand(
+    name: string,
+    definition: {
+      lua: string;
+      numberOfKeys?: number;
+      readOnly?: boolean;
+    }
+  ): void {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return this.redis.defineCommand(name, definition);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to define command in redis.', {
+          exception: error?.toString(),
+          name,
+          definition,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('DEFINECOMMAND', performanceProfiler.duration);
+    }
+  }
+
+  public async executeCommand(name: string, ...args: (string | Buffer | number)[]): Promise<unknown> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      // @ts-ignore
+      return await this.redis[name](args);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to execute custom command in redis.', {
+          exception: error?.toString(),
+          name,
+          args,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration(name, performanceProfiler.duration);
+    }
+  }
+
   private buildInternalCreateValueFunc<T>(
     key: string,
     createValueFunc: () => Promise<T>,
