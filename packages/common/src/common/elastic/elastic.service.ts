@@ -88,8 +88,6 @@ export class ElasticService {
     const documents = result.data.hits.hits;
     const scrollId = result.data._scroll_id;
 
-    console.log({ scrollId });
-
     try {
       await action(documents.map((document: any) => this.formatItem(document, key)));
 
