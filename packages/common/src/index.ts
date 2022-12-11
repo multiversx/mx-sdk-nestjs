@@ -2,6 +2,7 @@ export * from './utils/address.utils';
 export * from './utils/api.utils';
 export * from './utils/batch.utils';
 export * from './utils/binary.utils';
+export * from './utils/configuration';
 export * from './utils/constants';
 export * from './utils/context.tracker';
 export * from './utils/cpu.profiler';

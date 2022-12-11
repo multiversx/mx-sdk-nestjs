@@ -1,6 +1,6 @@
 {
   "name": "@elrondnetwork/erdnest",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "NestJS microservice template",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
@@ -57,7 +57,9 @@
     "axios": "^0.27.2",
     "cache-manager": "^4.1.0",
     "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.3",
     "ioredis": "^5.2.3",
+    "js-yaml": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
     "nest-winston": "^1.6.2",
     "prom-client": "^14.0.1",
