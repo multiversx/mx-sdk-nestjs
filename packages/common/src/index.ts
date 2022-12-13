@@ -105,4 +105,3 @@ export * from './interceptors/request.cpu.time.interceptor';
 export * from './common/rabbit';
 export * from './common';
 export * from './sc.interactions';
-export * as ErdnestEventEmitter from '@nestjs/event-emitter';
