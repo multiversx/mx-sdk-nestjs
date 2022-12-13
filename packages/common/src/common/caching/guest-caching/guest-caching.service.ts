@@ -39,7 +39,7 @@ export class GuestCachingService {
     const keysToComputeCurrentMinute: string[] = await this.cachingService.zRange(`${REDIS_PREFIX}.${currentDate}`, threshold, '+inf', 'BYSCORE');
     const keysToComputePreviousMinute: string[] = await this.cachingService.zRange(`${REDIS_PREFIX}.${previousMinute}`, threshold, '+inf', 'BYSCORE');
 
-    const keysToCompute = [...new Set([...keysToComputeCurrentMinute, ...keysToComputePreviousMinute])];
+    const keysToCompute = [...keysToComputeCurrentMinute, ...keysToComputePreviousMinute].distinct();
 
     await Promise.allSettled(keysToCompute.map(async key => {
       const parsedKey = `${REDIS_PREFIX}.${key}.body`;

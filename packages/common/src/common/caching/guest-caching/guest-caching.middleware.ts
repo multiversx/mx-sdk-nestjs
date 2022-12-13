@@ -88,9 +88,9 @@ export class GuestCachingMiddleware implements NestMiddleware {
 
     if (cacheResponse) {
       return res.json(cacheResponse);
-    } else {
-      MetricsService.incrementGuestNoCacheHits();
     }
+
+    MetricsService.incrementGuestNoCacheHits();
 
     return next();
   }
