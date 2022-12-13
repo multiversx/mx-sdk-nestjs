@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { CachingService } from '../caching.service';
 import { MetricsService } from '../../metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
-import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheEntity, IGuestCacheOptions, REDIS_PREFIX } from '../entities/guest.caching';
+import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheEntity, IGuestCacheServiceOptions, REDIS_PREFIX } from '../entities/guest.caching';
 
 @Injectable()
 export class GuestCachingService {
@@ -31,7 +31,7 @@ export class GuestCachingService {
     return data;
   }
 
-  public async recompute(options: IGuestCacheOptions) {
+  public async recompute(options: IGuestCacheServiceOptions) {
     // recompute cache
     const currentDate = moment().format(DATE_FORMAT);
     const previousMinute = moment().subtract(1, 'minute').format(DATE_FORMAT);
