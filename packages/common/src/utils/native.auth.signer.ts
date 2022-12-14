@@ -74,7 +74,7 @@ export class NativeAuthSigner {
     signerAddress: string,
     signableToken: string,
   ): SignableMessage {
-    const messageToSign = `${signerAddress}${signableToken}{}`;
+    const messageToSign = `${signerAddress}${signableToken}`;
     return new SignableMessage({
       message: Buffer.from(messageToSign, 'utf8'),
     });
