@@ -96,6 +96,6 @@ export class CachingInterceptor implements NestInterceptor {
       return undefined;
     }
 
-    return httpAdapter.getRequestUrl(request);
+    return context.getClass().name + '.' + context.getHandler().name + '.' + JSON.stringify(request.query);
   }
 }
