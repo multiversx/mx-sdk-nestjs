@@ -1,7 +1,5 @@
 import { CallHandler, ExecutionContext, HttpAdapterHost, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { NoCacheOptions } from "../decorators";
-import { DecoratorUtils } from "../utils/decorator.utils";
 
 @Injectable()
 export class QueryCheckInterceptor implements NestInterceptor {
@@ -20,11 +18,6 @@ export class QueryCheckInterceptor implements NestInterceptor {
 
     const request = context.switchToHttp().getRequest();
     if (httpAdapter.getRequestMethod(request) !== 'GET') {
-      return next.handle();
-    }
-
-    const cachingMetadata = DecoratorUtils.getMethodDecorator(NoCacheOptions, context.getHandler());
-    if (cachingMetadata) {
       return next.handle();
     }
 

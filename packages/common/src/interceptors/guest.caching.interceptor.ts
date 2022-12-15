@@ -1,5 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, of } from "rxjs";
+import { NoCacheOptions } from "../decorators";
+import { DecoratorUtils } from "../utils/decorator.utils";
 import { IGuestCacheOptions } from "../common/caching/entities/guest.caching";
 import { GuestCachingService } from "../common/caching/guest-caching/guest-caching.service";
 
@@ -23,6 +25,11 @@ export class GuestCachingInterceptor implements NestInterceptor {
 
     const request = context.getArgByIndex(0);
     if (request.method !== 'GET') {
+      return next.handle();
+    }
+
+    const cachingMetadata = DecoratorUtils.getMethodDecorator(NoCacheOptions, context.getHandler());
+    if (cachingMetadata) {
       return next.handle();
     }
 
