@@ -26,6 +26,10 @@ export class GuestCachingInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    if (request.headers['no-cache'] === 'true') {
+      return next.handle();
+    }
+
     const cacheResult = await this.guestCachingService.getOrSetRequestCache(request, this.guestCachingOptions);
     if (cacheResult.fromCache) {
       return of(cacheResult.response);

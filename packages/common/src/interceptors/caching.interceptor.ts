@@ -26,6 +26,17 @@ export class CachingInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    const request = context.getArgByIndex(0);
+
+    if (request.headers['no-cache'] === 'true') {
+      return next.handle();
+    }
+
+    const httpAdapter = this.httpAdapterHost.httpAdapter;
+    if (httpAdapter.getRequestMethod(request) !== 'GET') {
+      return next.handle();
+    }
+
     const apiFunction = context.getClass().name + '.' + context.getHandler().name;
 
     const cachingMetadata = DecoratorUtils.getMethodDecorator(NoCacheOptions, context.getHandler());
@@ -89,12 +100,7 @@ export class CachingInterceptor implements NestInterceptor {
   }
 
   getCacheKey(context: ExecutionContext): string | undefined {
-    const httpAdapter = this.httpAdapterHost.httpAdapter;
-
     const request = context.getArgByIndex(0);
-    if (httpAdapter.getRequestMethod(request) !== 'GET') {
-      return undefined;
-    }
 
     return `${context.getClass().name}.${context.getHandler().name}.${JSON.stringify(request.query)}.${JSON.stringify(request.params)}`;
   }
