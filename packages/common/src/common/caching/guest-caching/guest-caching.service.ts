@@ -1,78 +1,91 @@
+import {
+  Injectable,
+} from '@nestjs/common';
 import moment from 'moment';
-import axios from 'axios';
-import { Injectable } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { CachingService } from '../caching.service';
 import { MetricsService } from '../../metrics/metrics.service';
-import { PerformanceProfiler } from '../../../utils/performance.profiler';
-import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheEntity, IGuestCacheServiceOptions, REDIS_PREFIX } from '../entities/guest.caching';
+import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheOptions, REDIS_PREFIX } from '../entities/guest.caching';
+
+const cacheHitsCounter: any = {};
 
 @Injectable()
 export class GuestCachingService {
+  constructor(private cacheService: CachingService) { }
 
-  constructor(
-    private readonly cachingService: CachingService,
-  ) { }
+  public async getOrSetRequestCache(req: any, options?: IGuestCacheOptions) {
 
-  private async getReq(url: string) {
-    const { data } = await axios.get(url, {
-      headers: {
-        'no-cache': true,
-      },
-    });
-    return data;
-  }
+    const url = req.guestCacheUrl ?? req.originalUrl;
 
-  private async postReq(url: string, body: any) {
-    const { data } = await axios.post(url, body, {
-      headers: {
-        'no-cache': true,
-      },
-    });
-    return data;
-  }
+    const redisValue = req.method === GuestCacheMethodEnum.POST ? {
+      method: req.method,
+      body: req.body,
+      path: url,
+    } : {
+      method: req.method,
+      path: url,
+    };
 
-  public async recompute(options: IGuestCacheServiceOptions) {
-    // recompute cache
-    const currentDate = moment().format(DATE_FORMAT);
+    MetricsService.incrementGuestHits();
+
+    const currentMinute = moment().format(DATE_FORMAT);
     const previousMinute = moment().subtract(1, 'minute').format(DATE_FORMAT);
-    const threshold = Number(options.cacheTriggerHitsThreshold || 100);
-    const keysToComputeCurrentMinute: string[] = await this.cachingService.zRange(`${REDIS_PREFIX}.${currentDate}`, threshold, '+inf', 'BYSCORE');
-    const keysToComputePreviousMinute: string[] = await this.cachingService.zRange(`${REDIS_PREFIX}.${previousMinute}`, threshold, '+inf', 'BYSCORE');
+    const gqlQueryMd5 = crypto.createHash('md5').update(JSON.stringify(redisValue)).digest('hex');
 
-    const keysToCompute = [...keysToComputeCurrentMinute, ...keysToComputePreviousMinute].distinct();
+    const redisQueryKey = `${REDIS_PREFIX}.${gqlQueryMd5}.body`;
+    const redisQueryResponse = `${REDIS_PREFIX}.${gqlQueryMd5}.response`;
+    const batchSize = options?.batchSize || 3;
 
-    await Promise.allSettled(keysToCompute.map(async key => {
-      const parsedKey = `${REDIS_PREFIX}.${key}.body`;
-      const keyValue: IGuestCacheEntity | undefined = await this.cachingService.getCache(parsedKey);
+    let isFirstEntryForThisKey = false;
 
-      if (!keyValue) {
-        return Promise.resolve();
-      }
+    if (!cacheHitsCounter[currentMinute]) {
+      isFirstEntryForThisKey = true;
+      cacheHitsCounter[currentMinute] = {};
+    }
 
-      console.log(`Started warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'`);
-      const profiler = new PerformanceProfiler();
+    const cacheHitsCurrentMinute = cacheHitsCounter[currentMinute];
 
-      let data;
-      try {
-        const url = `${options.targetUrl}${keyValue.path}`;
+    if (!cacheHitsCurrentMinute[gqlQueryMd5]) {
+      cacheHitsCurrentMinute[gqlQueryMd5] = 0;
+    }
 
-        if (keyValue.method === GuestCacheMethodEnum.GET) {
-          data = await this.getReq(url);
-        } else {
-          data = await this.postReq(url, keyValue.body);
-        }
-      } catch (error) {
-        console.error(`An error occurred while warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'`);
-        console.error(error);
-      }
+    if (cacheHitsCurrentMinute[gqlQueryMd5] < batchSize) {
+      cacheHitsCurrentMinute[gqlQueryMd5]++;
+    } else {
+      cacheHitsCurrentMinute[gqlQueryMd5] = 1;
+    }
 
-      profiler.stop();
+    const redisCounterKey = `${REDIS_PREFIX}.${currentMinute}`;
+    if (cacheHitsCurrentMinute[gqlQueryMd5] >= batchSize) {
+      await this.cacheService.setCache(redisQueryKey, redisValue);
+      await this.cacheService.zIncrBy(redisCounterKey, cacheHitsCurrentMinute[gqlQueryMd5], gqlQueryMd5);
+    }
 
-      console.log(`Finished warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'. Response size: ${JSON.stringify(data).length}. Duration: ${profiler.duration}`);
+    if (isFirstEntryForThisKey) {
+      // If it is first entry for this key, set expire
+      await this.cacheService.zIncrBy(redisCounterKey, 0, gqlQueryMd5);
+      await this.cacheService.setTtlRemote(redisCounterKey, 2 * 60);
+    }
 
-      return this.cachingService.setCache(`${REDIS_PREFIX}.${key}.response`, data, options.cacheTtl ?? 30);
-    }));
+    // If the value for this is already computed
+    const cacheResponse: any = await this.cacheService.getCache(redisQueryResponse);
 
-    MetricsService.setGuestHitQueries(keysToCompute.length);
+    // Delete data for previous minute
+    if (cacheHitsCounter[previousMinute]) {
+      delete cacheHitsCounter[previousMinute];
+    }
+
+    if (cacheResponse) {
+      return {
+        fromCache: true,
+        response: cacheResponse,
+      };
+    }
+
+    MetricsService.incrementGuestNoCacheHits();
+
+    return {
+      fromCache: false,
+    };
   }
 }

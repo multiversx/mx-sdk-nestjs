@@ -9,13 +9,13 @@ export interface IGuestCacheEntity {
   path: string;
 }
 
-export interface IGuestCacheServiceOptions {
+export interface IGuestCacheWarmerOptions {
   cacheTtl?: number,
   targetUrl: string,
   cacheTriggerHitsThreshold?: number;
 }
 
-export interface IGuestCacheMiddlewareOptions {
+export interface IGuestCacheOptions {
   batchSize?: number;
 }
 

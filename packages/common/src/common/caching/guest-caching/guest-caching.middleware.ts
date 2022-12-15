@@ -4,19 +4,15 @@ import {
   mixin,
   Type,
 } from '@nestjs/common';
-import moment from 'moment';
-import * as crypto from 'crypto';
-import { CachingService } from '../caching.service';
-import { MetricsService } from '../../../common/metrics/metrics.service';
-import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheMiddlewareOptions, REDIS_PREFIX } from '../entities/guest.caching';
+import { GuestCacheMethodEnum, IGuestCacheOptions } from '../entities/guest.caching';
+import { GuestCachingService } from './guest-caching.service';
 
-const cacheHitsCounter: any = {};
 
-export const GuestCachingMiddlewareCreator = (options?: IGuestCacheMiddlewareOptions): Type<NestMiddleware> => {
+export const GuestCachingMiddlewareCreator = (options?: IGuestCacheOptions): Type<NestMiddleware> => {
   @Injectable()
   class GuestCachingMiddleware implements NestMiddleware {
 
-    constructor(private cacheService: CachingService) { }
+    constructor(private guestCaching: GuestCachingService) { }
 
     async use(req: any, res: any, next: any) {
       if (
@@ -29,71 +25,12 @@ export const GuestCachingMiddlewareCreator = (options?: IGuestCacheMiddlewareOpt
         return next();
       }
 
-      const redisValue = req.method === GuestCacheMethodEnum.POST ? {
-        method: req.method,
-        body: req.body,
-        path: req.originalUrl,
-      } : {
-        method: req.method,
-        path: req.originalUrl,
-      };
+      const cacheResult = await this.guestCaching.getOrSetRequestCache(req, options);
+      res.setHeader('X-Guest-Cache-Hit', cacheResult.fromCache);
 
-      MetricsService.incrementGuestHits();
-
-      const currentMinute = moment().format(DATE_FORMAT);
-      const previousMinute = moment().subtract(1, 'minute').format(DATE_FORMAT);
-      const gqlQueryMd5 = crypto.createHash('md5').update(JSON.stringify(redisValue)).digest('hex');
-
-      const redisQueryKey = `${REDIS_PREFIX}.${gqlQueryMd5}.body`;
-      const redisQueryResponse = `${REDIS_PREFIX}.${gqlQueryMd5}.response`;
-      const batchSize = options?.batchSize || 3;
-
-      let isFirstEntryForThisKey = false;
-
-      if (!cacheHitsCounter[currentMinute]) {
-        isFirstEntryForThisKey = true;
-        cacheHitsCounter[currentMinute] = {};
+      if (cacheResult.fromCache) {
+        return res.json(cacheResult.response);
       }
-
-      const cacheHitsCurrentMinute = cacheHitsCounter[currentMinute];
-
-      if (!cacheHitsCurrentMinute[gqlQueryMd5]) {
-        cacheHitsCurrentMinute[gqlQueryMd5] = 0;
-      }
-
-      if (cacheHitsCurrentMinute[gqlQueryMd5] < batchSize) {
-        cacheHitsCurrentMinute[gqlQueryMd5]++;
-      } else {
-        cacheHitsCurrentMinute[gqlQueryMd5] = 1;
-      }
-
-      const redisCounterKey = `${REDIS_PREFIX}.${currentMinute}`;
-      if (cacheHitsCurrentMinute[gqlQueryMd5] >= batchSize) {
-        await this.cacheService.setCache(redisQueryKey, redisValue);
-        await this.cacheService.zIncrBy(redisCounterKey, cacheHitsCurrentMinute[gqlQueryMd5], gqlQueryMd5);
-      }
-
-      if (isFirstEntryForThisKey) {
-        // If it is first entry for this key, set expire
-        await this.cacheService.zIncrBy(redisCounterKey, 0, gqlQueryMd5);
-        await this.cacheService.setTtlRemote(redisCounterKey, 2 * 60);
-      }
-
-      // If the value for this is already computed
-      const cacheResponse: any = await this.cacheService.getCache(redisQueryResponse);
-
-      res.setHeader('X-Guest-Cache-Hit', !!cacheResponse);
-
-      // Delete data for previous minute
-      if (cacheHitsCounter[previousMinute]) {
-        delete cacheHitsCounter[previousMinute];
-      }
-
-      if (cacheResponse) {
-        return res.json(cacheResponse);
-      }
-
-      MetricsService.incrementGuestNoCacheHits();
 
       return next();
     }

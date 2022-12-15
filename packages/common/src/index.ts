@@ -102,6 +102,7 @@ export * from './interceptors/origin.interceptor';
 export * from './interceptors/pagination.interceptor';
 export * from './interceptors/query.check.interceptor';
 export * from './interceptors/request.cpu.time.interceptor';
+export * from './interceptors/guest.caching.interceptor';
 export * from './common/rabbit';
 export * from './common';
 export * from './sc.interactions';
