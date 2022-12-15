@@ -14,7 +14,6 @@ export class GuestCachingService {
   constructor(private cacheService: CachingService) { }
 
   public async getOrSetRequestCache(req: any, options?: IGuestCacheOptions) {
-
     if (
       (req.headers['authorization'] && !options?.ignoreAuthorizationHeader) || // if user is authenticated 
       req.headers['no-cache'] === 'true' || // if no-cache header is true
