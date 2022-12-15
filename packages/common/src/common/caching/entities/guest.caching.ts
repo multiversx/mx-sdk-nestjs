@@ -17,6 +17,7 @@ export interface IGuestCacheWarmerOptions {
 
 export interface IGuestCacheOptions {
   batchSize?: number;
+  ignoreAuthorizationHeader?: boolean;
 }
 
 export const DATE_FORMAT = "YYYY-MM-DD_HH:mm";

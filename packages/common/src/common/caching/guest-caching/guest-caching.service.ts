@@ -15,6 +15,15 @@ export class GuestCachingService {
 
   public async getOrSetRequestCache(req: any, options?: IGuestCacheOptions) {
 
+    if (
+      (req.headers['authorization'] && !options?.ignoreAuthorizationHeader) || // if user is authenticated 
+      req.headers['no-cache'] === 'true' || // if no-cache header is true
+      (req.method !== GuestCacheMethodEnum.POST && req.method !== GuestCacheMethodEnum.GET) || // if method other than POST / GET
+      (req.method === GuestCacheMethodEnum.POST && !req.originalUrl.includes('graphql')) // if POST method but not graphql
+    ) {
+      return { fromCache: false };
+    }
+
     const url = req.guestCacheUrl ?? req.originalUrl;
 
     const redisValue = req.method === GuestCacheMethodEnum.POST ? {
