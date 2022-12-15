@@ -16,7 +16,7 @@ export class QueryCheckInterceptor implements NestInterceptor {
 
     const httpAdapter = this.httpAdapterHost.httpAdapter;
 
-    const request = context.getArgByIndex(0);
+    const request = context.switchToHttp().getRequest();
     if (httpAdapter.getRequestMethod(request) !== 'GET') {
       return next.handle();
     }
@@ -30,6 +30,7 @@ export class QueryCheckInterceptor implements NestInterceptor {
 
     for (const paramName of Object.keys(request.query)) {
       if (!['fields', 'extract'].includes(paramName) && !supportedQueryNames.includes(paramName)) {
+        delete request.query[paramName];
         // throw new BadRequestException(`Unsupported parameter '${paramName}'. Supported parameters are: ${supportedQueryNames.join(', ')}`);
         // const origin = request.headers['origin'];
         // const apiFunction = context.getClass().name + '.' + context.getHandler().name;
@@ -37,6 +38,11 @@ export class QueryCheckInterceptor implements NestInterceptor {
         // logger.error(`Unsupported parameter '${paramName}' for function '${apiFunction}', origin '${origin}', ip '${request.clientIp}'`);
       }
     }
+
+    // rebuild sanitized url for guest caching
+    const queryParams = new URLSearchParams(request.query).toString();
+    const queryParamsUrl = queryParams ? `?${queryParams}` : '';
+    request.guestCacheUrl = `${request.baseUrl}${request.path}${queryParamsUrl}`;
 
     return next.handle();
   }
