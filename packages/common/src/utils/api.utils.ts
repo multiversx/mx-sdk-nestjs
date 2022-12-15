@@ -1,5 +1,5 @@
 export class ApiUtils {
-  static mergeObjects<T>(obj1: T, obj2: any) {
+  static mergeObjects<T extends object>(obj1: T, obj2: any) {
     for (const key of Object.keys(obj2)) {
       // @ts-ignore
       if (key in obj1) {
