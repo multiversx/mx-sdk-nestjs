@@ -9,14 +9,9 @@ import { REDIS_CLIENT_TOKEN } from '../../redis/entities/common.constants';
 export class RedisCacheService {
   private readonly logger = new OriginLogger(RedisCacheService.name);
 
-  constructor(
-    @Inject(REDIS_CLIENT_TOKEN) private readonly redis: Redis,
-    private readonly metricsService: MetricsService,
-  ) { }
+  constructor(@Inject(REDIS_CLIENT_TOKEN) private readonly redis: Redis, private readonly metricsService: MetricsService) {}
 
-  async get<T>(
-    key: string,
-  ): Promise<T | undefined> {
+  async get<T>(key: string): Promise<T | undefined> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.get(key);
@@ -37,21 +32,18 @@ export class RedisCacheService {
     return undefined;
   }
 
-  async getMany<T>(
-    keys: string[],
-  ): Promise<(T | undefined)[]> {
+  async getMany<T>(keys: string[]): Promise<(T | undefined)[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const items = await this.redis.mget(keys);
-      const values = items.map(item => item ? JSON.parse(item) as T : undefined);
+      const values = items.map((item) => (item ? (JSON.parse(item) as T) : undefined));
       return values;
     } catch (error) {
       if (error instanceof Error) {
-        this.logger.error('An error occurred while trying to get many keys from redis cache.',
-          {
-            exception: error?.toString(),
-            cacheKeys: keys,
-          });
+        this.logger.error('An error occurred while trying to get many keys from redis cache.', {
+          exception: error?.toString(),
+          cacheKeys: keys,
+        });
       }
       return [];
     } finally {
@@ -60,10 +52,7 @@ export class RedisCacheService {
     }
   }
 
-  async setnx<T>(
-    key: string,
-    value: T,
-  ): Promise<boolean> {
+  async setnx<T>(key: string, value: T): Promise<boolean> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const result = await this.redis.setnx(key, JSON.stringify(value));
@@ -74,11 +63,7 @@ export class RedisCacheService {
     }
   }
 
-  async set<T>(
-    key: string,
-    value: T,
-    ttl: number | null = null,
-  ): Promise<void> {
+  async set<T>(key: string, value: T, ttl: number | null = null): Promise<void> {
     if (value === undefined) {
       return;
     }
@@ -102,11 +87,7 @@ export class RedisCacheService {
     }
   }
 
-  async setMany<T>(
-    keys: string[],
-    values: T[],
-    ttl: number,
-  ): Promise<void> {
+  async setMany<T>(keys: string[], values: T[], ttl: number): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const commands = keys.map((key, index) => {
@@ -126,23 +107,15 @@ export class RedisCacheService {
     }
   }
 
-  async expire(
-    key: string,
-    ttl: number,
-  ): Promise<void> {
+  async expire(key: string, ttl: number): Promise<void> {
     await this.redis.expire(key, ttl);
   }
 
-  async pexpire(
-    key: string,
-    ttl: number,
-  ): Promise<void> {
+  async pexpire(key: string, ttl: number): Promise<void> {
     await this.redis.pexpire(key, ttl);
   }
 
-  async delete(
-    key: string,
-  ): Promise<void> {
+  async delete(key: string): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       await this.redis.del(key);
@@ -191,11 +164,7 @@ export class RedisCacheService {
     }
   }
 
-  async getOrSet<T>(
-    key: string,
-    createValueFunc: () => Promise<T>,
-    ttl: number,
-  ): Promise<T> {
+  async getOrSet<T>(key: string, createValueFunc: () => Promise<T>, ttl: number): Promise<T> {
     const cachedData = await this.get<T>(key);
     if (cachedData !== undefined) {
       return cachedData;
@@ -207,11 +176,7 @@ export class RedisCacheService {
     return value;
   }
 
-  async setOrUpdate<T>(
-    key: string,
-    createValueFunc: () => Promise<T>,
-    ttl: number,
-  ): Promise<T> {
+  async setOrUpdate<T>(key: string, createValueFunc: () => Promise<T>, ttl: number): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
     await this.set<T>(key, value, ttl);
@@ -231,10 +196,7 @@ export class RedisCacheService {
     return found;
   }
 
-  async increment(
-    key: string,
-    ttl: number | null = null,
-  ): Promise<number> {
+  async increment(key: string, ttl: number | null = null): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const newValue = await this.redis.incr(key);
@@ -256,10 +218,7 @@ export class RedisCacheService {
     }
   }
 
-  async decrement(
-    key: string,
-    ttl: number | null = null,
-  ): Promise<number> {
+  async decrement(key: string, ttl: number | null = null): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const newValue = await this.redis.decr(key);
@@ -281,10 +240,7 @@ export class RedisCacheService {
     }
   }
 
-  async hget<T>(
-    hash: string,
-    field: string,
-  ): Promise<T | null> {
+  async hget<T>(hash: string, field: string): Promise<T | null> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.hget(hash, field);
@@ -295,7 +251,8 @@ export class RedisCacheService {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hget from redis.', {
           exception: error?.toString(),
-          hash, field,
+          hash,
+          field,
         });
       }
     } finally {
@@ -305,9 +262,7 @@ export class RedisCacheService {
     return null;
   }
 
-  async hgetall<T>(
-    hash: string,
-  ): Promise<Record<string, T> | null> {
+  async hgetall<T>(hash: string): Promise<Record<string, T> | null> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.hgetall(hash);
@@ -335,11 +290,7 @@ export class RedisCacheService {
     return null;
   }
 
-  async hset<T>(
-    hash: string,
-    field: string,
-    value: T,
-  ): Promise<number> {
+  async hset<T>(hash: string, field: string, value: T): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.hset(hash, field, JSON.stringify(value));
@@ -347,7 +298,9 @@ export class RedisCacheService {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hset in redis.', {
           exception: error?.toString(),
-          hash, field, value,
+          hash,
+          field,
+          value,
         });
       }
       throw error;
@@ -357,12 +310,7 @@ export class RedisCacheService {
     }
   }
 
-  async zadd(
-    setName: string,
-    value: number,
-    key: string,
-    options: string[] = [],
-  ): Promise<string | number> {
+  async zadd(setName: string, value: number, key: string, options: string[] = []): Promise<string | number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.zadd(key, ...[...options, value, setName]);
@@ -382,11 +330,7 @@ export class RedisCacheService {
     }
   }
 
-  async zincrby(
-    setName: string,
-    increment: number,
-    key: string,
-  ): Promise<string> {
+  async zincrby(setName: string, increment: number, key: string): Promise<string> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.zincrby(key, increment, key);
@@ -406,10 +350,7 @@ export class RedisCacheService {
     }
   }
 
-  async zrank(
-    key: string,
-    member: string,
-  ): Promise<number | null> {
+  async zrank(key: string, member: string): Promise<number | null> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.zrank(key, member);
@@ -428,10 +369,7 @@ export class RedisCacheService {
     }
   }
 
-  async zrevrank(
-    key: string,
-    member: string,
-  ): Promise<number | null> {
+  async zrevrank(key: string, member: string): Promise<number | null> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.zrevrank(key, member);
@@ -453,12 +391,7 @@ export class RedisCacheService {
   /**
    * @deprecated As of Redis version 6.2.0, this command is regarded as deprecated. It can be replaced by ZRANGE with the REV argument when migrating or writing new code.
    */
-  async zrevrange(
-    setName: string,
-    start: number,
-    stop: number,
-    withScores: boolean = false,
-  ): Promise<string[]> {
+  async zrevrange(setName: string, start: number, stop: number, withScores: boolean = false): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       if (withScores) {
@@ -487,8 +420,8 @@ export class RedisCacheService {
     start: number,
     stop: number,
     options?: {
-      order?: 'REV' | undefined,
-      withScores?: boolean,
+      order?: 'REV' | undefined;
+      withScores?: boolean;
     }
   ): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
@@ -522,10 +455,7 @@ export class RedisCacheService {
     }
   }
 
-  async zmscore(
-    setName: string,
-    ...args: string[]
-  ): Promise<(string | null)[]> {
+  async zmscore(setName: string, ...args: string[]): Promise<(string | null)[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.zmscore(setName, args);
@@ -544,11 +474,7 @@ export class RedisCacheService {
     }
   }
 
-  async zcount(
-    key: string,
-    min: number | '-inf',
-    max: number | '+inf',
-  ): Promise<number> {
+  async zcount(key: string, min: number | '-inf', max: number | '+inf'): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       return await this.redis.zcount(key, min, max);
@@ -614,10 +540,47 @@ export class RedisCacheService {
     }
   }
 
-  private buildInternalCreateValueFunc<T>(
-    key: string,
-    createValueFunc: () => Promise<T>,
-  ): () => Promise<T> {
+  async rpush<T>(key: string, items: any): Promise<T | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await this.redis.rpush(key, items);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to rpush to redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('RPUSH', performanceProfiler.duration);
+    }
+    return null;
+  }
+
+  async lpop<T>(key: string, items: any): Promise<T | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await this.redis.lpop(key);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to lpop to redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('LPOP', performanceProfiler.duration);
+    }
+    return null;
+  }
+
+  private buildInternalCreateValueFunc<T>(key: string, createValueFunc: () => Promise<T>): () => Promise<T> {
     return async () => {
       try {
         return await createValueFunc();
