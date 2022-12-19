@@ -4,6 +4,7 @@ import { MetricsService } from '../../../common/metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
 import { OriginLogger } from '../../../utils/origin.logger';
 import { REDIS_CLIENT_TOKEN } from '../../redis/entities/common.constants';
+import { promisify } from 'util';
 
 @Injectable()
 export class RedisCacheService {
@@ -145,6 +146,39 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('DELMANY', performanceProfiler.duration);
+    }
+  }
+
+  deleteByPatern(key: string): void {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const stream = this.redis.scanStream({
+        match: `${key}*`,
+        count: 100,
+      });
+      const keys: string[] = [];
+      stream.on('data', async (resultKeys) => {
+        for (let i = 0; i < resultKeys.length; i++) {
+          keys.push(resultKeys[i]);
+        }
+        const dels = keys.map((key) => ['del', key]);
+
+        const multi = this.redis.multi(dels);
+        await promisify(multi.exec).call(multi);
+      });
+
+      stream.on('end', () => {
+        this.logger.log('final batch delete complete');
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to delete from redis cache by pattern.', {
+          error: error?.toString(),
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('MDEL', performanceProfiler.duration);
     }
   }
 
