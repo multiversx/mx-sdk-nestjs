@@ -62,7 +62,6 @@ export class GuestCachingWarmer {
         }
       } catch (error) {
         console.error(`An error occurred while warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'`);
-        console.log('Deleting entry..');
         await this.cachingService.deleteInCache(parsedKey);
         console.error(error);
       }
