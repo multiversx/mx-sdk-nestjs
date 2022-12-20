@@ -65,7 +65,7 @@ export class GuestCachingService {
 
     const redisCounterKey = `${REDIS_PREFIX}.${currentMinute}`;
     if (cacheHitsCurrentMinute[gqlQueryMd5] >= batchSize) {
-      await this.cacheService.setCache(redisQueryKey, redisValue);
+      await this.cacheService.setCache(redisQueryKey, redisValue, 2 * 60);
       await this.cacheService.zIncrBy(redisCounterKey, cacheHitsCurrentMinute[gqlQueryMd5], gqlQueryMd5);
     }
 

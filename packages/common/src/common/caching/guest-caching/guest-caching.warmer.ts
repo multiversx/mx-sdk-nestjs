@@ -36,8 +36,8 @@ export class GuestCachingWarmer {
     const currentDate = moment().format(DATE_FORMAT);
     const previousMinute = moment().subtract(1, 'minute').format(DATE_FORMAT);
     const threshold = Number(options.cacheTriggerHitsThreshold || 100);
-    const keysToComputeCurrentMinute: string[] = await this.cachingService.zRange(`${REDIS_PREFIX}.${currentDate}`, threshold, '+inf', 'BYSCORE');
-    const keysToComputePreviousMinute: string[] = await this.cachingService.zRange(`${REDIS_PREFIX}.${previousMinute}`, threshold, '+inf', 'BYSCORE');
+    const keysToComputeCurrentMinute: string[] = await this.cachingService.zRangeByScore(`${REDIS_PREFIX}.${currentDate}`, threshold, '+inf');
+    const keysToComputePreviousMinute: string[] = await this.cachingService.zRangeByScore(`${REDIS_PREFIX}.${previousMinute}`, threshold, '+inf');
 
     const keysToCompute = [...keysToComputeCurrentMinute, ...keysToComputePreviousMinute].distinct();
     await Promise.allSettled(keysToCompute.map(async key => {
@@ -62,6 +62,8 @@ export class GuestCachingWarmer {
         }
       } catch (error) {
         console.error(`An error occurred while warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'`);
+        console.log('Deleting entry..');
+        await this.cachingService.deleteInCache(parsedKey);
         console.error(error);
       }
 
