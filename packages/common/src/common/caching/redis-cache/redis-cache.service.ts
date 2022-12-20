@@ -183,19 +183,12 @@ export class RedisCacheService {
         match: keyPattern,
         count: 100,
       });
-      const keys: string[] = [];
       stream.on('data', async (resultKeys) => {
-        for (let i = 0; i < resultKeys.length; i++) {
-          keys.push(resultKeys[i]);
-        }
+        const keys: string[] = await resultKeys;
         const dels = keys.map((key) => ['del', key]);
 
         const multi = this.redis.multi(dels);
         await promisify(multi.exec).call(multi);
-      });
-
-      stream.on('end', () => {
-        this.logger.log('final batch delete complete');
       });
     } catch (error) {
       if (error instanceof Error) {
