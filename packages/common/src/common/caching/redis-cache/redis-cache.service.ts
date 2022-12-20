@@ -176,11 +176,11 @@ export class RedisCacheService {
     }
   }
 
-  deleteByPatern(key: string): void {
+  deleteByPattern(keyPattern: string): void {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const stream = this.redis.scanStream({
-        match: `${key}*`,
+        match: keyPattern,
         count: 100,
       });
       const keys: string[] = [];
