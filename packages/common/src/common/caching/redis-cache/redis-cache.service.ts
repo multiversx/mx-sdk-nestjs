@@ -183,9 +183,8 @@ export class RedisCacheService {
         match: keyPattern,
         count: 100,
       });
-      stream.on('data', async (resultKeys) => {
-        const keys: string[] = await resultKeys;
-        const dels = keys.map((key) => ['del', key]);
+      stream.on('data', async (resultKeys:string[]) => {
+        const dels = resultKeys.map((key) => ['del', key]);
 
         const multi = this.redis.multi(dels);
         await promisify(multi.exec).call(multi);
