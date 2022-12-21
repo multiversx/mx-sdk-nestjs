@@ -640,7 +640,7 @@ export class RedisCacheService {
     }
   }
 
-  async rpush<T>(key: string, items: any): Promise<T | null> {
+  async rpush(key: string, items: any): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       if (items?.length > 0) {
@@ -657,14 +657,15 @@ export class RedisCacheService {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('RPUSH', performanceProfiler.duration);
     }
-    return null;
   }
 
-  async lpop<T>(key: string, items: any): Promise<T | null> {
+  async lpop<T>(key: string): Promise<T[]> {
     const performanceProfiler = new PerformanceProfiler();
+    const items: T[] = [];
     try {
-      if (items?.length > 0) {
-        await this.redis.lpop(key);
+      let item: T[] ;
+      while (item = await this.lpop(key)) {
+        items.push(...item);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -677,7 +678,7 @@ export class RedisCacheService {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('LPOP', performanceProfiler.duration);
     }
-    return null;
+    return items;
   }
 
   private buildInternalCreateValueFunc<T>(
