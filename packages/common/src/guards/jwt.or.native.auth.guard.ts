@@ -1,14 +1,9 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  Inject,
-} from "@nestjs/common";
-import { CachingService } from "src/common/caching/caching.service";
-import { ErdnestConfigService } from "src/common/config/erdnest.config.service";
-import { ERDNEST_CONFIG_SERVICE } from "src/utils/erdnest.constants";
-import { JwtAuthenticateGuard } from "./jwt.authenticate.guard";
-import { NativeAuthGuard } from "./native.auth.guard";
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { CachingService } from '../common/caching/caching.service';
+import { ErdnestConfigService } from '../common/config/erdnest.config.service';
+import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { JwtAuthenticateGuard } from './jwt.authenticate.guard';
+import { NativeAuthGuard } from './native.auth.guard';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {
