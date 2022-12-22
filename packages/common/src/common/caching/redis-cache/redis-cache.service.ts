@@ -4,6 +4,7 @@ import { MetricsService } from '../../../common/metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
 import { OriginLogger } from '../../../utils/origin.logger';
 import { REDIS_CLIENT_TOKEN } from '../../redis/entities/common.constants';
+import { promisify } from 'util';
 
 @Injectable()
 export class RedisCacheService {
@@ -172,6 +173,31 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('DELMANY', performanceProfiler.duration);
+    }
+  }
+
+  deleteByPattern(keyPattern: string): void {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const stream = this.redis.scanStream({
+        match: keyPattern,
+        count: 100,
+      });
+      stream.on('data', async (resultKeys: string[]) => {
+        const dels = resultKeys.map((key) => ['del', key]);
+
+        const multi = this.redis.multi(dels);
+        await promisify(multi.exec).call(multi);
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to delete from redis cache by pattern.', {
+          error: error?.toString(),
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('MDEL', performanceProfiler.duration);
     }
   }
 
@@ -612,6 +638,47 @@ export class RedisCacheService {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration(name, performanceProfiler.duration);
     }
+  }
+
+  async rpush(key: string, items: any): Promise<void> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await this.redis.rpush(key, items);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to rpush to redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('RPUSH', performanceProfiler.duration);
+    }
+  }
+
+  async lpop<T>(key: string): Promise<T[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    const items: T[] = [];
+    try {
+      let item: T[] ;
+      while (item = await this.lpop(key)) {
+        items.push(...item);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to lpop to redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('LPOP', performanceProfiler.duration);
+    }
+    return items;
   }
 
   private buildInternalCreateValueFunc<T>(
