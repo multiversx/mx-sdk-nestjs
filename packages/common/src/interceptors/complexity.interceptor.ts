@@ -7,7 +7,7 @@ import { ComplexityUtils } from "../common/complexity/complexity.utils";
 
 @Injectable()
 export class ComplexityInterceptor implements NestInterceptor {
-  complexityThreshold: number = 10000;
+  constructor(private readonly complexityThreshold: number = 10000) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const contextType: string = context.getType();

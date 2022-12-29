@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, HttpException, HttpStatus, NestIntercept
 import { Observable } from "rxjs";
 
 export class PaginationInterceptor implements NestInterceptor {
-  constructor(readonly maxSize: number = 10000) { }
+  constructor(private readonly maxSize: number = 10000) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const contextType: string = context.getType();
