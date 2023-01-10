@@ -28,7 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo " - [npmjs](https://www.npmjs.com/package/@elrondnetwork/erdnest)" >> notes.txt
+          echo " - [npmjs](https://www.npmjs.com/package/@multiversx/erdnest)" >> notes.txt
           echo "" >> notes.txt
 
           RELEASE_TAG=v$(node -p "require('./package.json').version")
