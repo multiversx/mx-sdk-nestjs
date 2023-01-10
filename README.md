@@ -1,16 +1,17 @@
-# Elrond NestJS Microservice Utilities
+# MultiversX NestJS Microservice Utilities
 
-This package contains a set of utilities commonly used in the Elrond Microservice ecosystem.
+This package contains a set of utilities commonly used in the MultiversX Microservice ecosystem.
 
 It relies on the following peer dependencies which must be installed in the parent package:
-- @elrondnetwork/erdjs
-- @elrondnetwork/erdjs-walletcore
+
+- @multiversx/erdjs
+- @multiversx/erdjs-walletcore
 - @nestjs/common
 - @nestjs/swagger
 
 ## Documentation
 
- - [Elrond Docs](https://docs.elrond.com/sdk-and-tools/erdnest/)
+- [Multiversx Docs](https://docs.multiversx.com/sdk-and-tools/erdnest/)
 
 ## CHANGELOG
 
@@ -18,14 +19,14 @@ It relies on the following peer dependencies which must be installed in the pare
 
 ## Distribution
 
-[npm](https://socket.dev/npm/package/@elrondnetwork/erdnest)
+[npm](https://socket.dev/npm/package/@multiversx/erdnest)
 
 ## Installation
 
 `erdnest` is delivered via **npm** and it can be installed as follows:
 
 ```
-npm install @elrondnetwork/erdnest
+npm install @multiversx/erdnest
 ```
 
 ## Code examples
@@ -53,7 +54,7 @@ In your module:
     CachingModule.forRootAsync({
       imports: [ApiConfigModule],
       useFactory: (apiConfigService: ApiConfigService) => new CachingModuleOptions({
-        url: apiConfigService.getRedisUrl(), 
+        url: apiConfigService.getRedisUrl(),
         poolLimit: apiConfigService.getPoolLimit(),
         processTtl: apiConfigService.getProcessTtl(),
       }),
@@ -65,10 +66,10 @@ In your module:
 export class FeatureModule{}
 ```
 
-In your provider: 
+In your provider:
 
 ```
-import { CachingService } from "@elrondnetwork/erdnest";
+import { CachingService } from "@multiversx/erdnest";
 
 @Injectable()
 export class FeatureService {
@@ -90,7 +91,7 @@ const value = await this.cachingService.getCache<ExpectedType>(key);
 
 `setCache`
 
-Set both local and remote cache keys with the value you provided. It also accepts a ttl value  which represents the persistence time in seconds, if no value is provided it will use default ttl of 6 seconds.
+Set both local and remote cache keys with the value you provided. It also accepts a ttl value which represents the persistence time in seconds, if no value is provided it will use default ttl of 6 seconds.
 
 ```
 await this.cachingService.setCache(key, value, ttl);
@@ -121,7 +122,7 @@ This package is for dApps that interacts with smart contracts
 
 #### Contract Loader
 
-Uses Singleton pattern and load a [SmartContract](https://github.com/ElrondNetwork/elrond-sdk-erdjs/blob/main/src/smartcontracts/smartContract.ts) from an abi path.
+Uses Singleton pattern and load a [SmartContract](https://github.com/multiversx/mx-sdk-erdjs/blob/main/src/smartcontracts/smartContract.ts) from an abi path.
 You can also load multiple contracts with same abi.
 
 ```
@@ -132,7 +133,7 @@ const sc = await cLoader.getContract(CONTRACT_ADDRESS);
 
 #### Contract Query Runner
 
-Execute contract queries using an elrond proxy provider (api/gateway).
+Execute contract queries using a multiversx proxy provider (api/gateway).
 
 ```
 const cRunner = new ContractQueryRunner(new ApiNetworkProvider(this.apiConfigService.getApiUrl()));
@@ -146,17 +147,10 @@ const queryResponse = await cRunner.runQuery(contract, interaction);
 
 #### Contract Transaction Generator
 
-Create transactions from smart contract interactions using and elrond proxy provider (api/gateway).
+Create transactions from smart contract interactions using and multiversx proxy provider (api/gateway).
 
 ```
 const txGenerator = new ContractTransactionGenerator(provider);
 
 const tx = await this.transactionGenerator.createTransaction(interaction, signer.getAddress());
 ```
-
-
-
-
-
-
-
