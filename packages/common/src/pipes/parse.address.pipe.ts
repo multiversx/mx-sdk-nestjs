@@ -1,4 +1,4 @@
-import { Address } from "@multiversx/erdjs";
+import { Address } from "@multiversx/sdk-core";
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
 export class ParseAddressPipe implements PipeTransform<string | undefined, Promise<string | undefined>> {

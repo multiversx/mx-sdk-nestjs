@@ -1,7 +1,7 @@
 
-import { ContractQueryResponse } from "@multiversx/erdjs-network-providers";
-import { INetworkProvider } from "@multiversx/erdjs-network-providers/out/interface";
-import { ResultsParser, SmartContract, Interaction, TypedOutcomeBundle } from "@multiversx/erdjs";
+import { ContractQueryResponse } from "@multiversx/sdk-network-providers";
+import { INetworkProvider } from "@multiversx/sdk-network-providers/out/interface";
+import { ResultsParser, SmartContract, Interaction, TypedOutcomeBundle } from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractQueryRunner {

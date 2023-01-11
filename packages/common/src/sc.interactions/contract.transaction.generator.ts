@@ -1,7 +1,7 @@
 
-import { NetworkConfig } from "@multiversx/erdjs-network-providers";
-import { INetworkProvider } from "@multiversx/erdjs-network-providers/out/interface";
-import { Interaction, IAddress, Transaction } from "@multiversx/erdjs";
+import { NetworkConfig } from "@multiversx/sdk-network-providers";
+import { INetworkProvider } from "@multiversx/sdk-network-providers/out/interface";
+import { Interaction, IAddress, Transaction } from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractTransactionGenerator {
