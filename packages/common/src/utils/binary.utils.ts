@@ -1,4 +1,4 @@
-import { Hash } from "@multiversx/erdjs/out/hash";
+import { Hash } from "@multiversx/sdk-core/out/hash";
 import { AddressUtils } from "./address.utils";
 
 function base64DecodeBinary(str: string): Buffer {

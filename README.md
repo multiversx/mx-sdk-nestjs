@@ -4,8 +4,8 @@ This package contains a set of utilities commonly used in the MultiversX Microse
 
 It relies on the following peer dependencies which must be installed in the parent package:
 
-- @multiversx/erdjs
-- @multiversx/erdjs-walletcore
+- @multiversx/sdk-core
+- @multiversx/sdk-wallet
 - @nestjs/common
 - @nestjs/swagger
 
@@ -19,14 +19,14 @@ It relies on the following peer dependencies which must be installed in the pare
 
 ## Distribution
 
-[npm](https://socket.dev/npm/package/@multiversx/erdnest)
+[npm](https://socket.dev/npm/package/@multiversx/sdk-nestjs)
 
 ## Installation
 
-`erdnest` is delivered via **npm** and it can be installed as follows:
+`sdk-nestjs` is delivered via **npm** and it can be installed as follows:
 
 ```
-npm install @multiversx/erdnest
+npm install @multiversx/sdk-nestjs
 ```
 
 ## Code examples
@@ -42,7 +42,7 @@ Also, if you discover a feature that is missing and might be useful, we would ap
 ### Caching
 
 Caching is one of the most important components when talking about high scalable applications that needs to serve thousands of requests per second.
-`erdnest` uses both remote (redis) and local (in-memory) cache.
+`sdk-nestjs` uses both remote (redis) and local (in-memory) cache.
 
 #### Import
 
@@ -69,7 +69,7 @@ export class FeatureModule{}
 In your provider:
 
 ```
-import { CachingService } from "@multiversx/erdnest";
+import { CachingService } from "@multiversx/sdk-nestjs";
 
 @Injectable()
 export class FeatureService {

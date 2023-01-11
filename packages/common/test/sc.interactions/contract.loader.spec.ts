@@ -1,6 +1,6 @@
 import { ContractLoader } from "../../src/sc.interactions/contract.loader";
 import * as fs from "fs";
-import { SmartContract, AbiRegistry, SmartContractAbi } from "@multiversx/erdjs";
+import { SmartContract, AbiRegistry, SmartContractAbi } from "@multiversx/sdk-core";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";

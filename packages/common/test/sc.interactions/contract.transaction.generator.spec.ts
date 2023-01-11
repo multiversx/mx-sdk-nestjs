@@ -1,5 +1,5 @@
-import { ApiNetworkProvider, AccountOnNetwork, NetworkConfig } from "@multiversx/erdjs-network-providers/out";
-import { IAddress, SmartContract, Address, ContractFunction, Interaction } from "@multiversx/erdjs/out";
+import { ApiNetworkProvider, AccountOnNetwork, NetworkConfig } from "@multiversx/sdk-network-providers";
+import { IAddress, SmartContract, Address, ContractFunction, Interaction } from "@multiversx/sdk-core";
 import { ContractTransactionGenerator } from "../../src/sc.interactions/contract.transaction.generator";
 
 const TEST_ADDRESS = "erd1wtm3yl58vcnj089lqy3tatkdpwklffh4pjnf27zwsa2znjyk355sutafqh";
