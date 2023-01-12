@@ -18,7 +18,8 @@ export class GuestCachingService {
       (req.headers['authorization'] && !options?.ignoreAuthorizationHeader) || // if user is authenticated 
       req.headers['no-cache'] === 'true' || // if no-cache header is true
       (req.method !== GuestCacheMethodEnum.POST && req.method !== GuestCacheMethodEnum.GET) || // if method other than POST / GET
-      (req.method === GuestCacheMethodEnum.POST && !req.originalUrl.includes('graphql')) // if POST method but not graphql
+      (req.method === GuestCacheMethodEnum.POST && !req.originalUrl.includes('graphql')) || // if POST method but no graphql
+      (req.method === GuestCacheMethodEnum.POST && req.originalUrl.includes('graphql') && new RegExp("^mutation", "g").test(req.body.query)) // if POST method from graphql but is mutation
     ) {
       return { fromCache: false };
     }
