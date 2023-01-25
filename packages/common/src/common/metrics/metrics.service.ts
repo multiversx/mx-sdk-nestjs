@@ -127,7 +127,7 @@ export class MetricsService {
       MetricsService.consumerHistogram = new Histogram({
         name: 'consumer',
         help: 'Consumer jobs',
-        labelNames: ['job'],
+        labelNames: ['consumer'],
         buckets: [],
       });
     }
@@ -188,8 +188,8 @@ export class MetricsService {
     MetricsService.guestHitQueriesGauge.set(count);
   }
 
-  setConsumerJob(job: string, duration: number): void {
-    MetricsService.consumerHistogram.labels(job).observe(duration);
+  setConsumer(consumer: string, duration: number): void {
+    MetricsService.consumerHistogram.labels(consumer).observe(duration);
   }
 
   async getMetrics(): Promise<string> {

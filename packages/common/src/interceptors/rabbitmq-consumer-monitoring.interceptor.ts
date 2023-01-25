@@ -30,10 +30,10 @@ export class RabbitMqConsumerMonitoringInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         tap(() => {
-          this.metricsService.setConsumerJob(consumer, profiler.stop());
+          this.metricsService.setConsumer(consumer, profiler.stop());
         }),
         catchError(err => {
-          this.metricsService.setConsumerJob(consumer, profiler.stop());
+          this.metricsService.setConsumer(consumer, profiler.stop());
 
           return throwError(() => err);
         }),
