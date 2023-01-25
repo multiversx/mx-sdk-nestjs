@@ -384,14 +384,14 @@ export class RedisCacheService {
   }
 
   async zadd(
+    key: string,
     setName: string,
     value: number,
-    key: string,
     options: string[] = [],
   ): Promise<string | number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zadd(key, ...[...options, value, setName]);
+      return await this.redis.zadd(key, value, setName, options);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zadd in redis.', {
@@ -409,9 +409,9 @@ export class RedisCacheService {
   }
 
   async zincrby(
+    key: string,
     setName: string,
     increment: number,
-    key: string,
   ): Promise<string> {
     const performanceProfiler = new PerformanceProfiler();
     try {
