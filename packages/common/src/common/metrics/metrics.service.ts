@@ -16,6 +16,7 @@ export class MetricsService {
   private static guestHitsGauge: Gauge<string>;
   private static guestNoCacheHitsGauge: Gauge<string>;
   private static guestHitQueriesGauge: Gauge<string>;
+  private static consumerHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered: boolean = false;
 
 
@@ -122,6 +123,15 @@ export class MetricsService {
       });
     }
 
+    if (!MetricsService.consumerHistogram) {
+      MetricsService.consumerHistogram = new Histogram({
+        name: 'consumer',
+        help: 'Consumer jobs',
+        labelNames: ['consumer'],
+        buckets: [],
+      });
+    }
+
     if (!MetricsService.isDefaultMetricsRegistered) {
       MetricsService.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
@@ -176,6 +186,10 @@ export class MetricsService {
 
   static setGuestHitQueries(count: number) {
     MetricsService.guestHitQueriesGauge.set(count);
+  }
+
+  setConsumer(consumer: string, duration: number): void {
+    MetricsService.consumerHistogram.labels(consumer).observe(duration);
   }
 
   async getMetrics(): Promise<string> {
