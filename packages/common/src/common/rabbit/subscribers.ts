@@ -18,9 +18,6 @@ export const CompetingRabbitConsumer = (config: RabbitConsumerConfig) => {
       queue,
       exchange,
       routingKey: '',
-      queueOptions: {
-        messageTtl: 100,
-      },
     }),
   );
 };
