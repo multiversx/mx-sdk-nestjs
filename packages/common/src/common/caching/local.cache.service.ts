@@ -9,10 +9,6 @@ export class LocalCacheService {
   private static lastPruneTime: number = new Date().getTime();
 
   setCacheValue<T>(key: string, value: T, ttl: number): T {
-    if (value === undefined) {
-      return value;
-    }
-
     if (this.needsPrune()) {
       this.prune();
     }

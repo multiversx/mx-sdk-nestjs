@@ -113,6 +113,10 @@ export class CachingService {
   }
 
   async setCacheLocal<T>(key: string, value: T, ttl: number = this.getCacheTtl()): Promise<T> {
+    if (value === undefined) {
+      return value;
+    }
+    
     return await this.localCacheService.setCacheValue<T>(key, value, ttl);
   }
 
