@@ -32,16 +32,18 @@ export class ElrondCachingService {
     key: string,
     value: T,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    return this.inMemoryCacheService.set<T>(key, value, ttl);
+    return this.inMemoryCacheService.set<T>(key, value, ttl, cacheNullable);
   }
 
   setManyLocal<T>(
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    return this.inMemoryCacheService.setMany(keys, values, ttl);
+    return this.inMemoryCacheService.setMany(keys, values, ttl, cacheNullable);
   }
 
   deleteLocal(
@@ -96,16 +98,18 @@ export class ElrondCachingService {
     key: string,
     value: T,
     ttl: number | null = null,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    return this.redisCacheService.set<T>(key, value, ttl);
+    return this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
   }
 
   async setManyRemote<T>(
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    await this.redisCacheService.setMany(keys, values, ttl);
+    await this.redisCacheService.setMany(keys, values, ttl, cacheNullable);
   }
 
   setTtlRemote(
@@ -210,9 +214,10 @@ export class ElrondCachingService {
     value: T,
     ttl: number,
     inMemoryTtl: number = ttl,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl);
-    const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl);
+    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
+    const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
 
     await Promise.all([setInMemoryCachePromise, setRedisCachePromise]);
   }
@@ -221,10 +226,11 @@ export class ElrondCachingService {
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     await Promise.all([
-      this.setManyRemote(keys, values, ttl),
-      this.setManyLocal(keys, values, ttl),
+      this.setManyRemote(keys, values, ttl, cacheNullable),
+      this.setManyLocal(keys, values, ttl, cacheNullable),
     ]);
   }
 
@@ -266,8 +272,8 @@ export class ElrondCachingService {
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (cacheNullable || value !== null) {
-      await this.set<T>(key, value, ttl, inMemoryTtl);
+    if (value !== undefined) {
+      await this.set<T>(key, value, ttl, inMemoryTtl, cacheNullable);
     }
     return value;
   }

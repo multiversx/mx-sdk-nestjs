@@ -79,10 +79,16 @@ export class RedisCacheService {
     key: string,
     value: T,
     ttl: number | null = null,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     if (value === undefined) {
       return;
     }
+
+    if (!cacheNullable && value == null) {
+      return;
+    }
+
     const performanceProfiler = new PerformanceProfiler();
     try {
       if (!ttl) {
@@ -107,12 +113,29 @@ export class RedisCacheService {
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      const commands = keys.map((key, index) => {
-        return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
-      });
+      let commands = [];
+      if (!cacheNullable) {
+        commands = keys.map((key, index) => {
+          if (values[index] === undefined) {
+            return [];
+          }
+
+          if (values[index] == null) {
+            return [];
+          }
+          return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
+        });
+
+        commands = commands.filter(command => command.length !== 0);
+      } else {
+        commands = keys.map((key, index) => {
+          return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
+        });
+      }
       await this.redis.multi(commands);
     } catch (error) {
       if (error instanceof Error) {
@@ -230,9 +253,7 @@ export class RedisCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (cacheNullable || value !== null) {
-      await this.set<T>(key, value, ttl);
-    }
+    await this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
@@ -244,9 +265,7 @@ export class RedisCacheService {
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    if (cacheNullable || value !== null) {
-      await this.set<T>(key, value, ttl);
-    }
+    await this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
