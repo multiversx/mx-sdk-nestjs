@@ -221,6 +221,7 @@ export class RedisCacheService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     const cachedData = await this.get<T>(key);
     if (cachedData !== undefined) {
@@ -229,7 +230,9 @@ export class RedisCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl);
+    if (cacheNullable || value !== null) {
+      await this.set<T>(key, value, ttl);
+    }
     return value;
   }
 
@@ -237,10 +240,13 @@ export class RedisCacheService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl);
+    if (cacheNullable || value !== null) {
+      await this.set<T>(key, value, ttl);
+    }
     return value;
   }
 
@@ -663,7 +669,7 @@ export class RedisCacheService {
     const performanceProfiler = new PerformanceProfiler();
     const items: T[] = [];
     try {
-      let item: T[] ;
+      let item: T[];
       while (item = await this.lpop(key)) {
         items.push(...item);
       }
