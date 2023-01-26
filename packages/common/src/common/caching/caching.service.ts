@@ -60,6 +60,10 @@ export class CachingService {
   }
 
   public async setCacheRemote<T>(key: string, value: T, ttl: number = this.getCacheTtl()): Promise<T> {
+    if (value === undefined) {
+      return value;
+    }
+
     const profiler = new PerformanceProfiler();
     try {
       await this.asyncSet(key, JSON.stringify(value), 'EX', ttl ?? this.getCacheTtl());
