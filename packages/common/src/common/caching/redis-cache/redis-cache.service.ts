@@ -120,10 +120,6 @@ export class RedisCacheService {
       let commands = [];
       if (!cacheNullable) {
         commands = keys.map((key, index) => {
-          if (values[index] === undefined) {
-            return [];
-          }
-
           if (values[index] == null) {
             return [];
           }
@@ -140,8 +136,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to set many in redis cache.', {
-          error: error?.toString(),
           cacheKey: keys,
+          error: error?.toString(),
         });
       }
     } finally {

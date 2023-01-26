@@ -64,6 +64,7 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     return this.inMemoryCacheService.getOrSet<T>(
       key,
@@ -71,6 +72,7 @@ export class ElrondCachingService {
         return this.executeWithPendingPromise(key, createValueFunc);
       },
       ttl,
+      cacheNullable
     );
   }
 
@@ -78,8 +80,9 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
-    return this.inMemoryCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
+    return this.inMemoryCacheService.setOrUpdate<T>(key, createValueFunc, ttl, cacheNullable);
   }
 
   getRemote<T>(
@@ -139,6 +142,7 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     return this.redisCacheService.getOrSet<T>(
       key,
@@ -146,6 +150,7 @@ export class ElrondCachingService {
         return this.executeWithPendingPromise(key, createValueFunc);
       },
       ttl,
+      cacheNullable,
     );
   }
 
@@ -153,8 +158,9 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
-    return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
+    return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl, cacheNullable);
   }
 
   incrementRemote(
