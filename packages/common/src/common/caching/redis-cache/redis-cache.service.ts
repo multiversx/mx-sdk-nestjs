@@ -27,8 +27,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to get from redis cache.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -50,8 +50,8 @@ export class RedisCacheService {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to get many keys from redis cache.',
           {
-            exception: error?.toString(),
             cacheKeys: keys,
+            exception: error?.toString(),
           });
       }
       return [];
@@ -64,9 +64,14 @@ export class RedisCacheService {
   async setnx<T>(
     key: string,
     value: T,
+    cacheNullable: boolean = true,
   ): Promise<boolean> {
     const performanceProfiler = new PerformanceProfiler();
     try {
+      if (!cacheNullable && value == null) {
+        return false;
+      }
+
       const result = await this.redis.setnx(key, JSON.stringify(value));
       return result === 1;
     } finally {
@@ -99,8 +104,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to set in redis cache.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -169,8 +174,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to delete from redis cache.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -292,8 +297,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to increment redis key.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
       throw error;
@@ -317,8 +322,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to decrement redis key.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
       throw error;
@@ -341,8 +346,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hget from redis.', {
-          exception: error?.toString(),
           hash, field,
+          exception: error?.toString(),
         });
       }
     } finally {
@@ -371,8 +376,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hgetall from redis.', {
-          exception: error?.toString(),
           hash,
+          exception: error?.toString(),
         });
       }
     } finally {
@@ -386,15 +391,19 @@ export class RedisCacheService {
     hash: string,
     field: string,
     value: T,
+    cacheNullable: boolean = true,
   ): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
+      if (!cacheNullable && value == null) {
+        return 0;
+      }
       return await this.redis.hset(hash, field, JSON.stringify(value));
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hset in redis.', {
-          exception: error?.toString(),
           hash, field, value,
+          exception: error?.toString(),
         });
       }
       throw error;
