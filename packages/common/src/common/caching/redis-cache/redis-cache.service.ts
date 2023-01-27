@@ -414,21 +414,21 @@ export class RedisCacheService {
   }
 
   async zadd(
-    setName: string,
-    value: number,
     key: string,
+    member: string,
+    value: number,
     options: string[] = [],
   ): Promise<string | number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zadd(key, ...[...options, value, setName]);
+      return await this.redis.zadd(key, ...options, value, member);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zadd in redis.', {
           exception: error?.toString(),
-          setName,
-          value,
           key,
+          member,
+          value,
         });
       }
       throw error;
@@ -439,20 +439,20 @@ export class RedisCacheService {
   }
 
   async zincrby(
-    setName: string,
-    increment: number,
     key: string,
+    member: string,
+    increment: number,
   ): Promise<string> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zincrby(key, increment, key);
+      return await this.redis.zincrby(key, increment, member);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zincrby in redis.', {
           exception: error?.toString(),
-          setName,
-          increment,
           key,
+          member,
+          increment,
         });
       }
       throw error;
