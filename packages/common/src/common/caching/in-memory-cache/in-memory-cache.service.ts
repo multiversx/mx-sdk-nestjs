@@ -27,8 +27,13 @@ export class InMemoryCacheService {
     key: string,
     value: T,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     if (value === undefined) {
+      return;
+    }
+
+    if (!cacheNullable && value == null) {
       return;
     }
 
@@ -41,9 +46,10 @@ export class InMemoryCacheService {
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     for (const [index, key] of keys.entries()) {
-      await this.set(key, values[index], ttl);
+      await this.set(key, values[index], ttl, cacheNullable);
     }
   }
 
@@ -57,6 +63,7 @@ export class InMemoryCacheService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true
   ): Promise<T> {
     const cachedData = await this.get<T>(key);
     if (cachedData !== undefined) {
@@ -65,7 +72,7 @@ export class InMemoryCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl);
+    await this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
@@ -73,10 +80,11 @@ export class InMemoryCacheService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl);
+    await this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
