@@ -46,15 +46,14 @@ export class GuestCachingService {
     const batchSize = options?.batchSize || 3;
 
     let isFirstEntryForThisKey = false;
-
     if (!cacheHitsCounter[currentMinute]) {
-      isFirstEntryForThisKey = true;
       cacheHitsCounter[currentMinute] = {};
     }
 
     const cacheHitsCurrentMinute = cacheHitsCounter[currentMinute];
 
     if (!cacheHitsCurrentMinute[gqlQueryMd5]) {
+      isFirstEntryForThisKey = true;
       cacheHitsCurrentMinute[gqlQueryMd5] = 0;
     }
 
