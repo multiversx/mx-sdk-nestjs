@@ -1,4 +1,4 @@
-import { Address } from "@elrondnetwork/erdjs";
+import { Address } from "@multiversx/sdk-core";
 import { Logger } from "@nestjs/common";
 import { BinaryUtils } from "./binary.utils";
 

@@ -18,6 +18,8 @@ export class CachingService {
   private asyncExpire = promisify(this.client.expire).bind(this.client);
   private asyncFlushDb = promisify(this.client.flushdb).bind(this.client);
   private asyncMGet = promisify(this.client.mget).bind(this.client);
+  private asyncZIncrBy = promisify(this.client.zincrby).bind(this.client);
+  private asyncZRangeByScore = promisify(this.client.zrangebyscore).bind(this.client);
   private asyncSAdd = promisify(this.client.sadd).bind(this.client);
   private asyncSCard = promisify(this.client.scard).bind(this.client);
   private asyncMulti = (commands: any[]) => {
@@ -58,6 +60,10 @@ export class CachingService {
   }
 
   public async setCacheRemote<T>(key: string, value: T, ttl: number = this.getCacheTtl()): Promise<T> {
+    if (value === undefined) {
+      return value;
+    }
+
     const profiler = new PerformanceProfiler();
     try {
       await this.asyncSet(key, JSON.stringify(value), 'EX', ttl ?? this.getCacheTtl());
@@ -69,7 +75,7 @@ export class CachingService {
     return value;
   }
 
-  pendingPromises: { [key: string]: Promise<any> } = {};
+  pendingPromises: { [key: string]: Promise<any>; } = {};
 
   private async executeWithPendingPromise<T>(key: string, promise: () => Promise<T>): Promise<T> {
     let pendingGetRemote = this.pendingPromises[key];
@@ -107,6 +113,10 @@ export class CachingService {
   }
 
   async setCacheLocal<T>(key: string, value: T, ttl: number = this.getCacheTtl()): Promise<T> {
+    if (value === undefined) {
+      return value;
+    }
+    
     return await this.localCacheService.setCacheValue<T>(key, value, ttl);
   }
 
@@ -139,6 +149,22 @@ export class CachingService {
     await this.setCacheLocal<T>(key, value, ttl);
     await this.setCacheRemote<T>(key, value, ttl);
     return value;
+  }
+
+  public async zIncrBy<T>(
+    key: string,
+    increment: number,
+    member: string
+  ): Promise<T | undefined> {
+    return await this.asyncZIncrBy(key, increment, member);
+  }
+
+  public async zRangeByScore<T>(
+    key: string,
+    from: number | string,
+    to: number | string,
+  ): Promise<T> {
+    return await this.asyncZRangeByScore(key, from, to);
   }
 
   async batchProcess<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {
@@ -353,7 +379,7 @@ export class CachingService {
   async batchApply<TIN, TOUT>(
     elements: TIN[],
     cacheKeyFunc: (element: TIN) => string,
-    getter: (elements: TIN[]) => Promise<{ [key: string]: TOUT }>,
+    getter: (elements: TIN[]) => Promise<{ [key: string]: TOUT; }>,
     setter: (element: TIN, value: TOUT) => void,
     ttl: number,
     chunkSize: number = 100,
@@ -366,7 +392,7 @@ export class CachingService {
       chunkSize,
     );
 
-    const indexedElements: { [key: string]: TIN } = {};
+    const indexedElements: { [key: string]: TIN; } = {};
     for (const element of elements) {
       indexedElements[cacheKeyFunc(element)] = element;
     }
@@ -392,7 +418,7 @@ export class CachingService {
     getter: (element: TIN) => Promise<TOUT>,
     ttl: number,
     chunkSize: number = 100,
-  ): Promise<{ [key: string]: TOUT }> {
+  ): Promise<{ [key: string]: TOUT; }> {
     return await this.batchGet(
       elements,
       cacheKeyFunc,
@@ -405,17 +431,17 @@ export class CachingService {
   async batchGet<TIN, TOUT>(
     elements: TIN[],
     cacheKeyFunc: (element: TIN) => string,
-    getter: (elements: TIN[]) => Promise<{ [key: string]: TOUT }>,
+    getter: (elements: TIN[]) => Promise<{ [key: string]: TOUT; }>,
     ttl: number,
     chunkSize: number = 100,
-  ): Promise<{ [key: string]: TOUT }> {
+  ): Promise<{ [key: string]: TOUT; }> {
     return await BatchUtils.batchGet<TIN, TOUT>(
       elements,
       cacheKeyFunc,
       [
         {
           getter: async elements => {
-            const result: { [key: string]: TOUT } = {};
+            const result: { [key: string]: TOUT; } = {};
 
             for (const element of elements) {
               const key = cacheKeyFunc(element);
@@ -435,7 +461,7 @@ export class CachingService {
         },
         {
           getter: async elements => {
-            const result: { [key: string]: TOUT } = {};
+            const result: { [key: string]: TOUT; } = {};
             const keys = elements.map(element => cacheKeyFunc(element));
 
             const getResults = await this.batchGetCacheRemote<TOUT>(keys);

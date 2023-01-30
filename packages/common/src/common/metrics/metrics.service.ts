@@ -13,7 +13,12 @@ export class MetricsService {
   private static jobsHistogram: Histogram<string>;
   private static pendingApiHitGauge: Gauge<string>;
   private static cachedApiHitGauge: Gauge<string>;
+  private static guestHitsGauge: Gauge<string>;
+  private static guestNoCacheHitsGauge: Gauge<string>;
+  private static guestHitQueriesGauge: Gauge<string>;
+  private static consumerHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered: boolean = false;
+
 
   constructor() {
     if (!MetricsService.apiCpuTimeHistogram) {
@@ -94,6 +99,39 @@ export class MetricsService {
       });
     }
 
+    if (!MetricsService.guestNoCacheHitsGauge) {
+      MetricsService.guestNoCacheHitsGauge = new Gauge({
+        name: 'guest_no_cache_hits',
+        help: 'Request no-cache hits for guest users',
+        labelNames: [],
+      });
+    }
+
+    if (!MetricsService.guestHitsGauge) {
+      MetricsService.guestHitsGauge = new Gauge({
+        name: 'guest_hits',
+        help: 'Request hits for guest users',
+        labelNames: [],
+      });
+    }
+
+    if (!MetricsService.guestHitQueriesGauge) {
+      MetricsService.guestHitQueriesGauge = new Gauge({
+        name: 'guest_hit_queries',
+        help: 'Distinct queries for guest hit caching',
+        labelNames: [],
+      });
+    }
+
+    if (!MetricsService.consumerHistogram) {
+      MetricsService.consumerHistogram = new Histogram({
+        name: 'consumer',
+        help: 'Consumer jobs',
+        labelNames: ['consumer'],
+        buckets: [],
+      });
+    }
+
     if (!MetricsService.isDefaultMetricsRegistered) {
       MetricsService.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
@@ -135,6 +173,23 @@ export class MetricsService {
 
   incrementCachedApiHit(endpoint: string) {
     MetricsService.cachedApiHitGauge.inc({ endpoint });
+  }
+
+
+  static incrementGuestHits() {
+    MetricsService.guestHitsGauge.inc();
+  }
+
+  static incrementGuestNoCacheHits() {
+    MetricsService.guestNoCacheHitsGauge.inc();
+  }
+
+  static setGuestHitQueries(count: number) {
+    MetricsService.guestHitQueriesGauge.set(count);
+  }
+
+  setConsumer(consumer: string, duration: number): void {
+    MetricsService.consumerHistogram.labels(consumer).observe(duration);
   }
 
   async getMetrics(): Promise<string> {

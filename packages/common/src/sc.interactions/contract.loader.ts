@@ -1,4 +1,4 @@
-import { AbiRegistry, Address, SmartContract, SmartContractAbi } from "@elrondnetwork/erdjs/out";
+import { SmartContractAbi, AbiRegistry, SmartContract, Address } from "@multiversx/sdk-core";
 import * as fs from "fs";
 import { OriginLogger } from "../utils/origin.logger";
 
