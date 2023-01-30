@@ -161,6 +161,36 @@ export class ApiService {
     }
   }
 
+  async delete(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
+    const profiler = new PerformanceProfiler();
+    try {
+      const config = await this.getConfig(settings);
+
+      const response = await axios.delete(url, {
+        data,
+        ...config,
+      });
+      return response;
+    } catch (error: any) {
+      let handled = false;
+      if (errorHandler) {
+        handled = await errorHandler(error);
+      }
+
+      if (!handled) {
+        const customError = this.getCustomError('DELETE', url, data, error);
+
+        const logger = new Logger(ApiService.name);
+        logger.error(customError);
+
+        throw customError;
+      }
+    } finally {
+      profiler.stop();
+      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+    }
+  }
+
   async head(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
 

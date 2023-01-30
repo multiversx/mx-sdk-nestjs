@@ -35,7 +35,10 @@ export class JwtAuthenticateGuard implements CanActivate {
           }
 
           // @ts-ignore
-          resolve(decoded.user);
+          resolve({
+            ...decoded.user,
+            ...decoded,
+          });
         });
       });
 
