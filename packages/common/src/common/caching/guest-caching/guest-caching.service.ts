@@ -18,7 +18,8 @@ export class GuestCachingService {
       (req.headers['authorization'] && !options?.ignoreAuthorizationHeader) || // if user is authenticated 
       req.headers['no-cache'] === 'true' || // if no-cache header is true
       (req.method !== GuestCacheMethodEnum.POST && req.method !== GuestCacheMethodEnum.GET) || // if method other than POST / GET
-      (req.method === GuestCacheMethodEnum.POST && !req.originalUrl.includes('graphql')) // if POST method but not graphql
+      (req.method === GuestCacheMethodEnum.POST && !req.originalUrl.includes('graphql')) || // if POST method but no graphql
+      (req.method === GuestCacheMethodEnum.POST && req.originalUrl.includes('graphql') && new RegExp("^mutation", "g").test(req.body.query)) // if POST method from graphql but is mutation
     ) {
       return { fromCache: false };
     }
@@ -63,15 +64,15 @@ export class GuestCachingService {
       cacheHitsCurrentMinute[gqlQueryMd5] = 1;
     }
 
-    const redisCounterKey = `${REDIS_PREFIX}.${currentMinute}`;
+    const redisCounterKey = `${REDIS_PREFIX}.${currentMinute}.hits`;
     if (cacheHitsCurrentMinute[gqlQueryMd5] >= batchSize) {
-      await this.cacheService.setCache(redisQueryKey, redisValue);
       await this.cacheService.zIncrBy(redisCounterKey, cacheHitsCurrentMinute[gqlQueryMd5], gqlQueryMd5);
     }
 
     if (isFirstEntryForThisKey) {
-      // If it is first entry for this key, set expire
+      // If it is first entry for this key, set expire date and request body
       await this.cacheService.zIncrBy(redisCounterKey, 0, gqlQueryMd5);
+      await this.cacheService.setCache(redisQueryKey, redisValue, 2 * 60);
       await this.cacheService.setTtlRemote(redisCounterKey, 2 * 60);
     }
 
