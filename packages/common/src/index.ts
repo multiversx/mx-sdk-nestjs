@@ -107,5 +107,4 @@ export * from './interceptors/guest.caching.interceptor';
 export * from './common/rabbit';
 export * from './common';
 export * from './sc.interactions';
-export * as ErdnestEventEmitter from '@nestjs/event-emitter';
 export * from './common/caching/guest-caching';
