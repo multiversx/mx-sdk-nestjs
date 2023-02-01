@@ -146,6 +146,29 @@ export class ElasticService {
     return null;
   }
 
+  async setCustomValues<T>(collection: string, identifier: string, dict: Record<string, T>): Promise<void> {
+    const customValuePrefix = this.options.customValuePrefix;
+    if (!customValuePrefix) {
+      throw new Error('Custom value prefix not defined in the elastic service options');
+    }
+
+    const url = `${this.options.url}/${collection}/_update/${identifier}`;
+
+    const profiler = new PerformanceProfiler();
+
+    const doc: Record<string, T> = {};
+    for (const [key, value] of Object.entries(dict)) {
+      doc[customValuePrefix + '_' + key] = value;
+    }
+
+    const payload = { doc };
+
+    await this.post(url, payload);
+
+    profiler.stop();
+    this.metricsService.setElasticDuration(collection, ElasticMetricType.item, profiler.duration);
+  }
+
   async setCustomValue<T>(collection: string, identifier: string, attribute: string, value: T): Promise<void> {
     const customValuePrefix = this.options.customValuePrefix;
     if (!customValuePrefix) {
