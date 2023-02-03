@@ -2,7 +2,7 @@ import { task, src, dest } from 'gulp';
 import { packagePaths } from '../config';
 
 /**
- * Copies assets like Readme.md or LICENSE from the project base path
+ * Copies assets like README.md or LICENSE from the project base path
  * to all the packages.
  */
 function copyMisc(): NodeJS.ReadWriteStream {

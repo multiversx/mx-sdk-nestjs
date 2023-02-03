@@ -34,7 +34,8 @@
     "importHelpers": true,
   },
   "include": [
-    "packages"
+    "packages",
+    "tools"
   ],
   "exclude": [
     "node_modules",
