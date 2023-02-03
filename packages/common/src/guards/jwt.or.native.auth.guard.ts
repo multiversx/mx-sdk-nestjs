@@ -1,4 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { NoAuthOptions } from '../decorators';
+import { DecoratorUtils } from '../utils/decorator.utils';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
@@ -11,28 +13,30 @@ export class JwtOrNativeAuthGuard implements CanActivate {
     @Inject(ERDNEST_CONFIG_SERVICE)
     private readonly erdnestConfigService: ErdnestConfigService,
     private readonly cachingService: CachingService
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
+    if (noAuthMetadata) {
+      return true;
+    }
+
     const jwtGuard = new JwtAuthenticateGuard(this.erdnestConfigService);
     const nativeAuthGuard = new NativeAuthGuard(this.cachingService);
 
-    const guards = [jwtGuard, nativeAuthGuard];
+    try {
+      const result = await jwtGuard.canActivate(context);
+      if (result) {
+        return true;
+      }
+    } catch (error) {
+      // do nothing
+    }
 
-    const canActivateResponses = await Promise.all(
-      guards.map((guard) => {
-        try {
-          return guard.canActivate(context);
-        } catch {
-          return false;
-        }
-      })
-    );
-
-    const canActivate = canActivateResponses.reduce(
-      (result, value) => result || value,
-      false
-    );
-    return canActivate;
+    try {
+      return await nativeAuthGuard.canActivate(context);
+    } catch (error) {
+      return false;
+    }
   }
 }

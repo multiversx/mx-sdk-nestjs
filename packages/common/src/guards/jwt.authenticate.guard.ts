@@ -1,13 +1,10 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
-import { TokenExpiredError, verify } from 'jsonwebtoken';
-import { OriginLogger } from '../utils/origin.logger';
+import { verify } from 'jsonwebtoken';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
-  private readonly logger = new OriginLogger(JwtAuthenticateGuard.name);
-
   constructor(
     @Inject(ERDNEST_CONFIG_SERVICE)
     private readonly erdnestConfigService: ErdnestConfigService
@@ -43,11 +40,6 @@ export class JwtAuthenticateGuard implements CanActivate {
       });
 
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
-        return false;
-      }
-
-      this.logger.error(error);
       return false;
     }
 
