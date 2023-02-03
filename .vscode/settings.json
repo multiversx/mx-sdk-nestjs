@@ -14,11 +14,17 @@
     "**/dist": true,
     "**/config/config.yaml": true,
     "**/lib": true,
+    "packages/**/*.d.ts": true,
+    "packages/**/*.js": true,
+    "packages/**/*.tsbuildinfo": true
   },
   "search.exclude": {
     "**/node_modules": true,
     "**/coverage": true,
     "**/dist": true,
+    "packages/**/*.d.ts": true,
+    "packages/**/*.js": true,
+    "packages/**/*.tsbuildinfo": true
   },
   "search.useIgnoreFiles": false
 }
