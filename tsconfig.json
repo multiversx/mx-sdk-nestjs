@@ -39,5 +39,10 @@
   "exclude": [
     "node_modules",
     "**/__tests__/*"
-  ]
+  ],
+  "paths": {
+    "@multiversx/sdk-nestjs/auth": [
+      "packages/auth/src"
+    ],
+  }
 }
