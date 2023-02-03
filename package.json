@@ -1,0 +1,79 @@
+{
+  "name": "@multiversx/sdk-nestjs",
+  "version": "1.0.0",
+  "author": "MultiversX",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/multiversx/mx-sdk-nestjs"
+  },
+  "scripts": {
+    "build": "tsc -b -v packages",
+    "postbuild": "npm run move:node_modules",
+    "build:dev": "tsc -b -v packages --watch",
+    "prebuild:prod": "npm run clean",
+    "build:prod": "tsc -b -v packages",
+    "changelog": "lerna-changelog",
+    "clean": "tsc -b --clean packages",
+    "format": "prettier \"**/*.ts\" \"packages/**/*.json\" --ignore-path ./.prettierignore --write && git status",
+    "lint": "npm run lint:packages",
+    "lint:fix": "npm run lint:packages --fix",
+    "lint:packages": "eslint 'packages/**/**.ts'",
+    "prerelease": "gulp copy-misc",
+    "test": "jest",
+    "publish": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --force-publish --access public --exact -m \"chore(@multiversx) publish %s release\"",
+    "prepublishOnly": "npm run changelog | pbcopy",
+    "publish:beta": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=beta --access public -m \"chore(@multiversx) publish %s release\"",
+    "publish:next": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=next --access public --skip-git -m \"chore(@multiversx) publish %s release\"",
+    "publish:rc": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=rc --access public -m \"chore(@multiversx) publish %s release\"",
+    "publish:test": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --force-publish --access public --npm-tag=test --skip-git -m \"chore(@multiversx) publish %s release\""
+  },
+  "changelog": {
+    "labels": {
+      "type: feature :tada:": "Features",
+      "type: bug :sob:": "Bug fixes",
+      "type: enhancement :wolf:": "Enhancements",
+      "type: docs :page_facing_up:": "Docs",
+      "type: code style": "Code style tweaks",
+      "dependencies": "Dependencies"
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "cli-color": "^2.0.3",
+    "delete-empty": "^3.0.0",
+    "eslint": "^8.33.0",
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "jest": "^29.4.1",
+    "lerna": "^6.4.1",
+    "lerna-changelog": "^2.2.0",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/packages"
+    ],
+    "moduleNameMapper": {
+      "^@multiversx/sdk-nestjs/auth(|/.*)$": "<rootDir>/packages/auth/src/$1"
+    }
+  }
+}

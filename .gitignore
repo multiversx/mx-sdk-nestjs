@@ -1,6 +1,9 @@
 node_modules/
 lib/
-tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+packages/**/*.d.ts
+packages/**/*.js
 
 .DS_Store
 .idea/

@@ -7,12 +7,6 @@
   "files": [
     "lib/**/*"
   ],
-  "scripts": {
-    "test": "jest test/*",
-    "build": "tsc",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/multiversx/mx-sdk-nestjs.git"

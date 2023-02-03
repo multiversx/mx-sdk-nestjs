@@ -28,6 +28,15 @@ module.exports = {
     "semi": ["error"],
     "comma-dangle": ["error", "always-multiline"],
     "eol-last": ["error"],
+    'no-restricted-imports': ['error', {
+      patterns: ['packages/*', '**/packages'],
+    }],
+    'max-len': [
+      'error', {
+        'code': 120,
+        'tabWidth': 2,
+      },
+    ]
   },
   ignorePatterns: ['.eslintrc.js'],
 };
