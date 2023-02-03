@@ -9,14 +9,10 @@ on:
 jobs:
   common:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/common
 
     strategy:
       matrix:
         node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
       - uses: actions/checkout@v3
@@ -24,8 +20,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: ./packages/common/package-lock.json
       - run: npm ci
       - run: npm run lint
         env:
