@@ -9,7 +9,6 @@
   },
   "scripts": {
     "build": "tsc -b -v packages",
-    "postbuild": "npm run move:node_modules",
     "build:dev": "tsc -b -v packages --watch",
     "prebuild:prod": "npm run clean",
     "build:prod": "tsc -b -v packages",
