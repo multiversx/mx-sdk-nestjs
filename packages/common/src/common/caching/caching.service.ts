@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 const { promisify } = require('util');
 import { createClient } from 'redis';
-import asyncPool from 'tiny-async-pool';
+const asyncPool = require('tiny-async-pool');
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { LocalCacheService } from "./local.cache.service";
 import { MetricsService } from "../metrics/metrics.service";
@@ -116,7 +116,7 @@ export class CachingService {
     if (value === undefined) {
       return value;
     }
-    
+
     return await this.localCacheService.setCacheValue<T>(key, value, ttl);
   }
 

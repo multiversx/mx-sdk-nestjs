@@ -4,5 +4,8 @@
     {
       "path": "./auth/tsconfig.build.json"
     },
+    {
+      "path": "./common/tsconfig.build.json"
+    },
   ]
 }

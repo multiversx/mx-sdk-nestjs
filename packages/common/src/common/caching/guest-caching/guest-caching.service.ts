@@ -1,7 +1,7 @@
 import {
   Injectable,
 } from '@nestjs/common';
-import moment from 'moment';
+import * as moment from 'moment';
 import * as crypto from 'crypto';
 import { CachingService } from '../caching.service';
 import { MetricsService } from '../../metrics/metrics.service';

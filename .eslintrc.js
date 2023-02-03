@@ -29,7 +29,7 @@ module.exports = {
     "comma-dangle": ["error", "always-multiline"],
     "eol-last": ["error"],
     'no-restricted-imports': ['error', {
-      patterns: ['packages/*', '**/packages'],
+      patterns: ['packages/*', '**/packages', "lib/**", "**/lib"],
     }],
     // 'max-len': [
     //   'error', {
