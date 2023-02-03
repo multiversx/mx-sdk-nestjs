@@ -1,5 +1,5 @@
 {
-  "name": "@multiversx/sdk-nestjs-auth",
+  "name": "auth",
   "version": "0.0.1",
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -12,7 +12,9 @@
   },
   "scripts": {
     "test": "jest test/*",
-    "build": "tsc",
+    "build": "tsc -b -v",
+    "build:dev": "tsc -b -v --watch",
+    "clean": "tsc -b --clean",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix"
   },

@@ -1,5 +1,5 @@
 {
-  "name": "@multiversx/sdk-nestjs",
+  "name": "root",
   "version": "1.0.0",
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -8,18 +8,15 @@
     "url": "https://github.com/multiversx/mx-sdk-nestjs"
   },
   "scripts": {
-    "build": "tsc -b -v packages",
-    "build:dev": "tsc -b -v packages --watch",
-    "prebuild:prod": "npm run clean",
-    "build:prod": "tsc -b -v packages",
+    "build": "lerna run build",
+    "prebuild:prod": "lerna run clean",
     "changelog": "lerna-changelog",
-    "clean": "tsc -b --clean packages",
     "format": "prettier \"**/*.ts\" \"packages/**/*.json\" --ignore-path ./.prettierignore --write && git status",
-    "lint": "npm run lint:packages",
-    "lint:fix": "npm run lint:packages --fix",
-    "lint:packages": "eslint 'packages/**/**.ts'",
+    "lint": "lerna run lint",
+    "lint:fix": "lerna run lint:fix",
     "prerelease": "gulp copy-misc",
-    "test": "jest",
+    "test": "lerna run test",
+    "show:dependencies": "nx graph",
     "publish": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --force-publish --access public --exact -m \"chore(@multiversx) publish %s release\"",
     "prepublishOnly": "npm run changelog | pbcopy",
     "publish:beta": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=beta --access public -m \"chore(@multiversx) publish %s release\"",
@@ -50,29 +47,7 @@
     "lerna-changelog": "^2.2.0",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/packages"
-    ],
-    "moduleNameMapper": {
-      "^@multiversx/sdk-nestjs/auth(|/.*)$": "<rootDir>/packages/auth/src/$1"
-    }
+    "typescript": "^4.9.5",
+    "nx": "^15.6.3"
   }
 }

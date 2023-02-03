@@ -1,6 +1,6 @@
 {
-  "name": "@multiversx/sdk-nestjs",
-  "version": "0.3.4",
+  "name": "common",
+  "version": "0.0.1",
   "description": "NestJS microservice template",
   "repository": {
     "type": "git",
@@ -13,6 +13,14 @@
     "template",
     "common"
   ],
+  "scripts": {
+    "test": "jest",
+    "build": "tsc -b -v",
+    "build:dev": "tsc -b -v --watch",
+    "clean": "tsc -b --clean",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix"
+  },
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
@@ -23,7 +31,7 @@
     "@types/axios": "^0.14.0",
     "@types/cache-manager": "^4.0.1",
     "@types/crypto-js": "^4.1.1",
-    "@types/jest": "^27.4.1",
+    "@types/jest": "^27.5.2",
     "@types/js-yaml": "^4.0.5",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "^16.11.10",
@@ -34,7 +42,6 @@
     "axios-mock-adapter": "^1.20.0",
     "babel-jest": "^27.5.1",
     "eslint": "^8.9.0",
-    "jest": "^27.5.1",
     "tslib": "^2.5.0",
     "typescript": "^4.3.5"
   },
@@ -63,5 +70,28 @@
     "@multiversx/sdk-wallet": "*",
     "@nestjs/common": "^9.1.4",
     "@nestjs/swagger": "^6.1.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>"
+    ],
+    "moduleNameMapper": {
+      "^@multiversx/sdk-nestjs/auth(|/.*)$": "<rootDir>/packages/auth/src/$1"
+    }
   }
 }
