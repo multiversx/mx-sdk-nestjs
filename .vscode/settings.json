@@ -13,7 +13,6 @@
     "**/coverage": true,
     "**/dist": true,
     "**/config/config.yaml": true,
-    "**/lib": true,
     "packages/**/*.d.ts": true,
     "packages/**/*.js": true,
     "packages/**/*.tsbuildinfo": true
