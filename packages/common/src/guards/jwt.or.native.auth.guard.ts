@@ -11,11 +11,11 @@ export class JwtOrNativeAuthGuard implements CanActivate {
     @Inject(ERDNEST_CONFIG_SERVICE)
     private readonly erdnestConfigService: ErdnestConfigService,
     private readonly cachingService: CachingService
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const jwtGuard = new JwtAuthenticateGuard(this.erdnestConfigService);
-    const nativeAuthGuard = new NativeAuthGuard(this.cachingService);
+    const nativeAuthGuard = new NativeAuthGuard(this.cachingService, this.erdnestConfigService);
 
     const guards = [jwtGuard, nativeAuthGuard];
 
