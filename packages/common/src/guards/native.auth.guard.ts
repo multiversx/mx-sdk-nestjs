@@ -1,15 +1,22 @@
 import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
 import { OriginLogger } from '../utils/origin.logger';
 import { CachingService } from '../common/caching/caching.service';
+import { ErdnestConfigService } from '../common/config/erdnest.config.service';
+import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
   private readonly logger = new OriginLogger(NativeAuthGuard.name);
   private readonly authServer: NativeAuthServer;
 
-  constructor(cachingService: CachingService) {
+  constructor(
+    cachingService: CachingService,
+    @Inject(ERDNEST_CONFIG_SERVICE)
+    private readonly erdnestConfigService: ErdnestConfigService
+  ) {
     this.authServer = new NativeAuthServer({
+      apiUrl: this.erdnestConfigService.getApiUrl(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
