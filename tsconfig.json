@@ -16,6 +16,10 @@
       "es7"
     ],
     "baseUrl": ".",
+    "typeRoots": [
+      "src/@types",
+      "node_modules/@types"
+    ],
   },
   "include": [
     "packages",
@@ -26,10 +30,10 @@
     "**/__tests__/*"
   ],
   "paths": {
-    "@multiversx/sdk-nestjs/auth": [
+    "@multiversx/sdk-nestjs-auth": [
       "packages/auth/src"
     ],
-    "@multiversx/sdk-nestjs/common": [
+    "@multiversx/sdk-nestjs-common": [
       "packages/common/src"
     ],
   }

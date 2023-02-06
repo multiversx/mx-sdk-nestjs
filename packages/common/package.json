@@ -15,11 +15,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "build": "tsc -b -v",
-    "build:dev": "tsc -b -v --watch",
-    "clean": "tsc -b --clean",
-    "lint": "eslint \"{src,test}/**/*.ts\"",
-    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix"
+    "build": "tsc",
+    "build:dev": "tsc --watch",
+    "clean": "tsc --clean"
   },
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -31,7 +29,6 @@
     "@types/axios": "^0.14.0",
     "@types/cache-manager": "^4.0.1",
     "@types/crypto-js": "^4.1.1",
-    "@types/jest": "^27.5.2",
     "@types/js-yaml": "^4.0.5",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "^16.11.10",
@@ -39,11 +36,7 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.16.0",
-    "axios-mock-adapter": "^1.20.0",
-    "babel-jest": "^27.5.1",
-    "eslint": "^8.9.0",
-    "tslib": "^2.5.0",
-    "typescript": "^4.3.5"
+    "axios-mock-adapter": "^1.20.0"
   },
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
@@ -89,9 +82,6 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>"
-    ],
-    "moduleNameMapper": {
-      "^@multiversx/sdk-nestjs/auth(|/.*)$": "<rootDir>/packages/auth/src/$1"
-    }
+    ]
   }
 }

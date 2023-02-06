@@ -1,8 +1,8 @@
 {
-  "extends": "../tsconfig.build.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": ".",
-    "rootDir": ".",
+    "declaration": true,
+    "outDir": "../../dist/libs/auth/src"
   },
   "exclude": [
     "node_modules",

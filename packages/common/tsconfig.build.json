@@ -1,14 +1,13 @@
 {
-  "extends": "../tsconfig.build.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": ".",
-    "rootDir": ".",
+    "declaration": true,
+    "outDir": "../../dist/libs/common/src"
   },
   "exclude": [
     "node_modules",
     "dist",
     "test/**/*",
-    "*.spec.ts",
-    "**/jest.extensions.ts"
+    "*.spec.ts"
   ],
 }

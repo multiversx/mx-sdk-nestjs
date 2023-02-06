@@ -11,12 +11,9 @@
     "access": "public"
   },
   "scripts": {
-    "test": "jest test/*",
-    "build": "tsc -b -v",
-    "build:dev": "tsc -b -v --watch",
-    "clean": "tsc -b --clean",
-    "lint": "eslint \"{src,test}/**/*.ts\"",
-    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix"
+    "build": "tsc",
+    "build:dev": "tsc --watch",
+    "clean": "tsc --clean"
   },
   "keywords": [
     "multiversx",

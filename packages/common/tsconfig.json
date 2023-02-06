@@ -1,9 +1,7 @@
 {
-  "extends": "../tsconfig.build.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "node"
-    ]
+    "rootDir": "."
   },
   "files": [],
   "include": [],

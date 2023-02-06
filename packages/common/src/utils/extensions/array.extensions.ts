@@ -201,7 +201,7 @@ Array.prototype.except = function <T>(second: T[]) {
 
 Array.prototype.distinct = function <TCollection, TResult>(predicate?: (element: TCollection) => TResult): TCollection[] {
   if (!predicate) {
-    return [...new Set(this)];
+    return [...new Set<TCollection>(this)];
   }
 
   const distinctProjections: TResult[] = [];
