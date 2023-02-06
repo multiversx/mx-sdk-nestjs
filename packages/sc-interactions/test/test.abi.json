@@ -1,0 +1,71 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.61.0-nightly",
+            "commitHash": "4ce3749235fc31d15ebd444b038a9877e8c700d7",
+            "commitDate": "2022-02-28",
+            "channel": "Nightly",
+            "short": "rustc 1.61.0-nightly (4ce374923 2022-02-28)"
+        },
+        "contractCrate": {
+            "name": "metabonding",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "elrond-wasm",
+            "version": "0.30.0"
+        }
+    },
+    "docs": [
+        "Source code for the pause module:",
+        "https://github.com/ElrondNetwork/elrond-wasm-rs/blob/master/elrond-wasm-modules/src/pause.rs"
+    ],
+    "name": "Metabonding",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "signer",
+                "type": "Address"
+            },
+            {
+                "name": "opt_rewards_nr_first_grace_weeks",
+                "type": "optional<u32>",
+                "multi_arg": true
+            },
+            {
+                "name": "opt_first_week_start_epoch",
+                "type": "optional<u64>",
+                "multi_arg": true
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "getRewardsForWeek",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "week",
+                    "type": "u32"
+                },
+                {
+                    "name": "user_delegation_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "user_lkmex_staked_amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<multi<bytes,TokenIdentifier,BigUint>>",
+                    "multi_result": true
+                }
+            ]
+        }
+    ],
+    "hasCallback": false,
+    "types": {}
+}
