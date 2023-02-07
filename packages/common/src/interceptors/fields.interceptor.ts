@@ -20,7 +20,7 @@ export class FieldsInterceptor implements NestInterceptor {
         tap(async (result) => {
           const fieldsArgument = request.query.fields;
           if (fieldsArgument) {
-            const fields = fieldsArgument.split(',');
+            const fields = Array.isArray(fieldsArgument) ? fieldsArgument : fieldsArgument.split(',');
             if (Array.isArray(result)) {
               for (const item of result) {
                 this.transformItem(item, fields);
