@@ -267,7 +267,7 @@ describe('Array Extensions', () => {
     });
 
     it('simple ignore zeros', () => {
-      const actual = [2, 0, 1, 3].sorted(true);
+      const actual = [2, 0, 1, 3].sorted(undefined, true);
       const expected = [1, 2, 3, 0];
 
       expect(actual).toEqual(expected);
@@ -278,7 +278,7 @@ describe('Array Extensions', () => {
         { id: 2 },
         { id: 1 },
         { id: 3 },
-      ].sorted(false, x => x.id);
+      ].sorted([x => x.id]);
 
       const expected = [
         { id: 1 },
@@ -296,7 +296,7 @@ describe('Array Extensions', () => {
         { id: 1 },
         { id: 3 },
         { id: 0 },
-      ].sorted(true, x => x.id);
+      ].sorted([x => x.id], true);
 
       const expected = [
         { id: 1 },
@@ -313,7 +313,7 @@ describe('Array Extensions', () => {
         { a: 2, b: 1 },
         { a: 1, b: 2 },
         { a: 1, b: 1 },
-      ].sorted(false, x => x.a, x => x.b);
+      ].sorted([x => x.a, x => x.b]);
 
       const expected = [
         { a: 1, b: 1 },
@@ -329,7 +329,7 @@ describe('Array Extensions', () => {
         { a: 2, b: 1 },
         { a: 1, b: 2 },
         { a: 1, b: 0 },
-      ].sorted(true, x => x.a, x => x.b);
+      ].sorted([x => x.a, x => x.b], true);
 
       const expected = [
         { a: 1, b: 2 },
@@ -355,7 +355,7 @@ describe('Array Extensions', () => {
         { id: 2 },
         { id: 1 },
         { id: 3 },
-      ].sortedDescending(x => x.id);
+      ].sortedDescending([x => x.id]);
 
       const expected = [
         { id: 3 },

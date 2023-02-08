@@ -240,10 +240,10 @@ Array.prototype.toRecordAsync = async function <TIN, TOUT>(keyPredicate: (item: 
   return result;
 };
 
-Array.prototype.sorted = function <T>(ignoreZeros = false, ...predicates: ((item: T) => number)[]): T[] {
+Array.prototype.sorted = function <T>(predicates: ((item: T) => number)[], ignoreZeros = false): T[] {
   const cloned = [...this];
 
-  if (predicates.length > 0) {
+  if (predicates?.length > 0) {
     cloned.sort((a, b) => {
       for (const predicate of predicates) {
         if (ignoreZeros) {
@@ -281,8 +281,8 @@ Array.prototype.sorted = function <T>(ignoreZeros = false, ...predicates: ((item
   return cloned;
 };
 
-Array.prototype.sortedDescending = function <T>(...predicates: ((item: T) => number)[]): T[] {
-  const sorted = this.sorted(false, ...predicates);
+Array.prototype.sortedDescending = function <T>(predicates?: ((item: T) => number)[]): T[] {
+  const sorted = this.sorted(predicates);
 
   sorted.reverse();
 
@@ -345,8 +345,8 @@ declare interface Array<T> {
   zip<TSecond, TResult>(second: TSecond[], predicate: (first: T, second: TSecond) => TResult): TResult[];
   except(second: T[]): T[];
   distinct<TResult>(predicate?: (element: T) => TResult): T[];
-  sorted(ignoreZeros?: boolean, ...predicates: ((item: T) => number)[]): T[];
-  sortedDescending(...predicates: ((item: T) => number)[]): T[];
+  sorted(predicates?: ((item: T) => number)[], ignoreZeros?: boolean): T[];
+  sortedDescending(predicates?: ((item: T) => number)[]): T[];
   sum(predicate?: (item: T) => number): number;
   sumBigInt(predicate?: (item: T) => bigint): bigint;
   toRecord<TOUT>(keyPredicate: (item: T) => string, valuePredicate?: (item: T) => TOUT): Record<string, TOUT>;
