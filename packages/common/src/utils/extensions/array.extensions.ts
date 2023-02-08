@@ -5,7 +5,7 @@ Array.prototype.groupBy = function (predicate: Function, asArray = false) {
   }, {});
 
   if (asArray === true) {
-    result = Object.keys(result).map(key => {
+    result = Object.keys(result).map((key) => {
       return {
         key: key,
         values: result[key],
@@ -64,9 +64,9 @@ Array.prototype.first = function (predicate?: Function) {
 };
 
 Array.prototype.mapIndexed = function <TOUT>(items: TOUT[], predicate: Function): (TOUT | undefined)[] {
-  const records = items.toRecord<TOUT>(item => predicate(item));
+  const records = items.toRecord<TOUT>((item) => predicate(item));
 
-  return this.map(item => records[item]);
+  return this.map((item) => records[item]);
 };
 
 Array.prototype.lastOrUndefined = function (predicate?: Function) {
@@ -231,7 +231,7 @@ Array.prototype.toRecord = function <TIN, TOUT>(keyPredicate: (item: TIN) => str
 Array.prototype.toRecordAsync = async function <TIN, TOUT>(keyPredicate: (item: TIN) => string, valuePredicate: (item: TIN) => Promise<TOUT>): Promise<Record<string, TOUT>> {
   const result: Record<string, TOUT> = {};
 
-  const values = await Promise.all(this.map(x => valuePredicate(x)));
+  const values = await Promise.all(this.map((x) => valuePredicate(x)));
 
   for (const [index, item] of this.entries()) {
     result[keyPredicate(item)] = values[index];
@@ -240,12 +240,23 @@ Array.prototype.toRecordAsync = async function <TIN, TOUT>(keyPredicate: (item: 
   return result;
 };
 
-Array.prototype.sorted = function <T>(...predicates: ((item: T) => number)[]): T[] {
+Array.prototype.sorted = function <T>(ignoreZeros = false, ...predicates: ((item: T) => number)[]): T[] {
   const cloned = [...this];
 
   if (predicates.length > 0) {
     cloned.sort((a, b) => {
       for (const predicate of predicates) {
+        if (ignoreZeros) {
+          const x = predicate(a) === 0 ? Infinity : predicate(a);
+          const y = predicate(b) === 0 ? Infinity : predicate(b);
+
+          const result = x - y;
+          if (Math.abs(result) <= 0.0000000000001) {
+            continue;
+          }
+
+          return result;
+        }
         const result = predicate(a) - predicate(b);
         if (Math.abs(result) <= 0.0000000000001) {
           continue;
@@ -257,14 +268,21 @@ Array.prototype.sorted = function <T>(...predicates: ((item: T) => number)[]): T
       return 0;
     });
   } else {
-    cloned.sort((a, b) => a - b);
+    cloned.sort((a, b) => {
+      if (ignoreZeros) {
+        const x = a === 0 ? Infinity : a;
+        const y = b === 0 ? Infinity : b;
+        return x - y;
+      }
+      return a - b;
+    });
   }
 
   return cloned;
 };
 
 Array.prototype.sortedDescending = function <T>(...predicates: ((item: T) => number)[]): T[] {
-  const sorted = this.sorted(...predicates);
+  const sorted = this.sorted(false, ...predicates);
 
   sorted.reverse();
 
@@ -297,38 +315,37 @@ Array.prototype.remove = function <T>(element: T): void {
 };
 
 Array.prototype.shuffle = function <T>(): T[] {
-  let currentIndex = this.length, randomIndex;
+  let currentIndex = this.length,
+    randomIndex;
   const array = [...this];
 
   // While there remain elements to shuffle.
   while (currentIndex != 0) {
-
     // Pick a remaining element.
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
 
     // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
   }
 
   return array;
 };
 
 declare interface Array<T> {
-  groupBy(predicate: (item: T) => any): any;
+  groupBy(predicate: (item: T) => any, asArray?: boolean): any;
   selectMany<TOUT>(predicate: (item: T) => TOUT[]): TOUT[];
   first(predicate?: (item: T) => boolean): T | undefined;
   mapIndexed<TOUT>(items: TOUT[], predicate: (item: TOUT) => T): (TOUT | undefined)[];
   firstOrUndefined(predicate?: (item: T) => boolean): T | undefined;
-  last(predicate?: (item: T) => boolean): T
+  last(predicate?: (item: T) => boolean): T;
   lastOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   single(predicate?: (item: T) => boolean): T | undefined;
   singleOrUndefined(predicate?: (item: T) => boolean): T | undefined;
   zip<TSecond, TResult>(second: TSecond[], predicate: (first: T, second: TSecond) => TResult): TResult[];
   except(second: T[]): T[];
   distinct<TResult>(predicate?: (element: T) => TResult): T[];
-  sorted(...predicates: ((item: T) => number)[]): T[];
+  sorted(ignoreZeros?: boolean, ...predicates: ((item: T) => number)[]): T[];
   sortedDescending(...predicates: ((item: T) => number)[]): T[];
   sum(predicate?: (item: T) => number): number;
   sumBigInt(predicate?: (item: T) => bigint): bigint;

@@ -266,17 +266,43 @@ describe('Array Extensions', () => {
       expect(actual).toEqual(expected);
     });
 
+    it('simple ignore zeros', () => {
+      const actual = [2, 0, 1, 3].sorted(true);
+      const expected = [1, 2, 3, 0];
+
+      expect(actual).toEqual(expected);
+    }); 
+
     it('complex', () => {
       const actual = [
         { id: 2 },
         { id: 1 },
         { id: 3 },
-      ].sorted(x => x.id);
+      ].sorted(false, x => x.id);
 
       const expected = [
         { id: 1 },
         { id: 2 },
         { id: 3 },
+      ];
+
+      expect(actual).toEqual(expected);
+    });
+
+
+    it('complex ignores zeros', () => {
+      const actual = [
+        { id: 2 },
+        { id: 1 },
+        { id: 3 },
+        { id: 0 },
+      ].sorted(true, x => x.id);
+
+      const expected = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+        { id: 0 },
       ];
 
       expect(actual).toEqual(expected);
@@ -287,7 +313,7 @@ describe('Array Extensions', () => {
         { a: 2, b: 1 },
         { a: 1, b: 2 },
         { a: 1, b: 1 },
-      ].sorted(x => x.a, x => x.b);
+      ].sorted(false, x => x.a, x => x.b);
 
       const expected = [
         { a: 1, b: 1 },
@@ -297,8 +323,25 @@ describe('Array Extensions', () => {
 
       expect(actual).toEqual(expected);
     });
+
+    it('multiple criteria ignores zeros', () => {
+      const actual = [
+        { a: 2, b: 1 },
+        { a: 1, b: 2 },
+        { a: 1, b: 0 },
+      ].sorted(true, x => x.a, x => x.b);
+
+      const expected = [
+        { a: 1, b: 2 },
+        { a: 1, b: 0 },
+        { a: 2, b: 1 },
+      ];
+
+      expect(actual).toEqual(expected);
+    });
   });
 
+  
   describe('Sorted descending', () => {
     it('simple', () => {
       const actual = [2, 1, 3].sortedDescending();
