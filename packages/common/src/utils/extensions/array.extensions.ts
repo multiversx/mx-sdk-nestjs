@@ -316,7 +316,7 @@ Array.prototype.shuffle = function <T>(): T[] {
 };
 
 declare interface Array<T> {
-  groupBy(predicate: (item: T) => any): any;
+  groupBy(predicate: (item: T) => any, asArray? :boolean): any;
   selectMany<TOUT>(predicate: (item: T) => TOUT[]): TOUT[];
   first(predicate?: (item: T) => boolean): T | undefined;
   mapIndexed<TOUT>(items: TOUT[], predicate: (item: TOUT) => T): (TOUT | undefined)[];
