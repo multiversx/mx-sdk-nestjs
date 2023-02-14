@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
 import LRU from 'lru-cache';
+import { Injectable } from '@nestjs/common';
+import { LRU_CACHE_MAX_ITEMS } from './entities/common.constants';
 
 @Injectable()
 export class InMemoryCacheService {
@@ -7,7 +8,7 @@ export class InMemoryCacheService {
   constructor(
   ) {
     this.localCache = new LRU({
-      max: 10000,
+      max: LRU_CACHE_MAX_ITEMS,
       allowStale: false,
       updateAgeOnGet: false,
       updateAgeOnHas: false,
@@ -58,9 +59,8 @@ export class InMemoryCacheService {
           value,
         };
 
-
     this.localCache.set(key, writeValue, {
-      ttl: ttl * 1000,
+      ttl: ttl * 1000, // Convert to milliseconds
     });
   }
 
