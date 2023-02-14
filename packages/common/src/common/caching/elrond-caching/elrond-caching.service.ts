@@ -33,7 +33,7 @@ export class ElrondCachingService {
     value: T,
     ttl: number,
     cacheNullable: boolean = true,
-  ): Promise<void> {
+  ): void {
     return this.inMemoryCacheService.set<T>(key, value, ttl, cacheNullable);
   }
 
