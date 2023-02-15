@@ -49,8 +49,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-native-auth-client": "^0.1.8",
-    "@multiversx/sdk-native-auth-server": "^0.2.6",
+    "@multiversx/sdk-native-auth-client": "^1.0.0",
+    "@multiversx/sdk-native-auth-server": "^1.0.0",
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
     "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",

@@ -15,6 +15,8 @@ export class NativeAuthGuard implements CanActivate {
   ) {
     this.authServer = new NativeAuthServer({
       apiUrl: this.erdnestConfigService.getApiUrl(),
+      maxExpirySeconds: this.erdnestConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: this.erdnestConfigService.getNativeAuthAcceptedOrigins(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
@@ -35,6 +37,8 @@ export class NativeAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
+    const origin = request.headers['origin'];
+
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       return false;
@@ -44,6 +48,10 @@ export class NativeAuthGuard implements CanActivate {
 
     try {
       const userInfo = await this.authServer.validate(jwt);
+      if (userInfo.origin !== origin) {
+        throw new Error(`Invalid origin '${userInfo.origin}'. should be '${origin}'`);
+      }
+
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
