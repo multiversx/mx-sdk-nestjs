@@ -1,8 +1,9 @@
-import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
+import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
@@ -49,7 +50,7 @@ export class NativeAuthGuard implements CanActivate {
     try {
       const userInfo = await this.authServer.validate(jwt);
       if (userInfo.origin !== origin) {
-        throw new Error(`Invalid origin '${userInfo.origin}'. should be '${origin}'`);
+        throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
@@ -60,11 +61,13 @@ export class NativeAuthGuard implements CanActivate {
       request.nativeAuth = userInfo;
       return true;
     } catch (error) {
-      // @ts-ignore
-      const message = error?.message;
-      if (message) {
-        request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
-        request.res.set('X-Native-Auth-Error-Message', message);
+      if (error instanceof NativeAuthError) {
+        // @ts-ignore
+        const message = error?.message;
+        if (message) {
+          request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
+          request.res.set('X-Native-Auth-Error-Message', message);
+        }
       }
 
       return false;
