@@ -1,14 +1,16 @@
 import LRU from 'lru-cache';
-import { Injectable } from '@nestjs/common';
-import { LRU_CACHE_MAX_ITEMS } from './entities/common.constants';
+import { Injectable, Inject, Optional } from '@nestjs/common';
+import { IN_MEMORY_CACHE_OPTIONS, LRU_CACHE_MAX_ITEMS } from './entities/common.constants';
+import { InMemoryCacheOptions } from './entities/in-memory-cache-options.interface';
 
 @Injectable()
 export class InMemoryCacheService {
   private localCache: LRU<any, any>;
   constructor(
+    @Optional() @Inject(IN_MEMORY_CACHE_OPTIONS) private readonly inMemoryCacheOptions?: InMemoryCacheOptions
   ) {
     this.localCache = new LRU({
-      max: LRU_CACHE_MAX_ITEMS,
+      max: this.inMemoryCacheOptions?.maxItems ?? LRU_CACHE_MAX_ITEMS,
       allowStale: false,
       updateAgeOnGet: false,
       updateAgeOnHas: false,
@@ -19,6 +21,10 @@ export class InMemoryCacheService {
     key: string,
   ): Promise<T | undefined> {
     const data = this.localCache.get(key);
+
+    if (this.inMemoryCacheOptions?.skipItemsSerialization) {
+      return data;
+    }
 
     const parsedData = data ? data.serialized === true
       ? JSON.parse(data.value)
@@ -48,8 +54,10 @@ export class InMemoryCacheService {
     if (!cacheNullable && value == null) {
       return;
     }
-    const writeValue =
-      typeof value === 'object'
+
+    let writeValue: any = value;
+    if (!this.inMemoryCacheOptions?.skipItemsSerialization) {
+      writeValue = typeof value === 'object'
         ? {
           serialized: true,
           value: JSON.stringify(value),
@@ -58,6 +66,7 @@ export class InMemoryCacheService {
           serialized: false,
           value,
         };
+    }
 
     this.localCache.set(key, writeValue, {
       ttl: ttl * 1000, // Convert to milliseconds
