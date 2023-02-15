@@ -137,7 +137,8 @@ export class RedisCacheService {
           return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
         });
       }
-      await this.redis.multi(commands);
+      const multi = this.redis.multi(commands);
+      await promisify(multi.exec).call(multi);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to set many in redis cache.', {
