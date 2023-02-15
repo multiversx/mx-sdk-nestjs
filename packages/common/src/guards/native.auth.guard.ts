@@ -1,13 +1,11 @@
 import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
-import { OriginLogger } from '../utils/origin.logger';
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
-  private readonly logger = new OriginLogger(NativeAuthGuard.name);
   private readonly authServer: NativeAuthServer;
 
   constructor(
@@ -37,21 +35,15 @@ export class NativeAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const host = new URL(request.headers['origin']).hostname;
-
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       return false;
     }
+
     const jwt = authorization.replace('Bearer ', '');
 
     try {
       const userInfo = await this.authServer.validate(jwt);
-      if (userInfo.host !== host) {
-        this.logger.error(`Invalid host '${userInfo.host}'. should be '${host}'`);
-        return false;
-      }
-
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
@@ -60,8 +52,14 @@ export class NativeAuthGuard implements CanActivate {
       request.nativeAuth = userInfo;
       return true;
     } catch (error) {
-      this.logger.error(error);
-      throw new UnauthorizedException();
+      // @ts-ignore
+      const message = error?.message;
+      if (message) {
+        request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
+        request.res.set('X-Native-Auth-Error-Message', message);
+      }
+
+      return false;
     }
   }
 }

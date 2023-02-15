@@ -40,6 +40,13 @@ export class JwtAuthenticateGuard implements CanActivate {
       });
 
     } catch (error) {
+      // @ts-ignore
+      const message = error?.message;
+      if (message) {
+        request.res.set('X-Jwt-Auth-Error-Type', error.constructor.name);
+        request.res.set('X-Jwt-Auth-Error-Message', message);
+      }
+
       return false;
     }
 
