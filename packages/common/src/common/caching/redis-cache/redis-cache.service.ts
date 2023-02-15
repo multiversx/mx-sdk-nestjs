@@ -694,7 +694,7 @@ export class RedisCacheService {
     const performanceProfiler = new PerformanceProfiler();
     const items: string[] = [];
     try {
-      let item: string|null;
+      let item: string | null;
       while (item = await this.redis.lpop(key)) {
         items.push(...item);
       }

@@ -1,18 +1,30 @@
-import {
-  Injectable, Inject, CACHE_MANAGER,
-} from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import LRU from 'lru-cache';
+import { Injectable } from '@nestjs/common';
+import { LRU_CACHE_MAX_ITEMS } from './entities/common.constants';
 
 @Injectable()
 export class InMemoryCacheService {
+  private localCache: LRU<any, any>;
   constructor(
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
-  ) { }
+  ) {
+    this.localCache = new LRU({
+      max: LRU_CACHE_MAX_ITEMS,
+      allowStale: false,
+      updateAgeOnGet: false,
+      updateAgeOnHas: false,
+    });
+  }
 
   get<T>(
     key: string,
   ): Promise<T | undefined> {
-    return this.cache.get<T>(key);
+    const data = this.localCache.get(key);
+
+    const parsedData = data ? data.serialized === true
+      ? JSON.parse(data.value)
+      : data.value : undefined;
+
+    return parsedData;
   }
 
   getMany<T>(
@@ -23,12 +35,12 @@ export class InMemoryCacheService {
     );
   }
 
-  async set<T>(
+  set<T>(
     key: string,
     value: T,
     ttl: number,
     cacheNullable: boolean = true,
-  ): Promise<void> {
+  ): void {
     if (value === undefined) {
       return;
     }
@@ -36,9 +48,19 @@ export class InMemoryCacheService {
     if (!cacheNullable && value == null) {
       return;
     }
+    const writeValue =
+      typeof value === 'object'
+        ? {
+          serialized: true,
+          value: JSON.stringify(value),
+        }
+        : {
+          serialized: false,
+          value,
+        };
 
-    await this.cache.set<T>(key, value, {
-      ttl,
+    this.localCache.set(key, writeValue, {
+      ttl: ttl * 1000, // Convert to milliseconds
     });
   }
 
@@ -56,7 +78,7 @@ export class InMemoryCacheService {
   async delete(
     key: string,
   ): Promise<void> {
-    await this.cache.del(key);
+    await this.localCache.delete(key);
   }
 
   async getOrSet<T>(
@@ -65,7 +87,7 @@ export class InMemoryCacheService {
     ttl: number,
     cacheNullable: boolean = true
   ): Promise<T> {
-    const cachedData = await this.get<T>(key);
+    const cachedData = await this.get<any>(key);
     if (cachedData !== undefined) {
       return cachedData;
     }
