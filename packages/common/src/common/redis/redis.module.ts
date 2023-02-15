@@ -6,20 +6,20 @@ import { REDIS_CLIENT_TOKEN, REDIS_OPTIONS_TOKEN } from './entities/common.const
 @Module({})
 export class RedisModule {
 
-  public static forRoot(connectionOptions: RedisModuleOptions): DynamicModule {
+  public static forRoot(connectionOptions: RedisModuleOptions, customClientToken?: string): DynamicModule {
     return {
       module: RedisModule,
       providers: [
         {
-          provide: REDIS_CLIENT_TOKEN,
+          provide: customClientToken || REDIS_CLIENT_TOKEN,
           useValue: new Redis(connectionOptions.config),
         },
       ],
-      exports: [REDIS_CLIENT_TOKEN],
+      exports: [customClientToken || REDIS_CLIENT_TOKEN],
     };
   }
 
-  public static forRootAsync(connectOptions: RedisModuleAsyncOptions): DynamicModule {
+  public static forRootAsync(connectOptions: RedisModuleAsyncOptions, customClientToken?: string): DynamicModule {
 
     if (!(connectOptions.useExisting || connectOptions.useFactory || connectOptions.useClass)) {
       throw new Error('[Redis Module] Please provide useFactory, useClass or useExisting');
@@ -27,7 +27,7 @@ export class RedisModule {
 
     const clientProvider = {
       inject: [REDIS_OPTIONS_TOKEN],
-      provide: REDIS_CLIENT_TOKEN,
+      provide: customClientToken || REDIS_CLIENT_TOKEN,
       useFactory: (factoryOptions: RedisModuleOptions) => new Redis(factoryOptions.config),
     };
 

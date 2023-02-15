@@ -690,15 +690,16 @@ export class RedisCacheService {
     }
   }
 
-  async lpop<T>(key: string): Promise<T[]> {
+  async lpop(key: string): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
-    const items: T[] = [];
+    const items: string[] = [];
     try {
-      let item: T[];
-      while (item = await this.lpop(key)) {
+      let item: string | null;
+      while (item = await this.redis.lpop(key)) {
         items.push(...item);
       }
     } catch (error) {
+
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to lpop to redis.', {
           exception: error?.toString(),
