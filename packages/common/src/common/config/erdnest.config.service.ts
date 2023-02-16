@@ -4,4 +4,8 @@ export interface ErdnestConfigService {
   getJwtSecret(): string;
 
   getApiUrl(): string;
+
+  getNativeAuthMaxExpirySeconds(): number;
+
+  getNativeAuthAcceptedOrigins(): string[];
 }
