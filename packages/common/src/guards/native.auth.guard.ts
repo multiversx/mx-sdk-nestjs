@@ -1,13 +1,12 @@
-import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
-import { OriginLogger } from '../utils/origin.logger';
+import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
-  private readonly logger = new OriginLogger(NativeAuthGuard.name);
   private readonly authServer: NativeAuthServer;
 
   constructor(
@@ -17,6 +16,8 @@ export class NativeAuthGuard implements CanActivate {
   ) {
     this.authServer = new NativeAuthServer({
       apiUrl: this.erdnestConfigService.getApiUrl(),
+      maxExpirySeconds: this.erdnestConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: this.erdnestConfigService.getNativeAuthAcceptedOrigins(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
@@ -37,19 +38,19 @@ export class NativeAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const host = new URL(request.headers['origin']).hostname;
+    const origin = request.headers['origin'];
 
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       return false;
     }
+
     const jwt = authorization.replace('Bearer ', '');
 
     try {
       const userInfo = await this.authServer.validate(jwt);
-      if (userInfo.host !== host) {
-        this.logger.error(`Invalid host '${userInfo.host}'. should be '${host}'`);
-        return false;
+      if (userInfo.origin !== origin) {
+        throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
@@ -60,8 +61,16 @@ export class NativeAuthGuard implements CanActivate {
       request.nativeAuth = userInfo;
       return true;
     } catch (error) {
-      this.logger.error(error);
-      throw new UnauthorizedException();
+      if (error instanceof NativeAuthError) {
+        // @ts-ignore
+        const message = error?.message;
+        if (message) {
+          request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
+          request.res.set('X-Native-Auth-Error-Message', message);
+        }
+      }
+
+      return false;
     }
   }
 }
