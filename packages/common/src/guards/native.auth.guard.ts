@@ -49,7 +49,7 @@ export class NativeAuthGuard implements CanActivate {
 
     try {
       const userInfo = await this.authServer.validate(jwt);
-      if (userInfo.origin !== origin) {
+      if (origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
         throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
