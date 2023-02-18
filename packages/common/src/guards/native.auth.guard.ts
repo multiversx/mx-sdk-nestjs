@@ -59,6 +59,7 @@ export class NativeAuthGuard implements CanActivate {
       request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
 
       request.nativeAuth = userInfo;
+      request.jwt = userInfo;
       return true;
     } catch (error) {
       if (error instanceof NativeAuthError) {
