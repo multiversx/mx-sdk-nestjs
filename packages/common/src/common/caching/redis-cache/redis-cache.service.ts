@@ -201,19 +201,28 @@ export class RedisCacheService {
     }
   }
 
-  deleteByPattern(keyPattern: string): void {
+  async deleteByPattern(keyPattern: string): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const stream = this.redis.scanStream({
         match: keyPattern,
-        count: 100,
+        count: 10,
       });
-      stream.on('data', async (resultKeys: string[]) => {
-        const dels = resultKeys.map((key) => ['del', key]);
+      const dels: [][] = await new Promise((resolve, reject) => {
+        let delKeys: [][] = [];
+        stream.on('data', function (resultKeys) {
+          delKeys = [...delKeys, ...resultKeys.map((key: string) => ['del', key])];
+        });
+        stream.on('end', () => {
+          resolve(delKeys);
+        });
+        stream.on('error', (err) => {
+          reject(err);
+        });
+      });
 
-        const multi = this.redis.multi(dels);
-        await promisify(multi.exec).call(multi);
-      });
+      const multi = this.redis.multi(dels);
+      await promisify(multi.exec).call(multi);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to delete from redis cache by pattern.', {
