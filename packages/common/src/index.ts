@@ -25,6 +25,7 @@ export * from './guards/jwt.admin.guard';
 export * from './guards/jwt.authenticate.guard';
 export * from './guards/jwt.authenticate.global.guard';
 export * from './guards/jwt.or.native.auth.guard';
+export * from './guards/native.auth.admin.guard';
 export * from './guards/native.auth.guard';
 export * from './pipes/parse.address.pipe';
 export * from './pipes/parse.address.array.pipe';
