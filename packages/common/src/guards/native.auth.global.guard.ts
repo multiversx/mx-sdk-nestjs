@@ -6,6 +6,17 @@ import { ERDNEST_CONFIG_SERVICE } from "../utils/erdnest.constants";
 import { NativeAuthGuard } from "./native.auth.guard";
 import { CachingService } from "../common/caching/caching.service";
 
+/**
+ * This Guard can be registered as a global guard and will protect all routes that do not have the `@NoAuth` decorator.
+ *
+ * @return {boolean} `canActivate` returns true if the Authorization header is a valid Native-Auth token.
+ * 
+ * @param {CachingService} CachingService - Dependency of `NativeAuthGuard`
+ * @param {ErdnestConfigService} ErdnestConfigService - Dependency of `NativeAuthGuard`
+ * 
+ * @example <caption>Example of guard registration</caption>
+ *   nestjsApp.useGlobalGuards(new NativeAuthGlobalGuard(cachingService, new ErdnestConfigServiceImpl(apiConfigService)));
+ */
 @Injectable()
 export class NativeAuthGlobalGuard implements CanActivate {
   constructor(
