@@ -2,6 +2,7 @@ import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-s
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { NoAuthOptions } from '../decorators';
 import { DecoratorUtils } from '../utils/decorator.utils';
+import { PerformanceProfiler } from '../utils/performance.profiler';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
@@ -58,9 +59,12 @@ export class NativeAuthGuard implements CanActivate {
     }
 
     const jwt = authorization.replace('Bearer ', '');
+    const profiler = new PerformanceProfiler();
 
     try {
       const userInfo = await this.authServer.validate(jwt);
+      profiler.stop();
+
       if (origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
         throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
@@ -69,6 +73,7 @@ export class NativeAuthGuard implements CanActivate {
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
       request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
+      request.res.set('X-Native-Auth-Duration', profiler.duration);
 
       request.nativeAuth = userInfo;
       request.jwt = userInfo;
@@ -78,8 +83,10 @@ export class NativeAuthGuard implements CanActivate {
         // @ts-ignore
         const message = error?.message;
         if (message) {
+          profiler.stop();
           request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
           request.res.set('X-Native-Auth-Error-Message', message);
+          request.res.set('X-Native-Auth-Duration', profiler.duration);
         }
       }
 

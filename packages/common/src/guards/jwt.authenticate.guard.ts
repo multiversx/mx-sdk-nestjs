@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { verify } from 'jsonwebtoken';
+import { PerformanceProfiler } from 'src/utils/performance.profiler';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
@@ -21,6 +22,7 @@ export class JwtAuthenticateGuard implements CanActivate {
     }
 
     const jwt = authorization.replace('Bearer ', '');
+    const profiler = new PerformanceProfiler();
 
     try {
       const jwtSecret = this.erdnestConfigService.getJwtSecret();
@@ -43,8 +45,11 @@ export class JwtAuthenticateGuard implements CanActivate {
       // @ts-ignore
       const message = error?.message;
       if (message) {
+        profiler.stop();
+
         request.res.set('X-Jwt-Auth-Error-Type', error.constructor.name);
         request.res.set('X-Jwt-Auth-Error-Message', message);
+        request.res.set('X-Jwt-Auth-Duration', profiler.duration);
       }
 
       return false;
