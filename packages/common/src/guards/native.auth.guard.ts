@@ -1,10 +1,17 @@
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { NoAuthOptions } from '../decorators';
+import { DecoratorUtils } from '../utils/decorator.utils';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 
+/**
+ * This Guard protects all routes that do not have the `@NoAuth` decorator and sets the `X-Native-Auth-*` HTTP headers.
+ *
+ * @return {boolean} `canActivate` returns true if the Authorization header is a valid Native-Auth token.
+ */
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
   private readonly authServer: NativeAuthServer;
@@ -36,6 +43,11 @@ export class NativeAuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
+    if (noAuthMetadata) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest();
 
     const origin = request.headers['origin'];
