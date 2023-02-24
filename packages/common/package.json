@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "NestJS microservice template",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-native-auth-client": "^1.0.0",
-    "@multiversx/sdk-native-auth-server": "^1.0.2",
+    "@multiversx/sdk-native-auth-server": "^1.0.4",
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
     "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",
