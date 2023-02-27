@@ -71,6 +71,9 @@ export class NativeAuthGuard implements CanActivate {
 
     const origin = request.headers['origin'];
 
+    const requestUrl = new URL(origin);
+    const isLocalhostOrigin = requestUrl.hostname === 'localhost' && requestUrl.protocol === 'https:';
+
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       return false;
@@ -83,7 +86,7 @@ export class NativeAuthGuard implements CanActivate {
       const userInfo = await this.authServer.validate(jwt);
       profiler.stop();
 
-      if (origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
+      if (!isLocalhostOrigin && origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
         throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
