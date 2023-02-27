@@ -1,20 +1,21 @@
-import { NativeAuthServer } from '@elrondnetwork/native-auth-server';
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@nestjs/common';
-import { OriginLogger } from '../utils/origin.logger';
-import { CachingService } from '../common/caching/caching.service';
 import { ElrondCachingService } from '../common/caching/elrond-caching/elrond-caching.service';
-import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
+import { NoAuthOptions } from '../decorators';
+import { DecoratorUtils } from '../utils/decorator.utils';
+import { PerformanceProfiler } from '../utils/performance.profiler';
+import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
+import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 
-export interface NativeAuthGuardOptions {
-  apiUrl?: string;
-  acceptedHosts?: string[];
-  maxExpirySeconds?: number;
-}
-
+/**
+ * This Guard protects all routes that do not have the `@NoAuth` decorator and sets the `X-Native-Auth-*` HTTP headers.
+ *
+ * @return {boolean} `canActivate` returns true if the Authorization header is a valid Native-Auth token.
+ */
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
-  private readonly logger = new OriginLogger(NativeAuthGuard.name);
   private readonly authServer: NativeAuthServer;
 
   constructor(
@@ -23,7 +24,9 @@ export class NativeAuthGuard implements CanActivate {
     @Optional() elrondCachingService?: ElrondCachingService,
   ) {
     this.authServer = new NativeAuthServer({
-      ...erdnestConfigService.getNativeAuthGuardOptions(),
+      apiUrl: erdnestConfigService.getApiUrl(),
+      maxExpirySeconds: erdnestConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: erdnestConfigService.getNativeAuthAcceptedOrigins(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
@@ -59,33 +62,58 @@ export class NativeAuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
+    if (noAuthMetadata) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest();
+
+    const origin = request.headers['origin'];
+
+    const authorization: string = request.headers['authorization'];
+    if (!authorization) {
+      return false;
+    }
+
+    const jwt = authorization.replace('Bearer ', '');
+    const profiler = new PerformanceProfiler();
+
     try {
       const request = context.switchToHttp().getRequest();
-
-      const host = new URL(request.headers['origin']).hostname;
 
       const authorization: string = request.headers['authorization'];
       if (!authorization) {
         return false;
       }
-      const jwt = authorization.replace('Bearer ', '');
 
       const userInfo = await this.authServer.validate(jwt);
-      if (userInfo.host !== host) {
-        this.logger.error(`Invalid host '${userInfo.host}'. should be '${host}'`);
-        return false;
+      profiler.stop();
+
+      if (origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
+        throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
       request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
+      request.res.set('X-Native-Auth-Duration', profiler.duration);
 
       request.nativeAuth = userInfo;
 
       return true;
     } catch (error) {
-      this.logger.error(error);
+      if (error instanceof NativeAuthError) {
+        // @ts-ignore
+        const message = error?.message;
+        if (message) {
+          profiler.stop();
+          request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
+          request.res.set('X-Native-Auth-Error-Message', message);
+          request.res.set('X-Native-Auth-Duration', profiler.duration);
+        }
+      }
 
       return false;
     }

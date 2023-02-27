@@ -4,6 +4,7 @@ import { MetricsService } from '../../../common/metrics/metrics.service';
 import { PerformanceProfiler } from '../../../utils/performance.profiler';
 import { OriginLogger } from '../../../utils/origin.logger';
 import { REDIS_CLIENT_TOKEN } from '../../redis/entities/common.constants';
+import { promisify } from 'util';
 
 @Injectable()
 export class RedisCacheService {
@@ -26,8 +27,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to get from redis cache.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -49,8 +50,8 @@ export class RedisCacheService {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to get many keys from redis cache.',
           {
-            exception: error?.toString(),
             cacheKeys: keys,
+            exception: error?.toString(),
           });
       }
       return [];
@@ -63,9 +64,14 @@ export class RedisCacheService {
   async setnx<T>(
     key: string,
     value: T,
+    cacheNullable: boolean = true,
   ): Promise<boolean> {
     const performanceProfiler = new PerformanceProfiler();
     try {
+      if (!cacheNullable && value == null) {
+        return false;
+      }
+
       const result = await this.redis.setnx(key, JSON.stringify(value));
       return result === 1;
     } finally {
@@ -78,10 +84,16 @@ export class RedisCacheService {
     key: string,
     value: T,
     ttl: number | null = null,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     if (value === undefined) {
       return;
     }
+
+    if (!cacheNullable && value == null) {
+      return;
+    }
+
     const performanceProfiler = new PerformanceProfiler();
     try {
       if (!ttl) {
@@ -92,8 +104,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to set in redis cache.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -106,18 +118,32 @@ export class RedisCacheService {
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      const commands = keys.map((key, index) => {
-        return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
-      });
-      await this.redis.multi(commands);
+      let commands = [];
+      if (!cacheNullable) {
+        commands = keys.map((key, index) => {
+          if (values[index] == null) {
+            return [];
+          }
+          return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
+        });
+
+        commands = commands.filter(command => command.length !== 0);
+      } else {
+        commands = keys.map((key, index) => {
+          return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
+        });
+      }
+      const multi = this.redis.multi(commands);
+      await promisify(multi.exec).call(multi);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to set many in redis cache.', {
-          error: error?.toString(),
           cacheKey: keys,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -149,8 +175,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to delete from redis cache.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
     } finally {
@@ -175,6 +201,40 @@ export class RedisCacheService {
     }
   }
 
+  async deleteByPattern(keyPattern: string): Promise<void> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const stream = this.redis.scanStream({
+        match: keyPattern,
+        count: 10,
+      });
+      const dels: [][] = await new Promise((resolve, reject) => {
+        let delKeys: [][] = [];
+        stream.on('data', function (resultKeys) {
+          delKeys = [...delKeys, ...resultKeys.map((key: string) => ['del', key])];
+        });
+        stream.on('end', () => {
+          resolve(delKeys);
+        });
+        stream.on('error', (err) => {
+          reject(err);
+        });
+      });
+
+      const multi = this.redis.multi(dels);
+      await promisify(multi.exec).call(multi);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to delete from redis cache by pattern.', {
+          error: error?.toString(),
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('MDEL', performanceProfiler.duration);
+    }
+  }
+
   async flushDb(): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
     try {
@@ -195,6 +255,7 @@ export class RedisCacheService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     const cachedData = await this.get<T>(key);
     if (cachedData !== undefined) {
@@ -203,7 +264,7 @@ export class RedisCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl);
+    await this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
@@ -211,10 +272,11 @@ export class RedisCacheService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl);
+    await this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
@@ -245,8 +307,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to increment redis key.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
       throw error;
@@ -270,8 +332,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to decrement redis key.', {
-          error: error?.toString(),
           cacheKey: key,
+          error: error?.toString(),
         });
       }
       throw error;
@@ -294,8 +356,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hget from redis.', {
-          exception: error?.toString(),
           hash, field,
+          exception: error?.toString(),
         });
       }
     } finally {
@@ -324,8 +386,8 @@ export class RedisCacheService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hgetall from redis.', {
-          exception: error?.toString(),
           hash,
+          exception: error?.toString(),
         });
       }
     } finally {
@@ -339,15 +401,19 @@ export class RedisCacheService {
     hash: string,
     field: string,
     value: T,
+    cacheNullable: boolean = true,
   ): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
+      if (!cacheNullable && value == null) {
+        return 0;
+      }
       return await this.redis.hset(hash, field, JSON.stringify(value));
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to hset in redis.', {
-          exception: error?.toString(),
           hash, field, value,
+          exception: error?.toString(),
         });
       }
       throw error;
@@ -358,21 +424,21 @@ export class RedisCacheService {
   }
 
   async zadd(
-    setName: string,
-    value: number,
     key: string,
+    member: string,
+    value: number,
     options: string[] = [],
   ): Promise<string | number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zadd(key, ...[...options, value, setName]);
+      return await this.redis.zadd(key, ...options, value, member);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zadd in redis.', {
           exception: error?.toString(),
-          setName,
-          value,
           key,
+          member,
+          value,
         });
       }
       throw error;
@@ -383,20 +449,20 @@ export class RedisCacheService {
   }
 
   async zincrby(
-    setName: string,
-    increment: number,
     key: string,
+    member: string,
+    increment: number,
   ): Promise<string> {
     const performanceProfiler = new PerformanceProfiler();
     try {
-      return await this.redis.zincrby(key, increment, key);
+      return await this.redis.zincrby(key, increment, member);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to zincrby in redis.', {
           exception: error?.toString(),
-          setName,
-          increment,
           key,
+          member,
+          increment,
         });
       }
       throw error;
@@ -612,6 +678,48 @@ export class RedisCacheService {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration(name, performanceProfiler.duration);
     }
+  }
+
+  async rpush(key: string, items: any): Promise<void> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await this.redis.rpush(key, items);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to rpush to redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('RPUSH', performanceProfiler.duration);
+    }
+  }
+
+  async lpop(key: string): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    const items: string[] = [];
+    try {
+      let item: string | null;
+      while (item = await this.redis.lpop(key)) {
+        items.push(...item);
+      }
+    } catch (error) {
+
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to lpop to redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('LPOP', performanceProfiler.duration);
+    }
+    return items;
   }
 
   private buildInternalCreateValueFunc<T>(

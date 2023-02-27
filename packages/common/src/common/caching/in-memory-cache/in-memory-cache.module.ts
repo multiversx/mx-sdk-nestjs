@@ -1,20 +1,21 @@
-import {
-  CacheModule, Module,
-} from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
+import { IN_MEMORY_CACHE_OPTIONS } from './entities/common.constants';
+import { InMemoryCacheOptions } from './entities/in-memory-cache-options.interface';
 import { InMemoryCacheService } from './in-memory-cache.service';
 
-@Module({
-  imports: [
-    CacheModule.register({
-      store: 'memory',
-      shouldCloneBeforeSet: false,
-    }),
-  ],
-  exports: [
-    InMemoryCacheService,
-  ],
-  providers: [
-    InMemoryCacheService,
-  ],
-})
-export class InMemoryCacheModule { }
+@Module({})
+export class InMemoryCacheModule {
+  public static forRoot(inMemoryCacheOptions?: InMemoryCacheOptions): DynamicModule {
+    return {
+      module: InMemoryCacheModule,
+      providers: [
+        {
+          provide: IN_MEMORY_CACHE_OPTIONS,
+          useValue: inMemoryCacheOptions,
+        },
+        InMemoryCacheService,
+      ],
+      exports: [InMemoryCacheService],
+    };
+  }
+}

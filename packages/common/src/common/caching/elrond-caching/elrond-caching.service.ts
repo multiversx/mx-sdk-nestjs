@@ -32,16 +32,18 @@ export class ElrondCachingService {
     key: string,
     value: T,
     ttl: number,
-  ): Promise<void> {
-    return this.inMemoryCacheService.set<T>(key, value, ttl);
+    cacheNullable: boolean = true,
+  ): void {
+    return this.inMemoryCacheService.set<T>(key, value, ttl, cacheNullable);
   }
 
   setManyLocal<T>(
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    return this.inMemoryCacheService.setMany(keys, values, ttl);
+    return this.inMemoryCacheService.setMany(keys, values, ttl, cacheNullable);
   }
 
   deleteLocal(
@@ -62,6 +64,7 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     return this.inMemoryCacheService.getOrSet<T>(
       key,
@@ -69,6 +72,7 @@ export class ElrondCachingService {
         return this.executeWithPendingPromise(key, createValueFunc);
       },
       ttl,
+      cacheNullable
     );
   }
 
@@ -76,8 +80,9 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
-    return this.inMemoryCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
+    return this.inMemoryCacheService.setOrUpdate<T>(key, createValueFunc, ttl, cacheNullable);
   }
 
   getRemote<T>(
@@ -96,16 +101,18 @@ export class ElrondCachingService {
     key: string,
     value: T,
     ttl: number | null = null,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    return this.redisCacheService.set<T>(key, value, ttl);
+    return this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
   }
 
   async setManyRemote<T>(
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    await this.redisCacheService.setMany(keys, values, ttl);
+    await this.redisCacheService.setMany(keys, values, ttl, cacheNullable);
   }
 
   setTtlRemote(
@@ -135,6 +142,7 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     return this.redisCacheService.getOrSet<T>(
       key,
@@ -142,6 +150,7 @@ export class ElrondCachingService {
         return this.executeWithPendingPromise(key, createValueFunc);
       },
       ttl,
+      cacheNullable,
     );
   }
 
@@ -149,8 +158,9 @@ export class ElrondCachingService {
     key: string,
     createValueFunc: () => Promise<T>,
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<T> {
-    return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl);
+    return this.redisCacheService.setOrUpdate<T>(key, createValueFunc, ttl, cacheNullable);
   }
 
   incrementRemote(
@@ -210,9 +220,10 @@ export class ElrondCachingService {
     value: T,
     ttl: number,
     inMemoryTtl: number = ttl,
+    cacheNullable: boolean = true,
   ): Promise<void> {
-    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl);
-    const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl);
+    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
+    const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
 
     await Promise.all([setInMemoryCachePromise, setRedisCachePromise]);
   }
@@ -221,10 +232,11 @@ export class ElrondCachingService {
     keys: string[],
     values: T[],
     ttl: number,
+    cacheNullable: boolean = true,
   ): Promise<void> {
     await Promise.all([
-      this.setManyRemote(keys, values, ttl),
-      this.setManyLocal(keys, values, ttl),
+      this.setManyRemote(keys, values, ttl, cacheNullable),
+      this.setManyLocal(keys, values, ttl, cacheNullable),
     ]);
   }
 
@@ -247,13 +259,14 @@ export class ElrondCachingService {
     createValueFunc: () => Promise<T>,
     ttl: number,
     inMemoryTtl: number = ttl,
+    cacheNullable: boolean = true
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const getOrAddFromRedisFunc = async (): Promise<T> => {
-      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl);
+      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl, cacheNullable);
     };
 
-    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl);
+    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl, cacheNullable);
   }
 
   async setOrUpdate<T>(
@@ -261,11 +274,12 @@ export class ElrondCachingService {
     createValueFunc: () => Promise<T>,
     ttl: number,
     inMemoryTtl: number = ttl,
+    cacheNullable: boolean = true,
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
     const value = await internalCreateValueFunc();
     if (value !== undefined) {
-      await this.set<T>(key, value, ttl, inMemoryTtl);
+      await this.set<T>(key, value, ttl, inMemoryTtl, cacheNullable);
     }
     return value;
   }

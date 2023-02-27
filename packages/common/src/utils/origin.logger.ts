@@ -21,15 +21,15 @@ export class OriginLogger implements LoggerService {
     return actualContext;
   }
 
-  log(message: any, ..._optionalParams: any[]) {
-    this.logger.log(message, this.getContext());
+  log(message: any, ...optionalParams: any[]) {
+    this.logger.log(message, ...optionalParams, this.getContext());
   }
 
-  error(message: any, ..._optionalParams: any[]) {
-    this.logger.error(message, message.stack ?? new Error().stack, this.getContext());
+  error(message: any, ...optionalParams: any[]) {
+    this.logger.error(message, ...optionalParams, message.stack ?? new Error().stack, this.getContext());
   }
 
-  warn(message: any, ..._optionalParams: any[]) {
-    this.logger.warn(message, this.getContext());
+  warn(message: any, ...optionalParams: any[]) {
+    this.logger.warn(message, ...optionalParams, this.getContext());
   }
 }

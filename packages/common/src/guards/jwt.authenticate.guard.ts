@@ -1,13 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
-import { TokenExpiredError, verify } from 'jsonwebtoken';
-import { OriginLogger } from '../utils/origin.logger';
+import { verify } from 'jsonwebtoken';
+import { PerformanceProfiler } from '../utils/performance.profiler';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
-  private readonly logger = new OriginLogger(JwtAuthenticateGuard.name);
-
   constructor(
     @Inject(ERDNEST_CONFIG_SERVICE)
     private readonly erdnestConfigService: ErdnestConfigService
@@ -24,6 +22,7 @@ export class JwtAuthenticateGuard implements CanActivate {
     }
 
     const jwt = authorization.replace('Bearer ', '');
+    const profiler = new PerformanceProfiler();
 
     try {
       const jwtSecret = this.erdnestConfigService.getJwtSecret();
@@ -43,11 +42,16 @@ export class JwtAuthenticateGuard implements CanActivate {
       });
 
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
-        return false;
+      // @ts-ignore
+      const message = error?.message;
+      if (message) {
+        profiler.stop();
+
+        request.res.set('X-Jwt-Auth-Error-Type', error.constructor.name);
+        request.res.set('X-Jwt-Auth-Error-Message', message);
+        request.res.set('X-Jwt-Auth-Duration', profiler.duration);
       }
 
-      this.logger.error(error);
       return false;
     }
 

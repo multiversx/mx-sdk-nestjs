@@ -19,7 +19,7 @@ export class CachingService {
   private asyncFlushDb = promisify(this.client.flushdb).bind(this.client);
   private asyncMGet = promisify(this.client.mget).bind(this.client);
   private asyncZIncrBy = promisify(this.client.zincrby).bind(this.client);
-  private asyncZRange = promisify(this.client.zrange).bind(this.client);
+  private asyncZRangeByScore = promisify(this.client.zrangebyscore).bind(this.client);
   private asyncSAdd = promisify(this.client.sadd).bind(this.client);
   private asyncSCard = promisify(this.client.scard).bind(this.client);
   private asyncMulti = (commands: any[]) => {
@@ -60,6 +60,10 @@ export class CachingService {
   }
 
   public async setCacheRemote<T>(key: string, value: T, ttl: number = this.getCacheTtl()): Promise<T> {
+    if (value === undefined) {
+      return value;
+    }
+
     const profiler = new PerformanceProfiler();
     try {
       await this.asyncSet(key, JSON.stringify(value), 'EX', ttl ?? this.getCacheTtl());
@@ -109,6 +113,10 @@ export class CachingService {
   }
 
   async setCacheLocal<T>(key: string, value: T, ttl: number = this.getCacheTtl()): Promise<T> {
+    if (value === undefined) {
+      return value;
+    }
+    
     return await this.localCacheService.setCacheValue<T>(key, value, ttl);
   }
 
@@ -151,13 +159,12 @@ export class CachingService {
     return await this.asyncZIncrBy(key, increment, member);
   }
 
-  public async zRange<T>(
+  public async zRangeByScore<T>(
     key: string,
-    from: number,
+    from: number | string,
     to: number | string,
-    type: string
   ): Promise<T> {
-    return await this.asyncZRange(key, from, to, type);
+    return await this.asyncZRangeByScore(key, from, to);
   }
 
   async batchProcess<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {

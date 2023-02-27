@@ -1,7 +1,7 @@
-import { UserSigner } from '@elrondnetwork/erdjs-walletcore/out';
-import { SignableMessage } from '@elrondnetwork/erdjs/out';
-import { NativeAuthClient } from '@elrondnetwork/native-auth-client';
-import { NativeAuthClientConfig } from '@elrondnetwork/native-auth-client/lib/src/entities/native.auth.client.config';
+import { NativeAuthClient } from '@multiversx/sdk-native-auth-client';
+import { NativeAuthClientConfig } from '@multiversx/sdk-native-auth-client/lib/src/entities/native.auth.client.config';
+import { UserSigner } from '@multiversx/sdk-wallet';
+import { SignableMessage } from '@multiversx/sdk-core';
 import { FileUtils } from './file.utils';
 
 export class NativeAuthSignerConfig extends NativeAuthClientConfig {
