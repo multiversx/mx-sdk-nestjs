@@ -95,7 +95,6 @@ export class NativeAuthGuard implements CanActivate {
 
       request.nativeAuth = userInfo;
       request.jwt = userInfo;
-
       return true;
     } catch (error) {
       if (error instanceof NativeAuthError) {
