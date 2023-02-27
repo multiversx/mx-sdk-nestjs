@@ -80,13 +80,6 @@ export class NativeAuthGuard implements CanActivate {
     const profiler = new PerformanceProfiler();
 
     try {
-      const request = context.switchToHttp().getRequest();
-
-      const authorization: string = request.headers['authorization'];
-      if (!authorization) {
-        return false;
-      }
-
       const userInfo = await this.authServer.validate(jwt);
       profiler.stop();
 
@@ -101,6 +94,7 @@ export class NativeAuthGuard implements CanActivate {
       request.res.set('X-Native-Auth-Duration', profiler.duration);
 
       request.nativeAuth = userInfo;
+      request.jwt = userInfo;
 
       return true;
     } catch (error) {
