@@ -8,6 +8,7 @@ import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
+import { UrlUtils } from '../utils/url.utils';
 
 /**
  * This Guard protects all routes that do not have the `@NoAuth` decorator and sets the `X-Native-Auth-*` HTTP headers.
@@ -71,9 +72,6 @@ export class NativeAuthGuard implements CanActivate {
 
     const origin = request.headers['origin'];
 
-    const requestUrl = new URL(origin);
-    const isLocalhostOrigin = requestUrl.hostname === 'localhost' && requestUrl.protocol === 'https:';
-
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       return false;
@@ -86,7 +84,7 @@ export class NativeAuthGuard implements CanActivate {
       const userInfo = await this.authServer.validate(jwt);
       profiler.stop();
 
-      if (!isLocalhostOrigin && origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
+      if (!UrlUtils.isLocalhost(origin) && origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
         throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 

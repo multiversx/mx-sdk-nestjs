@@ -13,6 +13,7 @@ export * from './utils/logger.initializer';
 export * from './utils/match.utils';
 export * from './utils/erdnest.constants';
 export * from './utils/number.utils';
+export * from './utils/url.utils';
 export * from './utils/origin.logger';
 export * from './utils/pending.executer';
 export * from './utils/performance.profiler';
