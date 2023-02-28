@@ -45,6 +45,10 @@ export class AddressUtils {
       return true;
     }
 
+    if (address === '4294967295') {
+      return true;
+    }
+
     try {
       return new Address(address).isContractAddress();
     } catch (error) {
