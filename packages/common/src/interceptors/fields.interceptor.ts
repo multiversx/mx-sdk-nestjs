@@ -16,9 +16,12 @@ export class FieldsInterceptor implements NestInterceptor {
     return next
       .handle()
       .pipe(
-        // eslint-disable-next-line require-await
-        map(async (resultRef) => {
-          const result = typeof resultRef === 'object' ? JSON.parse(JSON.stringify(resultRef)) : resultRef;
+        map((resultRef) => {
+          if (typeof resultRef !== 'object') {
+            return resultRef;
+          }
+
+          const result = JSON.parse(JSON.stringify(resultRef));
           const fieldsArgument = request.query.fields;
           if (fieldsArgument) {
             const fields = Array.isArray(fieldsArgument) ? fieldsArgument : fieldsArgument.split(',');
@@ -26,8 +29,7 @@ export class FieldsInterceptor implements NestInterceptor {
               for (const item of result) {
                 this.transformItem(item, fields);
               }
-            }
-            else {
+            } else {
               this.transformItem(result, fields);
             }
           }
