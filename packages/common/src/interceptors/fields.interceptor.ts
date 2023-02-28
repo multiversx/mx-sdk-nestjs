@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class FieldsInterceptor implements NestInterceptor {
@@ -17,7 +17,8 @@ export class FieldsInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         // eslint-disable-next-line require-await
-        tap(async (result) => {
+        map(async (resultRef) => {
+          const result = typeof resultRef === 'object' ? JSON.parse(JSON.stringify(resultRef)) : resultRef;
           const fieldsArgument = request.query.fields;
           if (fieldsArgument) {
             const fields = Array.isArray(fieldsArgument) ? fieldsArgument : fieldsArgument.split(',');
@@ -30,7 +31,6 @@ export class FieldsInterceptor implements NestInterceptor {
               this.transformItem(result, fields);
             }
           }
-
           return result;
         })
       );
