@@ -17,7 +17,8 @@ export class FieldsInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         // eslint-disable-next-line require-await
-        tap(async (result) => {
+        tap(async (resultRef) => {
+          const result = JSON.parse(JSON.stringify(resultRef));
           const fieldsArgument = request.query.fields;
           if (fieldsArgument) {
             const fields = Array.isArray(fieldsArgument) ? fieldsArgument : fieldsArgument.split(',');
