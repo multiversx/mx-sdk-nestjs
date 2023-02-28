@@ -6,7 +6,7 @@ import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { JwtAuthenticateGuard } from './jwt.authenticate.guard';
 import { NativeAuthGuard } from './native.auth.guard';
-import { ElrondCachingService } from 'src/common';
+import { ElrondCachingService } from '../common';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {
