@@ -1,6 +1,7 @@
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Injectable } from '@nestjs/common';
 import { OriginLogger } from '../../utils/origin.logger';
+import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class RabbitPublisherService {
@@ -13,6 +14,7 @@ export class RabbitPublisherService {
   /** Will publish the input to the exchange. */
   async publish(exchange: string, input: unknown): Promise<void> {
     try {
+      MetricsService.setQueuePublish(exchange);
       await this.amqpConnection.publish(exchange, '', input);
     } catch (err) {
       this.logger.error('An error occurred while publishing to RabbitMq Exchange.', {
