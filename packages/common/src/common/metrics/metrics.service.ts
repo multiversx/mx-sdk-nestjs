@@ -139,7 +139,7 @@ export class MetricsService {
       MetricsService.queuePublishGauge = new Gauge({
         name: 'queue_publish',
         help: 'Messages published to queue',
-        labelNames: ['queue'],
+        labelNames: ['queue', 'source'],
       });
     }
 
@@ -147,7 +147,7 @@ export class MetricsService {
       MetricsService.queueConsumeGauge = new Gauge({
         name: 'queue_consume',
         help: 'Messages consumed from queue',
-        labelNames: ['queue'],
+        labelNames: ['queue', 'handler'],
       });
     }
 
@@ -212,15 +212,17 @@ export class MetricsService {
     MetricsService.cachedApiHitGauge.inc({ endpoint });
   }
 
-  static setQueuePublish(queue: string) {
+  static setQueuePublish(queue: string, source?: string) {
     MetricsService.queuePublishGauge.inc({
       queue,
+      source,
     });
   }
 
-  static setQueueConsume(queue: string) {
+  static setQueueConsume(queue: string, handler?: string) {
     MetricsService.queueConsumeGauge.inc({
       queue,
+      handler,
     });
   }
 
