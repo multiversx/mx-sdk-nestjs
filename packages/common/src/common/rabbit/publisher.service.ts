@@ -31,15 +31,22 @@ export class RabbitPublisherService {
     return `duplicateCheck:${exchange}:${inputHex}`;
   }
 
-  async isExchangeDisabled(exchange: string): Promise<boolean> {
-    if (this.swappableSettingsService) {
-      const data = await this.swappableSettingsService.get(`${exchange}:disabled`);
+  private async isExchangeDisabled(exchange: string): Promise<boolean> {
+    const key = `${exchange}:disabled`;
+    if (this.swappableSettingsService && this.inMemoryCacheService) {
+      const valueFromMemory = await this.inMemoryCacheService.get(key);
+      if (valueFromMemory) {
+        return valueFromMemory === 'true';
+      }
+      const data = await this.swappableSettingsService.get(key);
+      this.inMemoryCacheService.set(key, data, Constants.oneSecond() * 10);
       return data === 'true';
     }
+
     return false;
   }
 
-  async isAlreadySent(exchange: string, input: unknown, source?: string): Promise<boolean> {
+  private async checkForDuplicatedMessages(exchange: string, input: unknown, source?: string): Promise<void> {
     if (this.redisService && this.inMemoryCacheService && this.options?.checkForDuplicates) {
       const key = this.generateDuplicateMessageKey(exchange, input);
       const existsInMemory = await this.inMemoryCacheService.get(key);
@@ -59,7 +66,6 @@ export class RabbitPublisherService {
             input,
           });
         }
-        return true;
       } else {
         const ttl = this.options.duplicatesCheckTtl || Constants.oneMinute();
         const profiler = new PerformanceProfiler();
@@ -67,10 +73,8 @@ export class RabbitPublisherService {
         profiler.stop();
         MetricsService.setRedisCommonDuration('SET', profiler.duration);
         this.inMemoryCacheService?.set(key, '1', ttl);
-        return false;
       }
     }
-    return false;
   }
 
   public async invalidateDuplicateMessageKey(exchange: string, input: unknown): Promise<void> {
@@ -91,16 +95,15 @@ export class RabbitPublisherService {
         return;
       }
 
-      const isAlreadySent = await this.isAlreadySent(exchange, input, source);
-      if (!isAlreadySent) {
+      await this.checkForDuplicatedMessages(exchange, input, source);
 
-        if (this.options?.logsVerbose) {
-          this.logger.log(`Publishing to RabbitMq Exchange: ${exchange}`, { input });
-        }
-
-        MetricsService.setQueuePublish(exchange, source || '');
-        await this.amqpConnection.publish(exchange, '', input);
+      if (this.options?.logsVerbose) {
+        this.logger.log(`Publishing to RabbitMq Exchange: ${exchange}`, { input });
       }
+
+      MetricsService.setQueuePublish(exchange, source || '');
+      await this.amqpConnection.publish(exchange, '', input);
+
     } catch (err) {
       this.logger.error('An error occurred while publishing to RabbitMq Exchange.', {
         exchange,
