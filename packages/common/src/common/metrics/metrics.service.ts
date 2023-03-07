@@ -12,6 +12,7 @@ export class MetricsService {
   private static rabbitConsumerCpuHistogram: Histogram<string>;
   private static elasticDurationHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
+  private static redisCommonDurationHistogram: Histogram<string>;
   private static jobsHistogram: Histogram<string>;
   private static pendingApiHitGauge: Gauge<string>;
   private static cachedApiHitGauge: Gauge<string>;
@@ -21,6 +22,7 @@ export class MetricsService {
   private static consumerHistogram: Histogram<string>;
   private static queuePublishGauge: Gauge<string>;
   private static queueConsumeGauge: Gauge<string>;
+  private static duplicateQueueMessagesDetected: Gauge<string>;
   private static isDefaultMetricsRegistered: boolean = false;
 
   constructor() {
@@ -72,6 +74,15 @@ export class MetricsService {
       MetricsService.redisDurationHistogram = new Histogram({
         name: 'redis_duration',
         help: 'Redis Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsService.redisCommonDurationHistogram) {
+      MetricsService.redisCommonDurationHistogram = new Histogram({
+        name: 'redis_common_duration',
+        help: 'Redis Common Duration',
         labelNames: ['action'],
         buckets: [],
       });
@@ -148,6 +159,14 @@ export class MetricsService {
         name: 'queue_consume',
         help: 'Messages consumed from queue',
         labelNames: ['queue', 'handler'],
+      });
+    }
+
+    if (!MetricsService.duplicateQueueMessagesDetected) {
+      MetricsService.duplicateQueueMessagesDetected = new Gauge({
+        name: 'queue_duplicated_messages',
+        help: 'Duplicated messages detected in queue',
+        labelNames: ['queue', 'source'],
       });
     }
 
@@ -244,6 +263,14 @@ export class MetricsService {
 
   static setQueueHandlerCpu(queue: string, method: string, duration: number) {
     MetricsService.rabbitConsumerCpuHistogram.labels(queue, method).observe(duration);
+  }
+
+  static setDuplicatedMessageDetected(queue: string, source?: string) {
+    MetricsService.duplicateQueueMessagesDetected.inc({ queue, source });
+  }
+
+  static setRedisCommonDuration(action: string, duration: number) {
+    MetricsService.redisCommonDurationHistogram.labels(action).observe(duration);
   }
 
   setConsumer(consumer: string, duration: number): void {

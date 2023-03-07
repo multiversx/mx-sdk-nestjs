@@ -1,15 +1,16 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { RedisCacheModuleOptions, RedisCacheService } from '../caching';
-import { RedisCacheModuleAsyncOptions } from '../caching/redis-cache/options';
+import { RedisOptions } from 'ioredis';
+import { RedisCacheService } from '../caching';
+import { RedisModuleAsyncOptions } from '../redis/options';
 import { RedisModule } from '../redis/redis.module';
 import { SwappableSettingsService } from './swappable-settings.service';
 
 @Module({})
 export class SwappableSettingsModule {
-  public static forRoot(redisCacheOptions: RedisCacheModuleOptions): DynamicModule {
+  public static forRoot(redisOptions: { config: RedisOptions }): DynamicModule {
     return {
       module: SwappableSettingsModule,
-      imports: [RedisModule.forRoot(redisCacheOptions)],
+      imports: [RedisModule.forRoot(redisOptions)],
       providers: [
         RedisCacheService,
         SwappableSettingsService,
@@ -21,11 +22,11 @@ export class SwappableSettingsModule {
     };
   }
 
-  public static forRootAsync(redisCacheOptions: RedisCacheModuleAsyncOptions): DynamicModule {
+  public static forRootAsync(redisAyncOptions: RedisModuleAsyncOptions): DynamicModule {
     return {
       module: SwappableSettingsModule,
       imports: [
-        RedisModule.forRootAsync(redisCacheOptions),
+        RedisModule.forRootAsync(redisAyncOptions),
       ],
       providers: [
         RedisCacheService,
