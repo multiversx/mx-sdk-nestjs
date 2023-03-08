@@ -9,8 +9,7 @@ import { MetricsService } from '../metrics/metrics.service';
 import { RABBIT_ADDITIONAL_OPTIONS } from './constants';
 import { OptionsInterface } from './entities/options.interface';
 import { PerformanceProfiler } from '../../utils/performance.profiler';
-import { REDIS_CLIENT_TOKEN } from '../redis/entities/common.constants';
-import { SwappableSettingsService } from '../swappable-settings';
+import { SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '../swappable-settings';
 
 
 @Injectable()
@@ -19,7 +18,7 @@ export class RabbitPublisherService {
 
   constructor(
     private readonly amqpConnection: AmqpConnection,
-    @Optional() @Inject(REDIS_CLIENT_TOKEN) private readonly redisService?: Redis,
+    @Optional() @Inject(SWAPPABLE_SETTINGS_REDIS_CLIENT) private readonly redisService?: Redis,
     @Optional() private readonly inMemoryCacheService?: InMemoryCacheService,
     @Optional() private readonly swappableSettingsService?: SwappableSettingsService,
     @Optional() @Inject(RABBIT_ADDITIONAL_OPTIONS) private readonly options?: OptionsInterface,
@@ -57,7 +56,6 @@ export class RabbitPublisherService {
         profiler.stop();
         MetricsService.setRedisCommonDuration('GET', profiler.duration);
       }
-
       if (exists) {
         MetricsService.setDuplicatedMessageDetected(exchange, source || '');
         if (this.options?.logsVerbose) {
