@@ -35,14 +35,14 @@ export class RedisModule {
       module: RedisModule,
       imports: connectOptions.imports || [],
       providers: [
-        ...this.createConenctOptionsProviders(connectOptions),
+        ...this.createConnectOptionsProviders(connectOptions),
         clientProvider,
       ],
       exports: [clientProvider],
     };
   }
 
-  private static createConenctOptionsProviders(
+  private static createConnectOptionsProviders(
     options: RedisModuleAsyncOptions,
   ): Provider[] {
 
