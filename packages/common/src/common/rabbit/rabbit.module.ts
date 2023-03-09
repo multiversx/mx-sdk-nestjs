@@ -1,6 +1,6 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Module, Provider } from '@nestjs/common';
-import { InMemoryCacheModule, InMemoryCacheService, RedisCacheService } from '../caching';
+import { InMemoryCacheModule, InMemoryCacheService } from '../caching';
 import { RedisModule } from '../redis/redis.module';
 import { RabbitModuleAsyncOptions } from './async-options';
 import { RABBIT_ADDITIONAL_OPTIONS } from './constants';
@@ -11,6 +11,7 @@ import { RabbitContextCheckerService } from './rabbit-context-checker.service';
 import { RedisOptions } from 'ioredis';
 import { RedisModuleAsyncOptions } from '../redis/options';
 import { SwappableSettingsModule, SwappableSettingsService } from '../swappable-settings';
+import { SWAPPABLE_SETTINGS_REDIS_CLIENT } from '../swappable-settings/entities/constants';
 
 @Module({
   providers: [RabbitContextCheckerService],
@@ -29,11 +30,10 @@ export class RabbitModule {
     ];
 
     if (redisOptions) {
-      imports.push(RedisModule.forRoot({ config: redisOptions }));
+      imports.push(RedisModule.forRoot({ config: redisOptions }, SWAPPABLE_SETTINGS_REDIS_CLIENT));
       imports.push(InMemoryCacheModule.forRoot());
       imports.push(SwappableSettingsModule.forRoot({ config: redisOptions }));
 
-      providers.push(RedisCacheService);
       providers.push(InMemoryCacheService);
       providers.push(SwappableSettingsService);
     }
@@ -59,11 +59,10 @@ export class RabbitModule {
     ];
 
     if (redisAsyncOptions) {
-      imports.push(RedisModule.forRootAsync(redisAsyncOptions));
+      imports.push(RedisModule.forRootAsync(redisAsyncOptions, SWAPPABLE_SETTINGS_REDIS_CLIENT));
       imports.push(InMemoryCacheModule.forRoot());
       imports.push(SwappableSettingsModule.forRootAsync(redisAsyncOptions));
 
-      providers.push(RedisCacheService);
       providers.push(InMemoryCacheService);
       providers.push(SwappableSettingsService);
     }
