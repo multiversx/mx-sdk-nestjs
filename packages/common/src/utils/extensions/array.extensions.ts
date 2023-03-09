@@ -315,8 +315,24 @@ Array.prototype.shuffle = function <T>(): T[] {
   return array;
 };
 
+Array.prototype.includesSome = function <T>(elements: T[]): boolean {
+  return elements.some(el => this.includes(el));
+};
+
+Array.prototype.includesNone = function <T>(elements: T[]): boolean {
+  return !elements.some(el => this.includes(el));
+};
+
+Array.prototype.includesEvery = function <T>(elements: T[]): boolean {
+  return elements.every(el => this.includes(el));
+};
+
+Array.prototype.none = function <T>(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean {
+  return !this.some(predicate, thisArg);
+};
+
 declare interface Array<T> {
-  groupBy(predicate: (item: T) => any, asArray? :boolean): any;
+  groupBy(predicate: (item: T) => any, asArray?: boolean): any;
   selectMany<TOUT>(predicate: (item: T) => TOUT[]): TOUT[];
   first(predicate?: (item: T) => boolean): T | undefined;
   mapIndexed<TOUT>(items: TOUT[], predicate: (item: TOUT) => T): (TOUT | undefined)[];
@@ -336,4 +352,8 @@ declare interface Array<T> {
   toRecordAsync<TOUT>(keyPredicate: (item: T) => string, valuePredicate: (item: T) => Promise<TOUT>): Promise<Record<string, TOUT>>;
   remove(element: T): void;
   shuffle(): T[];
+  none(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
+  includesSome(elements: T[]): boolean;
+  includesNone(elements: T[]): boolean;
+  includesEvery(elements: T[]): boolean;
 }
