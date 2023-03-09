@@ -21,7 +21,7 @@ function QueueMetricsConsumer(queue: string) {
       performanceProfiler.stop();
       MetricsService.setQueueHandlerCpu(queue, key as string, cpuProfiler.stop());
       MetricsService.setQueueHandlerDuration(queue, key as string, performanceProfiler.duration);
-      MetricsService.setQueueConsume(queue);
+      MetricsService.setQueueConsume(queue, key as string);
       return data;
     };
     return descriptor;

@@ -13,6 +13,7 @@ export class RedisCacheModuleOptions {
     connectTimeout?: number | undefined;
     name?: string | undefined;
     tls?: ConnectionOptions | undefined;
+    db?: number | undefined;
   };
 
   constructor(

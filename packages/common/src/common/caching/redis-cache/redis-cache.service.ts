@@ -705,7 +705,7 @@ export class RedisCacheService {
     try {
       let item: string | null;
       while (item = await this.redis.lpop(key)) {
-        items.push(...item);
+        items.push(item);
       }
     } catch (error) {
 
