@@ -9,6 +9,7 @@ import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 import { UrlUtils } from '../utils/url.utils';
+import { ExecutionContextUtils } from '../utils/execution.context.utils';
 
 /**
  * This Guard protects all routes that do not have the `@NoAuth` decorator and sets the `X-Native-Auth-*` HTTP headers.
@@ -68,11 +69,13 @@ export class NativeAuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = ExecutionContextUtils.getRequest(context);
+    const response = ExecutionContextUtils.getResponse(context);
+    const headers = ExecutionContextUtils.getHeaders(context);
 
-    const origin = request.headers['origin'];
+    const origin = headers['origin'];
 
-    const authorization: string = request.headers['authorization'];
+    const authorization: string = headers['authorization'];
     if (!authorization) {
       return false;
     }
@@ -88,14 +91,19 @@ export class NativeAuthGuard implements CanActivate {
         throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
-      request.res.set('X-Native-Auth-Issued', userInfo.issued);
-      request.res.set('X-Native-Auth-Expires', userInfo.expires);
-      request.res.set('X-Native-Auth-Address', userInfo.address);
-      request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
-      request.res.set('X-Native-Auth-Duration', profiler.duration);
+      if (response) {
+        response.set('X-Native-Auth-Issued', userInfo.issued);
+        response.set('X-Native-Auth-Expires', userInfo.expires);
+        response.set('X-Native-Auth-Address', userInfo.address);
+        response.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
+        response.set('X-Native-Auth-Duration', profiler.duration);
+      }
 
-      request.nativeAuth = userInfo;
-      request.jwt = userInfo;
+      if (request) {
+        request.nativeAuth = userInfo;
+        request.jwt = userInfo;
+      }
+
       return true;
     } catch (error) {
       if (error instanceof NativeAuthError) {

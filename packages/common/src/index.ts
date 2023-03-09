@@ -24,7 +24,6 @@ export * from './utils/swagger.utils';
 export * from './utils/token.utils';
 export * from './guards/jwt.admin.guard';
 export * from './guards/jwt.authenticate.guard';
-export * from './guards/jwt.authenticate.global.guard';
 export * from './guards/jwt.or.native.auth.guard';
 export * from './guards/native.auth.admin.guard';
 export * from './guards/native.auth.guard';

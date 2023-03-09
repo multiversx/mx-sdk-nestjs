@@ -1,4 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { ExecutionContextUtils } from '../utils/execution.context.utils';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
@@ -25,9 +26,8 @@ export class NativeAuthAdminGuard implements CanActivate {
       return false;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = ExecutionContextUtils.getRequest(context);
 
-    const { address } = request.nativeAuth;
-    return admins.includes(address);
+    return admins.includes(request.nativeAuth.address);
   }
 }

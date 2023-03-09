@@ -1,6 +1,4 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, Optional } from '@nestjs/common';
-import { NoAuthOptions } from '../decorators';
-import { DecoratorUtils } from '../utils/decorator.utils';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
@@ -17,11 +15,6 @@ export class JwtOrNativeAuthGuard implements CanActivate {
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
-    if (noAuthMetadata) {
-      return true;
-    }
-
     const jwtGuard = new JwtAuthenticateGuard(this.erdnestConfigService);
     const nativeAuthGuard = new NativeAuthGuard(this.erdnestConfigService, this.cachingService, this.elrondCachingService);
 

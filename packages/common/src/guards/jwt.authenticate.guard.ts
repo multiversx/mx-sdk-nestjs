@@ -3,6 +3,9 @@ import { verify } from 'jsonwebtoken';
 import { PerformanceProfiler } from '../utils/performance.profiler';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { DecoratorUtils } from '../utils/decorator.utils';
+import { NoAuthOptions } from '../decorators';
+import { ExecutionContextUtils } from '../utils/execution.context.utils';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
@@ -14,9 +17,15 @@ export class JwtAuthenticateGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
+    if (noAuthMetadata) {
+      return true;
+    }
 
-    const authorization: string = request.headers['authorization'];
+    const headers = ExecutionContextUtils.getHeaders(context);
+    const request = ExecutionContextUtils.getRequest(context);
+
+    const authorization: string = headers['authorization'];
     if (!authorization) {
       return false;
     }
