@@ -6,6 +6,8 @@
     "type": "git",
     "url": "git+https://github.com/multiversx/mx-sdk-nestjs.git"
   },
+  "main": "dist/libs/common/src/index.js",
+  "types": "dist/libs/common/src/index.d.ts",
   "keywords": [
     "multiversx",
     "nestjs",
@@ -15,9 +17,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "build": "tsc",
-    "build:dev": "tsc --watch",
-    "clean": "tsc --clean"
+    "build": "tsc --project tsconfig.build.json",
+    "build:dev": "tsc --project tsconfig.build.json --watch",
+    "clean": "tsc --project tsconfig.build.json --clean"
   },
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
