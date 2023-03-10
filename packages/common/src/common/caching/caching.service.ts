@@ -116,7 +116,6 @@ export class CachingService {
     if (value === undefined) {
       return value;
     }
-
     return await this.localCacheService.setCacheValue<T>(key, value, ttl);
   }
 

@@ -2,7 +2,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import moment from 'moment';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { CachingService } from '../caching.service';
 import { MetricsService } from '../../metrics/metrics.service';
 import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheOptions, REDIS_PREFIX } from '../entities/guest.caching';

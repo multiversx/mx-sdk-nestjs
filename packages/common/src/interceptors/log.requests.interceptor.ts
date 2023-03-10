@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 import { Observable } from "rxjs";
-import * as winston from "winston";
+import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 @Injectable()
