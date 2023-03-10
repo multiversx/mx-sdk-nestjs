@@ -14,7 +14,8 @@
     "lint": "eslint \"{packages,tools}/**/*.ts\"",
     "lint:fix": "eslint \"{packages,tools}/**/*.ts\" --fix",
     "test": "lerna run test",
-    "show:dependencies": "nx graph"
+    "show:dependencies": "nx graph",
+    "version": "lerna run version"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
