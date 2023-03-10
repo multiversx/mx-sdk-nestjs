@@ -14,37 +14,15 @@
     "format": "prettier \"**/*.ts\" \"packages/**/*.json\" --ignore-path ./.prettierignore --write && git status",
     "lint": "eslint \"{packages,tools}/**/*.ts\"",
     "lint:fix": "eslint \"{packages,tools}/**/*.ts\" --fix",
-    "prerelease": "gulp copy-misc",
     "test": "lerna run test",
-    "show:dependencies": "nx graph",
-    "publish": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --force-publish --access public --exact -m \"chore(@multiversx) publish %s release\"",
-    "prepublishOnly": "npm run changelog | pbcopy",
-    "publish:beta": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=beta --access public -m \"chore(@multiversx) publish %s release\"",
-    "publish:next": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=next --access public --skip-git -m \"chore(@multiversx) publish %s release\"",
-    "publish:rc": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --npm-tag=rc --access public -m \"chore(@multiversx) publish %s release\"",
-    "publish:test": "npm run prerelease && npm run build:prod && ./node_modules/.bin/lerna publish --force-publish --access public --npm-tag=test --skip-git -m \"chore(@multiversx) publish %s release\""
-  },
-  "changelog": {
-    "labels": {
-      "type: feature :tada:": "Features",
-      "type: bug :sob:": "Bug fixes",
-      "type: enhancement :wolf:": "Enhancements",
-      "type: docs :page_facing_up:": "Docs",
-      "type: code style": "Code style tweaks",
-      "dependencies": "Dependencies"
-    }
+    "show:dependencies": "nx graph"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
-    "cli-color": "^2.0.3",
-    "delete-empty": "^3.0.0",
     "eslint": "^8.33.0",
-    "gulp": "^4.0.2",
-    "gulp-clean": "^0.4.0",
     "jest": "^29.4.1",
     "lerna": "^6.4.1",
-    "lerna-changelog": "^2.2.0",
     "nx": "^15.6.3",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",

@@ -30,9 +30,6 @@
     "**/__tests__/*"
   ],
   "paths": {
-    "@multiversx/sdk-nestjs-auth": [
-      "packages/auth/src"
-    ],
     "@multiversx/sdk-nestjs-common": [
       "packages/common/src"
     ],
