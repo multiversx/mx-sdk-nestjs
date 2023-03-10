@@ -14,6 +14,7 @@ function QueueMetricsConsumer(queue: string) {
   ) => {
     const childMethod = descriptor.value;
     descriptor.value = async function (...args: any[]) {
+      MetricsService.setQueueConsume(queue, key as string);
       const cpuProfiler = new CpuProfiler();
       const performanceProfiler = new PerformanceProfiler();
       const data = await childMethod.apply(this, args);
@@ -21,7 +22,6 @@ function QueueMetricsConsumer(queue: string) {
       performanceProfiler.stop();
       MetricsService.setQueueHandlerCpu(queue, key as string, cpuProfiler.stop());
       MetricsService.setQueueHandlerDuration(queue, key as string, performanceProfiler.duration);
-      MetricsService.setQueueConsume(queue, key as string);
       return data;
     };
     return descriptor;
