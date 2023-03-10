@@ -20,9 +20,15 @@ export class AddressUtils {
     }
   }
 
+  private static calculateMasks(numOfShards: number) {
+    const n = Math.ceil(Math.log2(numOfShards));
+    const mask1 = (1 << n) - 1;
+    const mask2 = (1 << (n - 1)) - 1;
+    return [mask1, mask2];
+  }
+
   static computeShard(hexPubKey: string, totalShards: number) {
-    const maskHigh = parseInt('11', 2);
-    const maskLow = parseInt('01', 2);
+    const [maskHigh, maskLow] = AddressUtils.calculateMasks(totalShards);
     const pubKey = Buffer.from(hexPubKey, 'hex');
     const lastByteOfPubKey = pubKey[31];
 

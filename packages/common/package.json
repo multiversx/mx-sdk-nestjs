@@ -1,5 +1,5 @@
 {
-  "name": "common",
+  "name": "@multiversx/sdk-nestjs-common",
   "version": "1.0.0",
   "description": "NestJS microservice template",
   "repository": {
