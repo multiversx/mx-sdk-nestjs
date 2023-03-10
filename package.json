@@ -1,5 +1,5 @@
 {
-  "name": "root",
+  "name": "@multiversx/sdk-nestjs",
   "version": "1.0.0",
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -10,7 +10,6 @@
   "scripts": {
     "build": "lerna run build",
     "prebuild:prod": "lerna run clean",
-    "changelog": "lerna-changelog",
     "format": "prettier \"**/*.ts\" \"packages/**/*.json\" --ignore-path ./.prettierignore --write && git status",
     "lint": "eslint \"{packages,tools}/**/*.ts\"",
     "lint:fix": "eslint \"{packages,tools}/**/*.ts\" --fix",
