@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NestJS microservice template",
   "repository": {
     "type": "git",
@@ -39,9 +39,9 @@
     "axios-mock-adapter": "^1.20.0"
   },
   "dependencies": {
+    "@golevelup/nestjs-rabbitmq": "^3.0.0",
     "@multiversx/sdk-native-auth-client": "^1.0.0",
     "@multiversx/sdk-native-auth-server": "^1.0.4",
-    "@golevelup/nestjs-rabbitmq": "^3.0.0",
     "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",
     "axios": "^0.27.2",
