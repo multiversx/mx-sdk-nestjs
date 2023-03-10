@@ -1,4 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { ExecutionContextUtils } from '../utils/execution.context.utils';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 
@@ -13,15 +14,15 @@ export class JwtAdminGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
 
-    const jwt = request.jwt;
 
     const admins = this.erdnestConfigService.getSecurityAdmins();
     if (!admins) {
       return false;
     }
 
-    return admins.includes(jwt.address);
+    const request = ExecutionContextUtils.getRequest(context);
+
+    return admins.includes(request.jwt.address);
   }
 }
