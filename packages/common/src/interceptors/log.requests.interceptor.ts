@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { HttpAdapterHost } from "@nestjs/core";
 import { Observable } from "rxjs";
 import * as winston from "winston";
-import * as DailyRotateFile from "winston-daily-rotate-file";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 @Injectable()
 export class LogRequestsInterceptor implements NestInterceptor {
