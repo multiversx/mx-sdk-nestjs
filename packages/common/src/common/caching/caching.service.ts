@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 const { promisify } = require('util');
 import { createClient } from 'redis';
-const asyncPool = require('tiny-async-pool');
+import asyncPool from 'tiny-async-pool';
 import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { LocalCacheService } from "./local.cache.service";
 import { MetricsService } from "../metrics/metrics.service";

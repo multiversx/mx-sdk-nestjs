@@ -1,4 +1,4 @@
-import * as async_hooks from 'async_hooks';
+import async_hooks from 'async_hooks';
 import { randomUUID } from 'crypto';
 import { OriginLogger } from './origin.logger';
 import { PerformanceProfiler } from './performance.profiler';
