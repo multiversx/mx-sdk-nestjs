@@ -1,4 +1,5 @@
 import { ModuleMetadata } from '@nestjs/common';
+import { ConnectionOptions } from 'tls';
 
 export class RedisCacheModuleOptions {
   config: {
@@ -11,6 +12,8 @@ export class RedisCacheModuleOptions {
     sentinels?: Array<{ host: string; port: number }> | undefined;
     connectTimeout?: number | undefined;
     name?: string | undefined;
+    tls?: ConnectionOptions | undefined;
+    db?: number | undefined;
   };
 
   constructor(

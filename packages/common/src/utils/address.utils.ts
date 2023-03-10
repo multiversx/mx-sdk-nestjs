@@ -20,8 +20,7 @@ export class AddressUtils {
     }
   }
 
-  static computeShard(hexPubKey: string) {
-    const numShards = 3;
+  static computeShard(hexPubKey: string, totalShards: number) {
     const maskHigh = parseInt('11', 2);
     const maskLow = parseInt('01', 2);
     const pubKey = Buffer.from(hexPubKey, 'hex');
@@ -33,7 +32,7 @@ export class AddressUtils {
 
     let shard = lastByteOfPubKey & maskHigh;
 
-    if (shard > numShards - 1) {
+    if (shard > totalShards - 1) {
       shard = lastByteOfPubKey & maskLow;
     }
 
@@ -42,6 +41,10 @@ export class AddressUtils {
 
   static isSmartContractAddress(address: string): boolean {
     if (address.toLowerCase() === 'metachain') {
+      return true;
+    }
+
+    if (address === '4294967295') {
       return true;
     }
 

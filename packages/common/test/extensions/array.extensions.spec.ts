@@ -332,4 +332,41 @@ describe('Array Extensions', () => {
     array.remove('x');
     expect(array).toEqual(['a', 'c', 'd']);
   });
+
+  describe('None', () => {
+    const array = [1, 2, 3, 4, 5];
+    expect(array.none(x => x > 5)).toStrictEqual(true);
+    expect(array.none(x => x <= 1)).toStrictEqual(false);
+    expect(array.none(x => x <= 5)).toStrictEqual(false);
+  });
+
+  describe('includesSome', () => {
+    const array = [1, 2, 3, 4, 5];
+    expect(array.includesSome([1])).toStrictEqual(true);
+    expect(array.includesSome([1, 6])).toStrictEqual(true);
+    expect(array.includesSome([1, 2, 3])).toStrictEqual(true);
+    expect(array.includesSome([1, 2, 3, 4, 5])).toStrictEqual(true);
+    expect(array.includesSome([6])).toStrictEqual(false);
+    expect(array.includesSome([6, 7, 8])).toStrictEqual(false);
+  });
+
+  describe('includesEvery', () => {
+    const array = [1, 2, 3, 4, 5];
+    expect(array.includesEvery([1])).toStrictEqual(true);
+    expect(array.includesEvery([1, 6])).toStrictEqual(false);
+    expect(array.includesEvery([1, 2, 3])).toStrictEqual(true);
+    expect(array.includesEvery([1, 2, 3, 4, 5])).toStrictEqual(true);
+    expect(array.includesEvery([6])).toStrictEqual(false);
+    expect(array.includesEvery([6, 7, 8])).toStrictEqual(false);
+  });
+
+  describe('includesNone', () => {
+    const array = [1, 2, 3, 4, 5];
+    expect(array.includesNone([1])).toStrictEqual(false);
+    expect(array.includesNone([1, 6])).toStrictEqual(false);
+    expect(array.includesNone([1, 2, 3])).toStrictEqual(false);
+    expect(array.includesNone([1, 2, 3, 4, 5])).toStrictEqual(false);
+    expect(array.includesNone([6])).toStrictEqual(true);
+    expect(array.includesNone([6, 7, 8])).toStrictEqual(true);
+  });
 });

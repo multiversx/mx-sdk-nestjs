@@ -1,38 +1,36 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject, Optional } from '@nestjs/common';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { JwtAuthenticateGuard } from './jwt.authenticate.guard';
 import { NativeAuthGuard } from './native.auth.guard';
+import { ElrondCachingService } from '../common';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {
   constructor(
-    @Inject(ERDNEST_CONFIG_SERVICE)
-    private readonly erdnestConfigService: ErdnestConfigService,
-    private readonly cachingService: CachingService
+    @Inject(ERDNEST_CONFIG_SERVICE) private readonly erdnestConfigService: ErdnestConfigService,
+    @Optional() private readonly cachingService?: CachingService,
+    @Optional() private readonly elrondCachingService?: ElrondCachingService,
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const jwtGuard = new JwtAuthenticateGuard(this.erdnestConfigService);
-    const nativeAuthGuard = new NativeAuthGuard(this.cachingService, this.erdnestConfigService);
+    const nativeAuthGuard = new NativeAuthGuard(this.erdnestConfigService, this.cachingService, this.elrondCachingService);
 
-    const guards = [jwtGuard, nativeAuthGuard];
+    try {
+      const result = await jwtGuard.canActivate(context);
+      if (result) {
+        return true;
+      }
+    } catch (error) {
+      // do nothing
+    }
 
-    const canActivateResponses = await Promise.all(
-      guards.map((guard) => {
-        try {
-          return guard.canActivate(context);
-        } catch {
-          return false;
-        }
-      })
-    );
-
-    const canActivate = canActivateResponses.reduce(
-      (result, value) => result || value,
-      false
-    );
-    return canActivate;
+    try {
+      return await nativeAuthGuard.canActivate(context);
+    } catch (error) {
+      return false;
+    }
   }
 }

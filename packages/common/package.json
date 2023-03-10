@@ -1,6 +1,6 @@
 {
   "name": "common",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "NestJS microservice template",
   "repository": {
     "type": "git",
@@ -39,9 +39,9 @@
     "axios-mock-adapter": "^1.20.0"
   },
   "dependencies": {
+    "@multiversx/sdk-native-auth-client": "^1.0.0",
+    "@multiversx/sdk-native-auth-server": "^1.0.4",
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
-    "@multiversx/sdk-native-auth-client": "^0.1.8",
-    "@multiversx/sdk-native-auth-server": "^0.2.3",
     "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",
     "axios": "^0.27.2",
@@ -49,6 +49,7 @@
     "crypto-js": "^4.1.1",
     "ioredis": "^5.2.3",
     "jsonwebtoken": "^8.5.1",
+    "lru-cache": "^7.14.1",
     "nest-winston": "^1.6.2",
     "prom-client": "^14.0.1",
     "redis": "^3.1.2",

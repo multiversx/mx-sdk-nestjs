@@ -1,22 +1,34 @@
-import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
-import { OriginLogger } from '../utils/origin.logger';
+import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@nestjs/common';
+import { ElrondCachingService } from '../common/caching/elrond-caching/elrond-caching.service';
+import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
+import { NoAuthOptions } from '../decorators';
+import { DecoratorUtils } from '../utils/decorator.utils';
+import { PerformanceProfiler } from '../utils/performance.profiler';
 import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
+import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
+import { UrlUtils } from '../utils/url.utils';
+import { ExecutionContextUtils } from '../utils/execution.context.utils';
 
+/**
+ * This Guard protects all routes that do not have the `@NoAuth` decorator and sets the `X-Native-Auth-*` HTTP headers.
+ *
+ * @return {boolean} `canActivate` returns true if the Authorization header is a valid Native-Auth token.
+ */
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
-  private readonly logger = new OriginLogger(NativeAuthGuard.name);
   private readonly authServer: NativeAuthServer;
 
   constructor(
-    cachingService: CachingService,
-    @Inject(ERDNEST_CONFIG_SERVICE)
-    private readonly erdnestConfigService: ErdnestConfigService
+    @Inject(ERDNEST_CONFIG_SERVICE) erdnestConfigService: ErdnestConfigService,
+    @Optional() cachingService?: CachingService,
+    @Optional() elrondCachingService?: ElrondCachingService,
   ) {
     this.authServer = new NativeAuthServer({
-      apiUrl: this.erdnestConfigService.getApiUrl(),
+      apiUrl: erdnestConfigService.getApiUrl(),
+      maxExpirySeconds: erdnestConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: erdnestConfigService.getNativeAuthAcceptedOrigins(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
@@ -25,43 +37,87 @@ export class NativeAuthGuard implements CanActivate {
             return new Date().getTime() / 1000;
           }
 
-          return await cachingService.getCache<T>(key);
+          if (elrondCachingService) {
+            return await elrondCachingService.get<T>(key);
+          }
+
+          if (cachingService) {
+            return await cachingService.getCache<T>(key);
+          }
+
+          throw new Error('CachingService or ElrondCachingService is not available in the context');
         },
         setValue: async function <T>(key: string, value: T, ttl: number): Promise<void> {
-          await cachingService.setCache(key, value, ttl);
+          if (elrondCachingService) {
+            return await elrondCachingService.set<T>(key, value, ttl);
+          }
+
+          if (cachingService) {
+            await cachingService.setCache<T>(key, value, ttl);
+            return;
+          }
+
+          throw new Error('CachingService or ElrondCachingService is not available in the context');
         },
       },
     });
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
+    if (noAuthMetadata) {
+      return true;
+    }
 
-    const host = new URL(request.headers['origin']).hostname;
+    const request = ExecutionContextUtils.getRequest(context);
+    const response = ExecutionContextUtils.getResponse(context);
+    const headers = ExecutionContextUtils.getHeaders(context);
 
-    const authorization: string = request.headers['authorization'];
+    const origin = headers['origin'];
+
+    const authorization: string = headers['authorization'];
     if (!authorization) {
       return false;
     }
+
     const jwt = authorization.replace('Bearer ', '');
+    const profiler = new PerformanceProfiler();
 
     try {
       const userInfo = await this.authServer.validate(jwt);
-      if (userInfo.host !== host) {
-        this.logger.error(`Invalid host '${userInfo.host}'. should be '${host}'`);
-        return false;
+      profiler.stop();
+
+      if (!UrlUtils.isLocalhost(origin) && origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
+        throw new NativeAuthInvalidOriginError(userInfo.origin, origin);
       }
 
-      request.res.set('X-Native-Auth-Issued', userInfo.issued);
-      request.res.set('X-Native-Auth-Expires', userInfo.expires);
-      request.res.set('X-Native-Auth-Address', userInfo.address);
-      request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
+      if (response) {
+        response.set('X-Native-Auth-Issued', userInfo.issued);
+        response.set('X-Native-Auth-Expires', userInfo.expires);
+        response.set('X-Native-Auth-Address', userInfo.address);
+        response.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
+        response.set('X-Native-Auth-Duration', profiler.duration);
+      }
 
-      request.nativeAuth = userInfo;
+      if (request) {
+        request.nativeAuth = userInfo;
+        request.jwt = userInfo;
+      }
+
       return true;
     } catch (error) {
-      this.logger.error(error);
-      throw new UnauthorizedException();
+      if (error instanceof NativeAuthError) {
+        // @ts-ignore
+        const message = error?.message;
+        if (message) {
+          profiler.stop();
+          request.res.set('X-Native-Auth-Error-Type', error.constructor.name);
+          request.res.set('X-Native-Auth-Error-Message', message);
+          request.res.set('X-Native-Auth-Duration', profiler.duration);
+        }
+      }
+
+      return false;
     }
   }
 }
