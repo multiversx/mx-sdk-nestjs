@@ -20,6 +20,7 @@ export class MetricsService {
   private static guestNoCacheHitsGauge: Gauge<string>;
   private static guestHitQueriesGauge: Gauge<string>;
   private static consumerHistogram: Histogram<string>;
+  private static clusterComparisonHistorgram: Histogram<string>;
   private static queuePublishGauge: Gauge<string>;
   private static queueConsumeGauge: Gauge<string>;
   private static duplicateQueueMessagesDetected: Gauge<string>;
@@ -40,6 +41,15 @@ export class MetricsService {
         name: 'api',
         help: 'API Calls',
         labelNames: ['endpoint', 'origin', 'code'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsService.clusterComparisonHistorgram) {
+      MetricsService.clusterComparisonHistorgram = new Histogram({
+        name: 'cluster_data',
+        help: 'Cluster comparison data',
+        labelNames: ['tag'],
         buckets: [],
       });
     }
@@ -271,6 +281,10 @@ export class MetricsService {
 
   static setRedisCommonDuration(action: string, duration: number) {
     MetricsService.redisCommonDurationHistogram.labels(action).observe(duration);
+  }
+
+  static setClusterComparisonValue(tag: string, value: number) {
+    MetricsService.clusterComparisonHistorgram.labels(tag).observe(value);
   }
 
   setConsumer(consumer: string, duration: number): void {
