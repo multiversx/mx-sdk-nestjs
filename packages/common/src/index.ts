@@ -110,4 +110,3 @@ export * from './common/rabbit';
 export * from './common';
 export * from './sc.interactions';
 export * from './common/caching/guest-caching';
-export * from './common/application-cluster-status';
