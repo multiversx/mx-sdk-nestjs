@@ -20,7 +20,7 @@ export class MetricsService {
   private static guestNoCacheHitsGauge: Gauge<string>;
   private static guestHitQueriesGauge: Gauge<string>;
   private static consumerHistogram: Histogram<string>;
-  private static clusterComparisonHistorgram: Histogram<string>;
+  private static clusterComparisonGauge: Gauge<string>;
   private static queuePublishGauge: Gauge<string>;
   private static queueConsumeGauge: Gauge<string>;
   private static duplicateQueueMessagesDetected: Gauge<string>;
@@ -45,12 +45,11 @@ export class MetricsService {
       });
     }
 
-    if (!MetricsService.clusterComparisonHistorgram) {
-      MetricsService.clusterComparisonHistorgram = new Histogram({
+    if (!MetricsService.clusterComparisonGauge) {
+      MetricsService.clusterComparisonGauge = new Gauge({
         name: 'cluster_data',
         help: 'Cluster comparison data',
-        labelNames: ['tag'],
-        buckets: [],
+        labelNames: ['name'],
       });
     }
 
@@ -284,7 +283,7 @@ export class MetricsService {
   }
 
   static setClusterComparisonValue(tag: string, value: number) {
-    MetricsService.clusterComparisonHistorgram.labels(tag).observe(value);
+    MetricsService.clusterComparisonGauge.labels(tag).set(value);
   }
 
   setConsumer(consumer: string, duration: number): void {
