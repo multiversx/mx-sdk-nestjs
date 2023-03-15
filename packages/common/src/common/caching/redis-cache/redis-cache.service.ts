@@ -137,8 +137,7 @@ export class RedisCacheService {
           return ['set', key, JSON.stringify(values[index]), 'EX', ttl.toString()];
         });
       }
-      const multi = this.redis.multi(commands);
-      await promisify(multi.exec).call(multi);
+      await this.asyncMulti(commands);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('RedisCache - An error occurred while trying to set many in redis cache.', {
@@ -221,8 +220,7 @@ export class RedisCacheService {
         });
       });
 
-      const multi = this.redis.multi(dels);
-      await promisify(multi.exec).call(multi);
+      await this.asyncMulti(dels);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error('An error occurred while trying to delete from redis cache by pattern.', {
@@ -494,6 +492,27 @@ export class RedisCacheService {
     }
   }
 
+
+  async keys(
+    key: string,
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.keys(key);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get keys from redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('KEYS', performanceProfiler.duration);
+    }
+  }
+
   async zrevrank(
     key: string,
     member: string,
@@ -513,6 +532,28 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('ZREVRANK', performanceProfiler.duration);
+    }
+  }
+
+  async sadd(
+    key: string,
+    ...values: string[]
+  ): Promise<number | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.sadd(key, ...values);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to sadd redis.', {
+          exception: error?.toString(),
+          key,
+          ...values,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SADD', performanceProfiler.duration);
     }
   }
 
@@ -607,6 +648,26 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('ZMSCORE', performanceProfiler.duration);
+    }
+  }
+
+  async scard(
+    key: string
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.scard(key);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to scard in redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SCARD', performanceProfiler.duration);
     }
   }
 
@@ -740,4 +801,13 @@ export class RedisCacheService {
       }
     };
   }
+
+  asyncMulti = async (commands: any[]) => {
+    const profiler = new PerformanceProfiler();
+    const multi = this.redis.multi(commands);
+    const data = await promisify(multi.exec).call(multi);
+    this.metricsService.setRedisDuration('MULTI', profiler.duration);
+    return data;
+  };
+
 }
