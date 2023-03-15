@@ -1,9 +1,5 @@
 node_modules/
 dist/
-*.tsbuildinfo
-
-packages/**/*.d.ts
-packages/**/*.js
 
 .DS_Store
 .idea/
