@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NestJS microservice template",
   "repository": {
     "type": "git",
@@ -8,8 +8,8 @@
   },
   "main": "dist/libs/common/src/index.js",
   "types": "dist/libs/common/src/index.d.ts",
-  "files": [	
-    "dist/libs/common/src/**/*"	
+  "files": [
+    "dist/libs/common/src/**/*"
   ],
   "keywords": [
     "multiversx",
@@ -34,12 +34,12 @@
     "@types/js-yaml": "^4.0.5",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "^16.11.10",
+    "@types/redis": "^2.8.32",
     "@types/tiny-async-pool": "^1.0.1",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.16.0",
-    "axios-mock-adapter": "^1.20.0",
-    "@types/redis": "^2.8.32"
+    "axios-mock-adapter": "^1.20.0"
   },
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
