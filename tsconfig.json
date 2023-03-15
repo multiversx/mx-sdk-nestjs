@@ -33,18 +33,10 @@
       "src/@types",
       "node_modules/@types"
     ],
+    "paths": {
+      "@multiversx/sdk-nestjs-common": [
+        "packages/common/src"
+      ],
+    }
   },
-  "include": [
-    "packages",
-    "tools"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/__tests__/*"
-  ],
-  "paths": {
-    "@multiversx/sdk-nestjs-common": [
-      "packages/common/src"
-    ],
-  }
 }
