@@ -19,7 +19,7 @@
     "common"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest --config=../../jest.config.json",
     "build": "tsc --project tsconfig.build.json",
     "build:dev": "tsc --project tsconfig.build.json --watch",
     "clean": "tsc --project tsconfig.build.json --clean"
@@ -27,9 +27,6 @@
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-env": "^7.16.11",
-    "@babel/preset-typescript": "^7.16.7",
     "@types/amqplib": "^0.8.2",
     "@types/axios": "^0.14.0",
     "@types/cache-manager": "^4.0.1",
@@ -41,13 +38,13 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.16.0",
-    "axios-mock-adapter": "^1.20.0"
+    "axios-mock-adapter": "^1.20.0",
+    "@types/redis": "^2.8.32"
   },
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^3.0.0",
     "@multiversx/sdk-native-auth-client": "^1.0.0",
     "@multiversx/sdk-native-auth-server": "^1.0.4",
-    "@types/redis": "^2.8.32",
     "agentkeepalive": "^4.2.1",
     "axios": "^0.27.2",
     "cache-manager": "^4.1.0",
@@ -69,25 +66,5 @@
     "@multiversx/sdk-wallet": "*",
     "@nestjs/common": "^9.1.4",
     "@nestjs/swagger": "^6.1.2"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>"
-    ]
   }
 }
