@@ -55,6 +55,7 @@ export * from './common/caching/entities/caching.module.options';
 export * from './common/caching/entities/caching.module.async.options';
 export * from './common/caching/entities/local.cache.value';
 export * from './common/swappable-settings';
+export * from './common/locker';
 export * from './common/logging/logging.module';
 export * from './common/elastic/elastic.module';
 export * from './common/elastic/elastic.service';
