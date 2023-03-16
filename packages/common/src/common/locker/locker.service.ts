@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Redis } from 'ioredis';
-import { PerformanceProfiler } from "src/utils/performance.profiler";
+import { PerformanceProfiler } from "../../utils/performance.profiler";
 import { MetricsService } from "../metrics/metrics.service";
 import { LOCKER_REDIS_CLIENT } from "./entities/constants";
 
