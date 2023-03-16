@@ -1,6 +1,6 @@
 import asyncPool from 'tiny-async-pool';
 import { Injectable, Optional } from '@nestjs/common';
-import { BatchUtils } from 'src/utils/batch.utils';
+import { BatchUtils } from '../../../utils/batch.utils';
 import { OriginLogger } from '../../../utils/origin.logger';
 import { PendingExecuter } from '../../../utils/pending.executer';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
@@ -285,12 +285,8 @@ export class ElrondCachingService {
     inMemoryTtl: number = ttl,
     cacheNullable: boolean = true
   ): Promise<T> {
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
-    const getOrAddFromRedisFunc = async (): Promise<T> => {
-      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl, cacheNullable);
-    };
 
-    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl, cacheNullable);
+    return await this.inMemoryCacheService.getOrSet<T>(key, createValueFunc, inMemoryTtl, cacheNullable);
   }
 
   async setOrUpdate<T>(
@@ -327,10 +323,7 @@ export class ElrondCachingService {
 
     for (const chunkKeys of chunks) {
 
-      let chunkValues = await this.redisCacheService.getMany<T>(chunkKeys);
-
-      chunkValues = chunkValues.map((value: any) => (value ? JSON.parse(value) : null));
-
+      const chunkValues = await this.redisCacheService.getMany<T>(chunkKeys);
       result.push(...chunkValues);
     }
 
@@ -368,12 +361,14 @@ export class ElrondCachingService {
   async batchProcessChunk<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {
     const keys = payload.map(element => cacheKeyFunction(element));
 
+    console.log({ keys });
     let cached: OUT[] = [];
     if (skipCache) {
       cached = new Array(keys.length).fill(null);
     } else {
       cached = await this.batchGetManyRemote(keys) as OUT[];
     }
+    console.log({ cached });
 
     const missing = cached
       .map((element, index) => (element === null ? index : false))

@@ -591,8 +591,8 @@ export class RedisCacheService {
 
   async zrange(
     setName: string,
-    start: number,
-    stop: number,
+    start: number | string,
+    stop: number | string,
     options?: {
       order?: 'REV' | undefined,
       withScores?: boolean,

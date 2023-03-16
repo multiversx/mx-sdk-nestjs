@@ -1,10 +1,11 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Global, Module } from '@nestjs/common';
 import { ElrondCachingService } from './elrond-caching.service';
 import { InMemoryCacheModule } from '../in-memory-cache/in-memory-cache.module';
 import { RedisCacheModule } from '../redis-cache/redis-cache.module';
 import { RedisCacheModuleAsyncOptions, RedisCacheModuleOptions } from '../redis-cache/options';
 import { InMemoryCacheOptions } from '../in-memory-cache/entities/in-memory-cache-options.interface';
 
+@Global()
 @Module({})
 export class ElrondCachingModule {
   static forRoot(
