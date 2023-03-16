@@ -40,7 +40,7 @@ export function Lock(options?: LockOptions) {
           ? options.redisLockOptions.argsToKeyMapper(args)
           : args.join(':');
         const lockerRedisKey = `${options?.redisLockOptions?.keyPrefix ?? 'locker'}:${stringifiedArgs}`;
-        const lockerRedisTtl = options?.redisLockOptions?.ttl ?? 10;
+        const lockerRedisTtl = options?.redisLockOptions?.ttl ?? 1;
 
         const isLockAcquired = await lockerService.isLockAcquired(lockerRedisKey, lockerRedisTtl);
         if (!isLockAcquired) {
