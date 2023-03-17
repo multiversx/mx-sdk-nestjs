@@ -25,9 +25,11 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+          cache-dependency-path: ./packages/common/package-lock.json
 
       - run: npm ci
       - run: npm test
+      - run: npm run build
 
       - name: Create release
         env:
