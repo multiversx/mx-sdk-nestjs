@@ -361,17 +361,15 @@ export class ElrondCachingService {
   async batchProcessChunk<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {
     const keys = payload.map(element => cacheKeyFunction(element));
 
-    console.log({ keys });
     let cached: OUT[] = [];
     if (skipCache) {
-      cached = new Array(keys.length).fill(null);
+      cached = new Array(keys.length).fill(undefined);
     } else {
       cached = await this.batchGetManyRemote(keys) as OUT[];
     }
-    console.log({ cached });
 
     const missing = cached
-      .map((element, index) => (element === null ? index : false))
+      .map((element, index) => (element === undefined ? index : false))
       .filter((element) => element !== false)
       .map(element => element as number);
 
@@ -387,7 +385,7 @@ export class ElrondCachingService {
       const params = {
         keys: keys.filter((_, index) => missing.includes(index)),
         values,
-        ttls: values.map((value) => (value ? ttl : Math.min(ttl, this.options.processTtl))),
+        ttls: values.map((value) => (value ? ttl : Math.min(ttl, this.options?.processTtl))),
       };
 
       await this.batchSet(params.keys, params.values, params.ttls);
