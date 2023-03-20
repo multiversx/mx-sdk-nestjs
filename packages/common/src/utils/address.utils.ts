@@ -11,9 +11,9 @@ export class AddressUtils {
     return Address.fromBech32(address).hex();
   }
 
-  static isAddressValid(address: string | Buffer): boolean {
+  static isAddressValid(address: string): boolean {
     try {
-      new Address(address);
+      Address.fromBech32(address);
       return true;
     } catch (error) {
       return false;
