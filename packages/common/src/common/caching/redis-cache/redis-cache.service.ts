@@ -40,11 +40,11 @@ export class RedisCacheService {
 
   async getMany<T>(
     keys: string[],
-  ): Promise<(T | undefined)[]> {
+  ): Promise<(T | undefined | null)[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const items = await this.redis.mget(keys);
-      const values = items.map(item => item ? JSON.parse(item) as T : undefined);
+      const values = items.map(item => item ? JSON.parse(item) as T : null);
       return values;
     } catch (error) {
       if (error instanceof Error) {

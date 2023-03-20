@@ -97,7 +97,7 @@ export class ElrondCachingService {
 
   getManyRemote<T>(
     keys: string[]
-  ): Promise<(T | undefined)[]> {
+  ): Promise<(T | undefined | null)[]> {
     return this.redisCacheService.getMany(keys);
   }
 
@@ -316,7 +316,7 @@ export class ElrondCachingService {
     return value;
   }
 
-  async batchGetManyRemote<T>(keys: string[]): Promise<(T | undefined)[]> {
+  async batchGetManyRemote<T>(keys: string[]): Promise<(T | undefined | null)[]> {
     const chunks = BatchUtils.splitArrayIntoChunks(keys, 100);
 
     const result = [];
@@ -369,7 +369,7 @@ export class ElrondCachingService {
     }
 
     const missing = cached
-      .map((element, index) => (element === undefined ? index : false))
+      .map((element, index) => (element === null ? index : false))
       .filter((element) => element !== false)
       .map(element => element as number);
 

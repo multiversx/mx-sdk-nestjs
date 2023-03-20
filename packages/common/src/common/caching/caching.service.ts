@@ -116,7 +116,7 @@ export class CachingService {
     if (value === undefined) {
       return value;
     }
-    
+
     return await this.localCacheService.setCacheValue<T>(key, value, ttl);
   }
 
@@ -197,7 +197,6 @@ export class CachingService {
 
   async batchProcessChunk<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {
     const keys = payload.map(element => cacheKeyFunction(element));
-
     let cached: OUT[] = [];
     if (skipCache) {
       cached = new Array(keys.length).fill(null);
@@ -338,7 +337,6 @@ export class CachingService {
     const chunks = BatchUtils.splitArrayIntoChunks(keys, 100);
 
     const result = [];
-
     for (const chunkKeys of chunks) {
       let chunkValues: any;
 
