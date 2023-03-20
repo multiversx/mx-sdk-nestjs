@@ -1,5 +1,5 @@
-import { Address } from "@multiversx/sdk-core";
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
+import { AddressUtils } from "../utils/address.utils";
 
 export class ParseAddressPipe implements PipeTransform<string | undefined, Promise<string | undefined>> {
   transform(value: string | undefined, metadata: ArgumentMetadata): Promise<string | undefined> {
@@ -8,12 +8,11 @@ export class ParseAddressPipe implements PipeTransform<string | undefined, Promi
         return resolve(undefined);
       }
 
-      try {
-        new Address(value);
+      if (AddressUtils.isAddressValid(value)) {
         return resolve(value);
-      } catch (error) {
-        throw new BadRequestException(`Validation failed for argument '${metadata.data}' (a bech32 address is expected)`);
       }
+
+      throw new BadRequestException(`Validation failed for argument '${metadata.data}' (a bech32 address is expected)`);
     });
   }
 }
