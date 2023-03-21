@@ -285,8 +285,12 @@ export class ElrondCachingService {
     inMemoryTtl: number = ttl,
     cacheNullable: boolean = true
   ): Promise<T> {
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
+    const getOrAddFromRedisFunc = async (): Promise<T> => {
+      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl, cacheNullable);
+    };
 
-    return await this.inMemoryCacheService.getOrSet<T>(key, createValueFunc, inMemoryTtl, cacheNullable);
+    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl, cacheNullable);
   }
 
   async setOrUpdate<T>(
