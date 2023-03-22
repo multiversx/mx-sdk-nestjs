@@ -589,6 +589,38 @@ export class RedisCacheService {
     }
   }
 
+  async zrangebyscore(
+    setName: string,
+    start: number | string,
+    stop: number | string,
+    options?: {
+      withScores?: boolean,
+    }
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      if (options?.withScores) {
+        return await this.redis.zrangebyscore(setName, start, stop, 'WITHSCORES');
+      }
+
+      return await this.redis.zrangebyscore(setName, start, stop);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to get zrangebyscore in redis.', {
+          exception: error?.toString(),
+          setName,
+          start,
+          stop,
+          options,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('ZRANGEBYSCORE', performanceProfiler.duration);
+    }
+  }
+
   async zrange(
     setName: string,
     start: number | string,

@@ -37,8 +37,8 @@ export class GuestCachingWarmer {
     const currentDate = moment().format(DATE_FORMAT);
     const previousMinute = moment().subtract(1, 'minute').format(DATE_FORMAT);
     const threshold = Number(options.cacheTriggerHitsThreshold || 100);
-    const keysToComputeCurrentMinute: string[] = await this.cachingService.zrange(`${REDIS_PREFIX}.${currentDate}.hits`, threshold, '+inf', { withScores: true });
-    const keysToComputePreviousMinute: string[] = await this.cachingService.zrange(`${REDIS_PREFIX}.${previousMinute}.hits`, threshold, '+inf', { withScores: true });
+    const keysToComputeCurrentMinute: string[] = await this.cachingService.zrangebyscore(`${REDIS_PREFIX}.${currentDate}.hits`, threshold, '+inf');
+    const keysToComputePreviousMinute: string[] = await this.cachingService.zrangebyscore(`${REDIS_PREFIX}.${previousMinute}.hits`, threshold, '+inf');
 
     const keysToCompute = [...keysToComputeCurrentMinute, ...keysToComputePreviousMinute].distinct();
     await Promise.allSettled(keysToCompute.map(async key => {

@@ -186,12 +186,20 @@ export class ElrondCachingService {
     return this.redisCacheService.zincrby(key, member, increment);
   }
 
-  zRangeByScoreRemote(
+  zRangeRemote(
     key: string,
     from: number,
     to: number,
   ): Promise<string[]> {
     return this.redisCacheService.zrange(key, from, to, { withScores: true });
+  }
+
+  zRangeByScoreRemote(
+    key: string,
+    from: number,
+    to: number,
+  ): Promise<string[]> {
+    return this.redisCacheService.zrangebyscore(key, from, to, { withScores: true });
   }
 
   decrementRemote(
@@ -618,7 +626,8 @@ export class ElrondCachingService {
   ): () => Promise<T> {
     return async () => {
       try {
-        return await this.executeWithPendingPromise(key, createValueFunc);
+        const data = await this.executeWithPendingPromise(key, createValueFunc);
+        return data;
       } catch (error) {
         if (error instanceof Error) {
           this.logger.error('ElrondCaching - An error occurred while trying to load value.', {
