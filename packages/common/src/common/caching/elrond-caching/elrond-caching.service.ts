@@ -1,11 +1,12 @@
 import asyncPool from 'tiny-async-pool';
-import { Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { BatchUtils } from '../../../utils/batch.utils';
 import { OriginLogger } from '../../../utils/origin.logger';
 import { PendingExecuter } from '../../../utils/pending.executer';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
 import { CachingModuleOptions } from '../entities/caching.module.options';
+import { ADDITIONAL_CACHING_OPTIONS } from '../entities/common';
 
 @Injectable()
 export class ElrondCachingService {
@@ -13,7 +14,7 @@ export class ElrondCachingService {
   private readonly logger = new OriginLogger(ElrondCachingService.name);
 
   constructor(
-    @Optional() private readonly options: CachingModuleOptions,
+    @Optional() @Inject(ADDITIONAL_CACHING_OPTIONS) private readonly options: CachingModuleOptions,
     private readonly inMemoryCacheService: InMemoryCacheService,
     private readonly redisCacheService: RedisCacheService,
   ) {
@@ -660,7 +661,6 @@ export class ElrondCachingService {
 
     return invalidatedKeys;
   }
-
 
   private getCacheTtl(): number {
     return 6;
