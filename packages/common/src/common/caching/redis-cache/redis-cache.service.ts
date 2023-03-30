@@ -94,6 +94,10 @@ export class RedisCacheService {
       return;
     }
 
+    if (typeof ttl === 'number' && ttl <= 0) {
+      return;
+    }
+
     const performanceProfiler = new PerformanceProfiler();
     try {
       if (!ttl) {
