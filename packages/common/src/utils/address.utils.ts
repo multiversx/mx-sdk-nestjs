@@ -84,7 +84,7 @@ export class AddressUtils {
     return false;
   }
 
-  static decodeCodeMetadata(codeMetadata: string): { isUpgradeable: boolean, isReadable: boolean, isPayable: boolean, isPayableBySmartContract: boolean } | undefined {
+  static decodeCodeMetadata(codeMetadata: string): { isUpgradeable: boolean, isReadable: boolean, isGuarded: boolean, isPayable: boolean, isPayableBySmartContract: boolean } | undefined {
     if (!codeMetadata) {
       return undefined;
     }
@@ -97,11 +97,12 @@ export class AddressUtils {
     const firstOctet = parseInt(codeHex.slice(0, 2), 16).toString(2).padStart(4, '0');
     const isUpgradeable = firstOctet.charAt(3) === '1';
     const isReadable = firstOctet.charAt(1) === '1';
+    const isGuarded = firstOctet.charAt(0) === '1';
 
     const secondOctet = parseInt(codeHex.slice(2), 16).toString(2).padStart(4, '0');
     const isPayable = secondOctet.charAt(2) === '1';
     const isPayableBySmartContract = secondOctet.charAt(1) === '1';
 
-    return { isUpgradeable, isReadable, isPayable, isPayableBySmartContract };
+    return { isUpgradeable, isReadable, isGuarded, isPayable, isPayableBySmartContract }; // Adăugăm "isGuarded" în obiectul returnat
   }
 }
