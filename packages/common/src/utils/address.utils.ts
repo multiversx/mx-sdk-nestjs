@@ -103,6 +103,6 @@ export class AddressUtils {
     const isPayable = secondOctet.charAt(2) === '1';
     const isPayableBySmartContract = secondOctet.charAt(1) === '1';
 
-    return { isUpgradeable, isReadable, isGuarded, isPayable, isPayableBySmartContract }; // Adăugăm "isGuarded" în obiectul returnat
+    return { isUpgradeable, isReadable, isGuarded, isPayable, isPayableBySmartContract };
   }
 }
