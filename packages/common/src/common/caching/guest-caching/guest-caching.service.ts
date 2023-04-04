@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import moment from 'moment';
 import * as crypto from 'crypto';
-import { CachingService } from '../caching.service';
+import { RedisCacheService } from '../redis-cache/redis-cache.service';
 import { MetricsService } from '../../metrics/metrics.service';
 import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheOptions, REDIS_PREFIX } from '../entities/guest.caching';
 
@@ -11,7 +11,7 @@ const cacheHitsCounter: any = {};
 
 @Injectable()
 export class GuestCachingService {
-  constructor(private cacheService: CachingService) { }
+  constructor(private cacheService: RedisCacheService) { }
 
   public async getOrSetRequestCache(req: any, options?: IGuestCacheOptions) {
     if (
@@ -65,18 +65,18 @@ export class GuestCachingService {
 
     const redisCounterKey = `${REDIS_PREFIX}.${currentMinute}.hits`;
     if (cacheHitsCurrentMinute[gqlQueryMd5] >= batchSize) {
-      await this.cacheService.zIncrBy(redisCounterKey, cacheHitsCurrentMinute[gqlQueryMd5], gqlQueryMd5);
+      await this.cacheService.zincrby(redisCounterKey, gqlQueryMd5, cacheHitsCurrentMinute[gqlQueryMd5]);
     }
 
     if (isFirstEntryForThisKey) {
       // If it is first entry for this key, set expire date and request body
-      await this.cacheService.zIncrBy(redisCounterKey, 0, gqlQueryMd5);
-      await this.cacheService.setCache(redisQueryKey, redisValue, 2 * 60);
-      await this.cacheService.setTtlRemote(redisCounterKey, 2 * 60);
+      await this.cacheService.zincrby(redisCounterKey, gqlQueryMd5, 0);
+      await this.cacheService.set(redisQueryKey, redisValue, 2 * 60);
+      await this.cacheService.expire(redisCounterKey, 2 * 60);
     }
 
     // If the value for this is already computed
-    const cacheResponse: any = await this.cacheService.getCache(redisQueryResponse);
+    const cacheResponse: any = await this.cacheService.get(redisQueryResponse);
 
     // Delete data for previous minute
     if (cacheHitsCounter[previousMinute]) {

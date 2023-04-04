@@ -68,9 +68,13 @@ export class InMemoryCacheService {
         };
     }
 
-    this.localCache.set(key, writeValue, {
-      ttl: ttl * 1000, // Convert to milliseconds
-    });
+    const ttlToMilliseconds = ttl * 1000; // Convert to milliseconds
+
+    if (ttlToMilliseconds > 0) { // Save only if ttl is greater than 0
+      this.localCache.set(key, writeValue, {
+        ttl: ttlToMilliseconds,
+      });
+    }
   }
 
   async setMany<T>(

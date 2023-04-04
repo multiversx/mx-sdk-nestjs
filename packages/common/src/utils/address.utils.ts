@@ -20,6 +20,16 @@ export class AddressUtils {
     }
   }
 
+
+  static isValidHexAddress(address: string): boolean {
+    try {
+      Address.fromHex(address);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   private static calculateMasks(numOfShards: number) {
     const n = Math.ceil(Math.log2(numOfShards));
     const mask1 = (1 << n) - 1;
