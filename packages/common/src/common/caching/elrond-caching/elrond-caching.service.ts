@@ -376,7 +376,7 @@ export class ElrondCachingService {
 
     let cached: OUT[] = [];
     if (skipCache) {
-      cached = new Array(keys.length).fill(undefined);
+      cached = new Array(keys.length).fill(null);
     } else {
       cached = await this.batchGetManyRemote(keys) as OUT[];
     }
