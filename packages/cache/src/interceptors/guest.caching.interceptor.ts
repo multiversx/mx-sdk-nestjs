@@ -1,9 +1,9 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, of } from "rxjs";
-import { NoCacheOptions } from "../decorators";
-import { DecoratorUtils } from "../utils/decorator.utils";
-import { IGuestCacheOptions } from "../common/caching/entities/guest.caching";
-import { GuestCachingService } from "../common/caching/guest-caching/guest-caching.service";
+import { NoCacheOptions } from "@multiversx/sdk-nestjs-common/src/decorators";
+import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/src/utils/decorator.utils";
+import { IGuestCacheOptions } from "../entities/guest.caching";
+import { GuestCachingService } from "../guest-caching/guest-caching.service";
 
 @Injectable()
 export class GuestCachingInterceptor implements NestInterceptor {

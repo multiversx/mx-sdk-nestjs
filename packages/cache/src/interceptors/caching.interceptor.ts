@@ -2,12 +2,12 @@ import { CallHandler, ExecutionContext, HttpException, Injectable, NestIntercept
 import { HttpAdapterHost } from "@nestjs/core";
 import { Observable, of, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
-import { MetricsService } from "../common/metrics/metrics.service";
-import { CachingService } from "../common/caching/caching.service";
-import { NoCacheOptions } from "../decorators/no.cache";
-import { DecoratorUtils } from "../utils/decorator.utils";
-import { Constants } from "../utils/constants";
-import { ElrondCachingService } from "../common";
+import { MetricsService } from "@multiversx/sdk-nestjs-common/src/common/metrics/metrics.service";
+import { CachingService } from "../caching.service";
+import { NoCacheOptions } from "@multiversx/sdk-nestjs-common/src/decorators/no.cache";
+import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/src/utils/decorator.utils";
+import { Constants } from "@multiversx/sdk-nestjs-common/src/utils/constants";
+import { ElrondCachingService } from "../elrond-caching";
 
 @Injectable()
 export class CachingInterceptor implements NestInterceptor {

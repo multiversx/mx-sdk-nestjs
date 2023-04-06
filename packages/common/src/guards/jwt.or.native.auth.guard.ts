@@ -1,10 +1,10 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, Optional } from '@nestjs/common';
-import { CachingService } from '../common/caching/caching.service';
+// CHANGE HERE
+import { CachingService, ElrondCachingService } from '@multiversx/sdk-nestjs-cache';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { JwtAuthenticateGuard } from './jwt.authenticate.guard';
 import { NativeAuthGuard } from './native.auth.guard';
-import { ElrondCachingService } from '../common';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {

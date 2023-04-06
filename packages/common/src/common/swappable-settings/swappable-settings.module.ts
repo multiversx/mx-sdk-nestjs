@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { RedisOptions } from 'ioredis';
-import { RedisModuleAsyncOptions } from '../redis/options';
-import { RedisModule } from '../redis/redis.module';
+// CHANGE HERE
+import { RedisModuleAsyncOptions, RedisModule } from '@multiversx/sdk-nestjs-redis';
 import { SWAPPABLE_SETTINGS_REDIS_CLIENT } from './entities/constants';
 import { SwappableSettingsService } from './swappable-settings.service';
 

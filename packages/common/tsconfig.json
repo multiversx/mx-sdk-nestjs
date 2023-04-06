@@ -36,7 +36,9 @@
   "include": [
     "src",
     "test",
-    "config"
+    "config",
+    "../cache/src/interceptors/caching.interceptor.ts",
+    "../cache/src/interceptors/guest.caching.interceptor.ts"
   ],
   "exclude": [
     "node_modules",

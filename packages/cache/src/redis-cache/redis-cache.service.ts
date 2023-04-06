@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { MetricsService } from '@multiversx/sdk-nestjs-common';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-common';
 import { OriginLogger } from '@multiversx/sdk-nestjs-common';
-import { REDIS_CLIENT_TOKEN } from '@multiversx/sdk-nestjs-common';
+import { REDIS_CLIENT_TOKEN } from '@multiversx/sdk-nestjs-redis';
 import { promisify } from 'util';
 
 @Injectable()

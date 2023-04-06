@@ -1,10 +1,9 @@
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@nestjs/common';
-import { ElrondCachingService } from '../common/caching/elrond-caching/elrond-caching.service';
+import { ElrondCachingService, CachingService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { NoAuthOptions } from '../decorators';
 import { DecoratorUtils } from '../utils/decorator.utils';
 import { PerformanceProfiler } from '../utils/performance.profiler';
-import { CachingService } from '../common/caching/caching.service';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';

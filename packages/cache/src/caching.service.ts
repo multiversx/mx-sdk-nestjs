@@ -3,6 +3,7 @@ const { promisify } = require('util');
 import { createClient } from 'redis';
 import asyncPool from 'tiny-async-pool';
 // CHANGE HERE
+import '@multiversx/sdk-nestjs-common/src/utils/extensions/array.extensions';
 import { PerformanceProfiler } from "@multiversx/sdk-nestjs-common";
 import { LocalCacheService } from "./local.cache.service";
 import { MetricsService } from "@multiversx/sdk-nestjs-common";
