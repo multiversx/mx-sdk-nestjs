@@ -3,7 +3,7 @@ import { RedisCacheService } from './redis-cache.service';
 import { RedisCacheModuleOptions, RedisCacheModuleAsyncOptions } from './options';
 // CHANGE HERE
 import { MetricsModule } from '@multiversx/sdk-nestjs-common';
-import { RedisModule } from '@multiversx/sdk-nestjs-common';
+import { RedisModule } from '@multiversx/sdk-nestjs-redis';
 
 @Module({})
 export class RedisCacheModule {

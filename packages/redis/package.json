@@ -1,9 +1,9 @@
 {
-  "name": "@multiversx/sdk-nestjs-cache",
+  "name": "@multiversx/sdk-nestjs-redis",
   "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs cache module",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
+  "description": "Multiversx SDK Nestjs redis client module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],
@@ -20,7 +20,7 @@
   "keywords": [
     "multiversx",
     "nestjs",
-    "cache"
+    "redis"
   ],
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -29,7 +29,6 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.1",
-    "@types/node": "^16.11.10",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.16.0",
     "babel-jest": "^27.5.1",
@@ -38,13 +37,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "lru-cache": "^8.0.4",
-    "nest-winston": "^1.6.2",
-    "redis": "^3.1.2",
-    "tiny-async-pool": "^1.2.0",
-    "uuid": "^8.3.2",
-    "winston": "^3.7.2",
-    "winston-daily-rotate-file": "^4.6.1"
+    "@types/redis": "^2.8.32",
+    "ioredis": "^5.2.3"
   },
   "peerDependencies": {
     "@nestjs/common": "^9.1.4"

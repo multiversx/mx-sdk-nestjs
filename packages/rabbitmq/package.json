@@ -1,9 +1,9 @@
 {
-  "name": "@multiversx/sdk-nestjs-cache",
+  "name": "@multiversx/sdk-nestjs-rabbitmq",
   "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs cache module",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
+  "description": "Multiversx SDK Nestjs rabbitmq client module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],
@@ -20,7 +20,7 @@
   "keywords": [
     "multiversx",
     "nestjs",
-    "cache"
+    "rabbitmq"
   ],
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -28,8 +28,8 @@
     "@babel/core": "^7.17.8",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
+    "@types/uuid": "^8.3.4",
     "@types/jest": "^27.4.1",
-    "@types/node": "^16.11.10",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.16.0",
     "babel-jest": "^27.5.1",
@@ -38,13 +38,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "lru-cache": "^8.0.4",
-    "nest-winston": "^1.6.2",
-    "redis": "^3.1.2",
-    "tiny-async-pool": "^1.2.0",
     "uuid": "^8.3.2",
-    "winston": "^3.7.2",
-    "winston-daily-rotate-file": "^4.6.1"
+    "@golevelup/nestjs-rabbitmq": "^3.0.0"
   },
   "peerDependencies": {
     "@nestjs/common": "^9.1.4"
