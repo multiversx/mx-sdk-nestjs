@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { PerformanceProfiler } from '../../utils/performance.profiler';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-optimisation';
 import { MetricsService } from '../metrics/metrics.service';
 import { SWAPPABLE_SETTINGS_REDIS_CLIENT } from './entities/constants';
 

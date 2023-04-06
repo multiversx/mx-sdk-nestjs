@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ApiService } from "../api/api.service";
-import { PerformanceProfiler } from "../../utils/performance.profiler";
+import { PerformanceProfiler } from "@multiversx/sdk-nestjs-optimisation";
 import { MetricsService } from "../../common/metrics/metrics.service";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticMetricType } from "../metrics/entities/elastic.metric.type";

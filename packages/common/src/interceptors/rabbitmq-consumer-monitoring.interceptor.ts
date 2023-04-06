@@ -5,7 +5,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { isRabbitContext } from '@golevelup/nestjs-rabbitmq';
 import { MetricsService } from 'src/common/metrics/metrics.service';
-import { PerformanceProfiler } from 'src/utils/performance.profiler';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-optimisation';
 
 @Injectable()
 export class RabbitMqConsumerMonitoringInterceptor implements NestInterceptor {

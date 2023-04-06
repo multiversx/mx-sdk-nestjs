@@ -2,10 +2,10 @@ import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import axios, { AxiosRequestConfig } from "axios";
 import Agent from 'agentkeepalive';
 import { MetricsService } from "../../common/metrics/metrics.service";
-import { PerformanceProfiler } from "../../utils/performance.profiler";
+import { PerformanceProfiler } from "@multiversx/sdk-nestjs-optimisation";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
-import { PendingExecuter } from "../../utils/pending.executer";
+import { PendingExecuter } from "@multiversx/sdk-nestjs-optimisation";
 
 @Injectable()
 export class ApiService {

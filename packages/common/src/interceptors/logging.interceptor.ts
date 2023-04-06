@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, HttpStatus, Injectable, NestInterceptor 
 import { Observable, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
 import { MetricsService } from "../common/metrics/metrics.service";
-import { PerformanceProfiler } from "../utils/performance.profiler";
+import { PerformanceProfiler } from "@multiversx/sdk-nestjs-optimisation";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

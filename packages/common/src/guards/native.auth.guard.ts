@@ -3,7 +3,7 @@ import { ElrondCachingService, CachingService } from '@multiversx/sdk-nestjs-cac
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { NoAuthOptions } from '../decorators';
 import { DecoratorUtils } from '../utils/decorator.utils';
-import { PerformanceProfiler } from '../utils/performance.profiler';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-optimisation';
 import { ErdnestConfigService } from '../common/config/erdnest.config.service';
 import { ERDNEST_CONFIG_SERVICE } from '../utils/erdnest.constants';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';

@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
-import { CpuProfiler } from "../utils/cpu.profiler";
+import { CpuProfiler } from "@multiversx/sdk-nestjs-optimisation";
 import { MetricsService } from "../common/metrics/metrics.service";
 
 @Injectable()
