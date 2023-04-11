@@ -2,11 +2,7 @@ import { CallHandler, ExecutionContext, HttpException, Injectable, NestIntercept
 import { HttpAdapterHost } from "@nestjs/core";
 import { Observable, of, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
-import { MetricsService } from "@multiversx/sdk-nestjs-common/src/common/metrics/metrics.service";
-import { CachingService } from "../caching.service";
-import { NoCacheOptions } from "@multiversx/sdk-nestjs-common/src/decorators/no.cache";
-import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/src/utils/decorator.utils";
-import { Constants } from "@multiversx/sdk-nestjs-common/src/utils/constants";
+import { MetricsService, NoCacheOptions, DecoratorUtils, Constants } from "@multiversx/sdk-nestjs-common";
 import { ElrondCachingService } from "../elrond-caching";
 
 @Injectable()
@@ -14,7 +10,7 @@ export class CachingInterceptor implements NestInterceptor {
   private pendingRequestsDictionary: { [key: string]: any; } = {};
 
   constructor(
-    private readonly cachingService: CachingService | ElrondCachingService,
+    private readonly cachingService: ElrondCachingService,
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly metricsService: MetricsService,
   ) { }
@@ -60,9 +56,7 @@ export class CachingInterceptor implements NestInterceptor {
         }
       }
 
-      const cachedValue = this.cachingService instanceof ElrondCachingService
-        ? await this.cachingService.getLocal(cacheKey)
-        : await this.cachingService.getCacheLocal(cacheKey);
+      const cachedValue = await this.cachingService.getLocal(cacheKey);
       if (cachedValue) {
         this.metricsService.incrementCachedApiHit(apiFunction);
         return of(cachedValue);
@@ -82,9 +76,7 @@ export class CachingInterceptor implements NestInterceptor {
             pendingRequestResolver(result);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
-            this.cachingService instanceof ElrondCachingService
-              ? await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * 3)
-              : await this.cachingService.setCacheLocal(cacheKey ?? '', result, Constants.oneSecond() * 3);
+            await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * 3);
           }),
           catchError((err) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];

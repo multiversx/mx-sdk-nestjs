@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@nestjs/common';
-import { ElrondCachingService, CachingService } from '@multiversx/sdk-nestjs-cache';
+import { ElrondCachingService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { NoAuthOptions } from '../decorators';
 import { DecoratorUtils } from '../utils/decorator.utils';
@@ -21,7 +21,6 @@ export class NativeAuthGuard implements CanActivate {
 
   constructor(
     @Inject(ERDNEST_CONFIG_SERVICE) erdnestConfigService: ErdnestConfigService,
-    @Optional() cachingService?: CachingService,
     @Optional() elrondCachingService?: ElrondCachingService,
   ) {
     this.authServer = new NativeAuthServer({
@@ -40,20 +39,11 @@ export class NativeAuthGuard implements CanActivate {
             return await elrondCachingService.get<T>(key);
           }
 
-          if (cachingService) {
-            return await cachingService.getCache<T>(key);
-          }
-
           throw new Error('CachingService or ElrondCachingService is not available in the context');
         },
         setValue: async function <T>(key: string, value: T, ttl: number): Promise<void> {
           if (elrondCachingService) {
             return await elrondCachingService.set<T>(key, value, ttl);
-          }
-
-          if (cachingService) {
-            await cachingService.setCache<T>(key, value, ttl);
-            return;
           }
 
           throw new Error('CachingService or ElrondCachingService is not available in the context');

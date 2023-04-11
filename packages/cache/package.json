@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-cache",
-  "version": "0.5.2",
+  "version": "0.0.23",
   "description": "Multiversx SDK Nestjs cache module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -38,6 +38,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@multiversx/sdk-nestjs-common": "^0.0.23",
     "lru-cache": "^8.0.4",
     "nest-winston": "^1.6.2",
     "redis": "^3.1.2",

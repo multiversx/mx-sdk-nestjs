@@ -1,7 +1,7 @@
 import moment from 'moment';
 import axios from 'axios';
 import { Injectable } from '@nestjs/common';
-import '@multiversx/sdk-nestjs-common/src/utils/extensions/array.extensions';
+import '@multiversx/sdk-nestjs-common/lib/src/utils/extensions/array.extensions';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
 // CHANGE HERE
 import { MetricsService } from '@multiversx/sdk-nestjs-common';

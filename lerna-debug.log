@@ -1,0 +1,13 @@
+39 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
+39 error npm ERR! code E404
+39 error npm ERR! 404 Not Found - GET https://registry.npmjs.org/@multiversx%2fnestjs-sdk-common - Not found
+39 error npm ERR! 404
+39 error npm ERR! 404  '@multiversx/nestjs-sdk-common@0.0.8' is not in this registry.
+39 error npm ERR! 404
+39 error npm ERR! 404 Note that you can also install from a
+39 error npm ERR! 404 tarball, folder, http url, or git url.
+39 error
+39 error npm ERR! A complete log of this run can be found in:
+39 error npm ERR!     /Users/cozy/.npm/_logs/2023-04-10T11_19_51_591Z-debug-0.log
+39 error     at makeError (/Users/cozy/work/elrond/erdnest/node_modules/execa/lib/error.js:60:11)
+39 error     at handlePromise (/Users/cozy/work/elrond/erdnest/node_modules/execa/index.js:118:26)
