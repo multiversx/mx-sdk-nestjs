@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { verify } from 'jsonwebtoken';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs-optimisation';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { ErdnestConfigService, ERDNEST_CONFIG_SERVICE, DecoratorUtils, NoAuthOptions, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 
 @Injectable()

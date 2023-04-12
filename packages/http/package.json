@@ -1,7 +1,7 @@
 {
-  "name": "@multiversx/sdk-nestjs-auth",
+  "name": "@multiversx/sdk-nestjs-http",
   "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs auth module",
+  "description": "Multiversx SDK Nestjs http module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -20,7 +20,7 @@
   "keywords": [
     "multiversx",
     "nestjs",
-    "auth"
+    "http"
   ],
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -36,9 +36,7 @@
     "jest": "^27.5.1",
     "typescript": "^4.3.5"
   },
-  "dependencies": {
-    "@multiversx/sdk-native-auth-server": "^1.0.6"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "@nestjs/common": "^9.1.4"
   },

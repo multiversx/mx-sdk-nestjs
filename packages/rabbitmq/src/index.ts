@@ -5,3 +5,4 @@ export * from './subscribers.decorators';
 export * from './entities/options';
 export * from './entities/async-options.interface';
 export * from './rabbit-context-checker.service';
+export * from './interceptors/rabbitmq-consumer-monitoring.interceptor';

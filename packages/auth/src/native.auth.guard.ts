@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@ne
 import { ElrondCachingService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { NoAuthOptions, DecoratorUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs-optimisation';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 
 /**

@@ -1,7 +1,7 @@
 {
-  "name": "@multiversx/sdk-nestjs-auth",
+  "name": "@multiversx/sdk-nestjs-elastic",
   "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs auth module",
+  "description": "Multiversx SDK Nestjs elastic client module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -20,7 +20,7 @@
   "keywords": [
     "multiversx",
     "nestjs",
-    "auth"
+    "redis"
   ],
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -37,7 +37,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-native-auth-server": "^1.0.6"
+    "@types/redis": "^2.8.32",
+    "ioredis": "^5.2.3"
   },
   "peerDependencies": {
     "@nestjs/common": "^9.1.4"

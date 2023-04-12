@@ -35,7 +35,8 @@
   },
   "include": [
     "src",
-    "test"
+    "test",
+    "config"
   ],
   "exclude": [
     "node_modules",

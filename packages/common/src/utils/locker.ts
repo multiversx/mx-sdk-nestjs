@@ -1,8 +1,6 @@
 import { Logger } from "@nestjs/common";
-import { MetricsService } from "../common/metrics/metrics.service";
+import { MetricsService, CpuProfiler, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ContextTracker } from "./context.tracker";
-import { CpuProfiler } from "@multiversx/sdk-nestjs-optimisation";
-import { PerformanceProfiler } from "@multiversx/sdk-nestjs-optimisation";
 
 export class Locker {
   private static lockArray: string[] = [];
