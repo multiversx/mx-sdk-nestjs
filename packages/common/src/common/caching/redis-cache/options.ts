@@ -16,11 +16,19 @@ export class RedisCacheModuleOptions {
     db?: number | undefined;
   };
 
+  additionalOptions?: {
+    poolLimit?: number | undefined;
+    processTtl?: number | undefined;
+  };
+
   constructor(
     options: RedisCacheModuleOptions['config'],
+    additionalOptions?: RedisCacheModuleOptions['additionalOptions'],
   ) {
     this.config = {};
+    this.additionalOptions = {};
     Object.assign(this.config, options);
+    Object.assign(this.additionalOptions, additionalOptions);
   }
 }
 

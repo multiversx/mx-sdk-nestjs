@@ -8,6 +8,13 @@ export class WildcardQuery extends AbstractQuery {
   }
 
   getQuery(): any {
-    return { wildcard: { [this.key]: this.value } };
+    return {
+      wildcard: {
+        [this.key]: {
+          value: this.value,
+          case_insensitive: true,
+        },
+      },
+    };
   }
 }
