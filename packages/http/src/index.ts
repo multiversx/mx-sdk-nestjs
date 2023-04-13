@@ -12,4 +12,5 @@ export * from './interceptors/origin.interceptor';
 export * from './interceptors/pagination.interceptor';
 export * from './interceptors/query.check.interceptor';
 export * from './interceptors/request.cpu.time.interceptor';
+export * from './interceptors/cleanup.interceptor';
 export * from './api.utils';
