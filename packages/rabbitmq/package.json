@@ -42,7 +42,8 @@
     "@golevelup/nestjs-rabbitmq": "^3.0.0"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.1.4"
+    "@nestjs/common": "^9.1.4",
+    "@multiversx/sdk-nestjs-common": "*"
   },
   "publishConfig": {
     "registry": "http://localhost:4873/"

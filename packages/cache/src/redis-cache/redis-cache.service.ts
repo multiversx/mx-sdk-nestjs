@@ -1,8 +1,7 @@
 import Redis from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
 // CHANGE HERE
-import { MetricsService } from '@multiversx/sdk-nestjs-common';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs-common';
+import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { OriginLogger } from '@multiversx/sdk-nestjs-common';
 import { REDIS_CLIENT_TOKEN } from '@multiversx/sdk-nestjs-redis';
 import { promisify } from 'util';

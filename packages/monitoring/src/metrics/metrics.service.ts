@@ -27,183 +27,179 @@ export class MetricsService {
   private static isDefaultMetricsRegistered: boolean = false;
 
   constructor() {
-    try {
-      if (!MetricsService.apiCpuTimeHistogram) {
-        MetricsService.apiCpuTimeHistogram = new Histogram({
-          name: 'api_cpu_time',
-          help: 'API CPU time',
-          labelNames: ['endpoint'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.apiCpuTimeHistogram) {
+      MetricsService.apiCpuTimeHistogram = new Histogram({
+        name: 'api_cpu_time',
+        help: 'API CPU time',
+        labelNames: ['endpoint'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.apiCallsHistogram) {
-        MetricsService.apiCallsHistogram = new Histogram({
-          name: 'api',
-          help: 'API Calls',
-          labelNames: ['endpoint', 'origin', 'code'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.apiCallsHistogram) {
+      MetricsService.apiCallsHistogram = new Histogram({
+        name: 'api',
+        help: 'API Calls',
+        labelNames: ['endpoint', 'origin', 'code'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.clusterComparisonGauge) {
-        MetricsService.clusterComparisonGauge = new Gauge({
-          name: 'cluster_data',
-          help: 'Cluster comparison data',
-          labelNames: ['name'],
-        });
-      }
+    if (!MetricsService.clusterComparisonGauge) {
+      MetricsService.clusterComparisonGauge = new Gauge({
+        name: 'cluster_data',
+        help: 'Cluster comparison data',
+        labelNames: ['name'],
+      });
+    }
 
-      if (!MetricsService.pendingRequestsHistogram) {
-        MetricsService.pendingRequestsHistogram = new Gauge({
-          name: 'pending_requests',
-          help: 'Pending requests',
-          labelNames: ['endpoint'],
-        });
-      }
+    if (!MetricsService.pendingRequestsHistogram) {
+      MetricsService.pendingRequestsHistogram = new Gauge({
+        name: 'pending_requests',
+        help: 'Pending requests',
+        labelNames: ['endpoint'],
+      });
+    }
 
-      if (!MetricsService.externalCallsHistogram) {
-        MetricsService.externalCallsHistogram = new Histogram({
-          name: 'external_apis',
-          help: 'External Calls',
-          labelNames: ['system'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.externalCallsHistogram) {
+      MetricsService.externalCallsHistogram = new Histogram({
+        name: 'external_apis',
+        help: 'External Calls',
+        labelNames: ['system'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.elasticDurationHistogram) {
-        MetricsService.elasticDurationHistogram = new Histogram({
-          name: 'elastic_duration',
-          help: 'Elastic Duration',
-          labelNames: ['type', 'index'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.elasticDurationHistogram) {
+      MetricsService.elasticDurationHistogram = new Histogram({
+        name: 'elastic_duration',
+        help: 'Elastic Duration',
+        labelNames: ['type', 'index'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.redisDurationHistogram) {
-        MetricsService.redisDurationHistogram = new Histogram({
-          name: 'redis_duration',
-          help: 'Redis Duration',
-          labelNames: ['action'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.redisDurationHistogram) {
+      MetricsService.redisDurationHistogram = new Histogram({
+        name: 'redis_duration',
+        help: 'Redis Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.redisCommonDurationHistogram) {
-        MetricsService.redisCommonDurationHistogram = new Histogram({
-          name: 'redis_common_duration',
-          help: 'Redis Common Duration',
-          labelNames: ['action'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.redisCommonDurationHistogram) {
+      MetricsService.redisCommonDurationHistogram = new Histogram({
+        name: 'redis_common_duration',
+        help: 'Redis Common Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.jobsHistogram) {
-        MetricsService.jobsHistogram = new Histogram({
-          name: 'jobs',
-          help: 'Jobs',
-          labelNames: ['job_identifier', 'result'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.jobsHistogram) {
+      MetricsService.jobsHistogram = new Histogram({
+        name: 'jobs',
+        help: 'Jobs',
+        labelNames: ['job_identifier', 'result'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.pendingApiHitGauge) {
-        MetricsService.pendingApiHitGauge = new Gauge({
-          name: 'pending_api_hits',
-          help: 'Number of hits for pending API calls',
-          labelNames: ['endpoint'],
-        });
-      }
+    if (!MetricsService.pendingApiHitGauge) {
+      MetricsService.pendingApiHitGauge = new Gauge({
+        name: 'pending_api_hits',
+        help: 'Number of hits for pending API calls',
+        labelNames: ['endpoint'],
+      });
+    }
 
-      if (!MetricsService.cachedApiHitGauge) {
-        MetricsService.cachedApiHitGauge = new Gauge({
-          name: 'cached_api_hits',
-          help: 'Number of hits for cached API calls',
-          labelNames: ['endpoint'],
-        });
-      }
+    if (!MetricsService.cachedApiHitGauge) {
+      MetricsService.cachedApiHitGauge = new Gauge({
+        name: 'cached_api_hits',
+        help: 'Number of hits for cached API calls',
+        labelNames: ['endpoint'],
+      });
+    }
 
-      if (!MetricsService.guestNoCacheHitsGauge) {
-        MetricsService.guestNoCacheHitsGauge = new Gauge({
-          name: 'guest_no_cache_hits',
-          help: 'Request no-cache hits for guest users',
-          labelNames: [],
-        });
-      }
+    if (!MetricsService.guestNoCacheHitsGauge) {
+      MetricsService.guestNoCacheHitsGauge = new Gauge({
+        name: 'guest_no_cache_hits',
+        help: 'Request no-cache hits for guest users',
+        labelNames: [],
+      });
+    }
 
-      if (!MetricsService.guestHitsGauge) {
-        MetricsService.guestHitsGauge = new Gauge({
-          name: 'guest_hits',
-          help: 'Request hits for guest users',
-          labelNames: [],
-        });
-      }
+    if (!MetricsService.guestHitsGauge) {
+      MetricsService.guestHitsGauge = new Gauge({
+        name: 'guest_hits',
+        help: 'Request hits for guest users',
+        labelNames: [],
+      });
+    }
 
-      if (!MetricsService.guestHitQueriesGauge) {
-        MetricsService.guestHitQueriesGauge = new Gauge({
-          name: 'guest_hit_queries',
-          help: 'Distinct queries for guest hit caching',
-          labelNames: [],
-        });
-      }
+    if (!MetricsService.guestHitQueriesGauge) {
+      MetricsService.guestHitQueriesGauge = new Gauge({
+        name: 'guest_hit_queries',
+        help: 'Distinct queries for guest hit caching',
+        labelNames: [],
+      });
+    }
 
-      if (!MetricsService.consumerHistogram) {
-        MetricsService.consumerHistogram = new Histogram({
-          name: 'consumer',
-          help: 'Consumer jobs',
-          labelNames: ['consumer'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.consumerHistogram) {
+      MetricsService.consumerHistogram = new Histogram({
+        name: 'consumer',
+        help: 'Consumer jobs',
+        labelNames: ['consumer'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.queuePublishGauge) {
-        MetricsService.queuePublishGauge = new Gauge({
-          name: 'queue_publish',
-          help: 'Messages published to queue',
-          labelNames: ['queue', 'source'],
-        });
-      }
+    if (!MetricsService.queuePublishGauge) {
+      MetricsService.queuePublishGauge = new Gauge({
+        name: 'queue_publish',
+        help: 'Messages published to queue',
+        labelNames: ['queue', 'source'],
+      });
+    }
 
-      if (!MetricsService.queueConsumeGauge) {
-        MetricsService.queueConsumeGauge = new Gauge({
-          name: 'queue_consume',
-          help: 'Messages consumed from queue',
-          labelNames: ['queue', 'handler'],
-        });
-      }
+    if (!MetricsService.queueConsumeGauge) {
+      MetricsService.queueConsumeGauge = new Gauge({
+        name: 'queue_consume',
+        help: 'Messages consumed from queue',
+        labelNames: ['queue', 'handler'],
+      });
+    }
 
-      if (!MetricsService.duplicateQueueMessagesDetected) {
-        MetricsService.duplicateQueueMessagesDetected = new Gauge({
-          name: 'queue_duplicated_messages',
-          help: 'Duplicated messages detected in queue',
-          labelNames: ['queue', 'source'],
-        });
-      }
+    if (!MetricsService.duplicateQueueMessagesDetected) {
+      MetricsService.duplicateQueueMessagesDetected = new Gauge({
+        name: 'queue_duplicated_messages',
+        help: 'Duplicated messages detected in queue',
+        labelNames: ['queue', 'source'],
+      });
+    }
 
-      if (!MetricsService.rabbitConsumerDurationHistogram) {
-        MetricsService.rabbitConsumerDurationHistogram = new Histogram({
-          name: 'rabbit_consumer_duration',
-          help: 'Rabbit consumer duration',
-          labelNames: ['queue', 'handler'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.rabbitConsumerDurationHistogram) {
+      MetricsService.rabbitConsumerDurationHistogram = new Histogram({
+        name: 'rabbit_consumer_duration',
+        help: 'Rabbit consumer duration',
+        labelNames: ['queue', 'handler'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.rabbitConsumerCpuHistogram) {
-        MetricsService.rabbitConsumerCpuHistogram = new Histogram({
-          name: 'rabbit_consumer_cpu',
-          help: 'Rabbit consumer cpu',
-          labelNames: ['queue', 'handler'],
-          buckets: [],
-        });
-      }
+    if (!MetricsService.rabbitConsumerCpuHistogram) {
+      MetricsService.rabbitConsumerCpuHistogram = new Histogram({
+        name: 'rabbit_consumer_cpu',
+        help: 'Rabbit consumer cpu',
+        labelNames: ['queue', 'handler'],
+        buckets: [],
+      });
+    }
 
-      if (!MetricsService.isDefaultMetricsRegistered) {
-        MetricsService.isDefaultMetricsRegistered = true;
-        collectDefaultMetrics();
-      }
-    } catch (e) {
-      console.log('Error when initialising metrics', e);
+    if (!MetricsService.isDefaultMetricsRegistered) {
+      MetricsService.isDefaultMetricsRegistered = true;
+      collectDefaultMetrics();
     }
   }
 

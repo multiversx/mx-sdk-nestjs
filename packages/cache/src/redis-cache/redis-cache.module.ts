@@ -2,7 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { RedisCacheService } from './redis-cache.service';
 import { RedisCacheModuleOptions, RedisCacheModuleAsyncOptions } from './options';
 // CHANGE HERE
-import { MetricsModule } from '@multiversx/sdk-nestjs-common';
+import { MetricsModule } from '@multiversx/sdk-nestjs-monitoring';
 import { RedisModule } from '@multiversx/sdk-nestjs-redis';
 
 @Module({})

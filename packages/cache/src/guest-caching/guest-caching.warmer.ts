@@ -4,8 +4,7 @@ import { Injectable } from '@nestjs/common';
 import '@multiversx/sdk-nestjs-common/lib/src/utils/extensions/array.extensions';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
 // CHANGE HERE
-import { MetricsService } from '@multiversx/sdk-nestjs-common';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs-common';
+import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheEntity, IGuestCacheWarmerOptions, REDIS_PREFIX } from '../entities/guest.caching';
 
 @Injectable()
