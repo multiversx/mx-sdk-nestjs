@@ -1,7 +1,8 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
-import { CpuProfiler, MetricsService } from "@multiversx/sdk-nestjs-monitoring";
+import { MetricsService } from '../metrics';
+import { CpuProfiler } from "../profilers/cpu.profiler";
 
 @Injectable()
 export class RequestCpuTimeInterceptor implements NestInterceptor {

@@ -6,10 +6,9 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Constants } from '@multiversx/sdk-nestjs-common';
 import { OriginLogger } from '@multiversx/sdk-nestjs-common';
 import { InMemoryCacheService } from '@multiversx/sdk-nestjs-cache';
-import { MetricsService } from '@multiversx/sdk-nestjs-common';
+import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { RABBIT_ADDITIONAL_OPTIONS } from './entities/constants';
 import { OptionsInterface } from './entities/options.interface';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs-common';
 import { SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
 
 

@@ -2,10 +2,7 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { applyDecorators } from '@nestjs/common';
 import { RabbitConsumerConfig } from './entities/consumer-config.interface';
 import * as uuid from 'uuid';
-// CHANGE HERE
-import { MetricsService } from '@multiversx/sdk-nestjs-common';
-import { CpuProfiler } from '@multiversx/sdk-nestjs-common';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs-common';
+import { CpuProfiler, MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 
 function QueueMetricsConsumer(queue: string) {
   return (
