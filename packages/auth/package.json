@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-native-auth-server": "^1.0.6",
-    "@multiversx/sdk-wallet": "*",
+    "@multiversx/sdk-wallet": "3.0.0",
     "@multiversx/sdk-core": "*"
   },
   "peerDependencies": {

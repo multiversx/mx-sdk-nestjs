@@ -38,8 +38,7 @@ export class NativeAuthSigner {
 
     const signableMessage = this.getSignableMessage(signerAddress, signableToken);
 
-    // CHANGE HERE
-    await userSigner.sign(signableMessage.message);
+    await userSigner.sign(signableMessage);
 
     const signature = signableMessage.getSignature();
 
