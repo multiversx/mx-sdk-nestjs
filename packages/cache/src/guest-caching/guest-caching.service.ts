@@ -4,7 +4,6 @@ import {
 import moment from 'moment';
 import * as crypto from 'crypto';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
-// CHANGE HERE
 import { MetricsService } from '@multiversx/sdk-nestjs-monitoring';
 import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheOptions, REDIS_PREFIX } from '../entities/guest.caching';
 

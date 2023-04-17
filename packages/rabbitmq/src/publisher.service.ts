@@ -2,14 +2,11 @@ import crypto from 'crypto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import Redis from 'ioredis';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-// CHANGE HERE
-import { Constants } from '@multiversx/sdk-nestjs-common';
-import { OriginLogger } from '@multiversx/sdk-nestjs-common';
+import { Constants, OriginLogger, SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
 import { InMemoryCacheService } from '@multiversx/sdk-nestjs-cache';
 import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { RABBIT_ADDITIONAL_OPTIONS } from './entities/constants';
 import { OptionsInterface } from './entities/options.interface';
-import { SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
 
 
 @Injectable()

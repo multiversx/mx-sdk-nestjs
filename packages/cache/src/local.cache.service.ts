@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-// CHANGE HERE
 import { PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { LocalCacheValue } from "./entities/local.cache.value";
 

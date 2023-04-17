@@ -1,5 +1,4 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, Optional } from '@nestjs/common';
-// CHANGE HERE
 import { ElrondCachingService } from '@multiversx/sdk-nestjs-cache';
 import { ErdnestConfigService, ERDNEST_CONFIG_SERVICE } from '@multiversx/sdk-nestjs-common';
 import { JwtAuthenticateGuard } from './jwt.authenticate.guard';

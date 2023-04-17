@@ -1,18 +1,11 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Module, Provider } from '@nestjs/common';
-// CHANGE HERE
 import { InMemoryCacheModule, InMemoryCacheService } from '@multiversx/sdk-nestjs-cache';
-import { RedisModule } from '@multiversx/sdk-nestjs-redis';
-import { RabbitModuleAsyncOptions } from './entities/async-options.interface';
-import { RABBIT_ADDITIONAL_OPTIONS } from './entities/constants';
-import { OptionsInterface } from './entities/options.interface';
-import { RabbitModuleOptions } from './entities/options';
+import { RedisModule, RedisDefaultOptions as RedisOptions, RedisModuleAsyncOptions } from '@multiversx/sdk-nestjs-redis';
+import { RabbitModuleAsyncOptions, OptionsInterface, RABBIT_ADDITIONAL_OPTIONS, RabbitModuleOptions } from './entities';
 import { RabbitPublisherService } from './publisher.service';
 import { RabbitContextCheckerService } from './rabbit-context-checker.service';
-import { RedisDefaultOptions as RedisOptions } from '@multiversx/sdk-nestjs-redis';
-import { RedisModuleAsyncOptions } from '@multiversx/sdk-nestjs-redis';
-import { SwappableSettingsModule, SwappableSettingsService } from '@multiversx/sdk-nestjs-common';
-import { SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
+import { SwappableSettingsModule, SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
 
 @Module({
   providers: [RabbitContextCheckerService],

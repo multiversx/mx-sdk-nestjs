@@ -1,6 +1,5 @@
 import asyncPool from 'tiny-async-pool';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-// CHANGE HERE
 import { OriginLogger, BatchUtils, PendingExecuter } from '@multiversx/sdk-nestjs-common';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
 import { InMemoryCacheService } from '../in-memory-cache/in-memory-cache.service';
