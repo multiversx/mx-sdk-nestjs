@@ -42,7 +42,7 @@
     "axios": "^0.27.2"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.1.4",
+    "@nestjs/common": "^9.x",
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-monitoring": "*"
   },

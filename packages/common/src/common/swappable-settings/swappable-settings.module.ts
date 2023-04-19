@@ -1,17 +1,21 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { RedisOptions } from 'ioredis';
-import { RedisModuleAsyncOptions, RedisModule } from '@multiversx/sdk-nestjs-redis';
-import { SWAPPABLE_SETTINGS_REDIS_CLIENT } from './entities/constants';
 import { SwappableSettingsService } from './swappable-settings.service';
+import { SwappableSettingsStorageInterface } from './entities/swappable-settings-storage.interface';
+import { SWAPPABLE_SETTINGS_STORAGE_CLIENT } from './entities/constants';
+import { SwappableSettingsAsyncOptions } from './entities/swappable-settings-async-options.interface';
 
 @Module({})
 export class SwappableSettingsModule {
-  public static forRoot(redisOptions: { config: RedisOptions }): DynamicModule {
+  public static forRoot(storage: SwappableSettingsStorageInterface): DynamicModule {
     return {
       module: SwappableSettingsModule,
-      imports: [RedisModule.forRoot(redisOptions, SWAPPABLE_SETTINGS_REDIS_CLIENT)],
+      imports: [],
       providers: [
         SwappableSettingsService,
+        {
+          provide: SWAPPABLE_SETTINGS_STORAGE_CLIENT,
+          useValue: storage,
+        },
       ],
       exports: [
         SwappableSettingsService,
@@ -19,13 +23,15 @@ export class SwappableSettingsModule {
     };
   }
 
-  public static forRootAsync(redisAyncOptions: RedisModuleAsyncOptions): DynamicModule {
+  public static forRootAsync(storageOptions: SwappableSettingsAsyncOptions): DynamicModule {
     return {
       module: SwappableSettingsModule,
-      imports: [
-        RedisModule.forRootAsync(redisAyncOptions, SWAPPABLE_SETTINGS_REDIS_CLIENT),
-      ],
+      imports: storageOptions.imports || [],
       providers: [
+        {
+          provide: SWAPPABLE_SETTINGS_STORAGE_CLIENT,
+          useFactory: (factoryOptions) => factoryOptions,
+        },
         SwappableSettingsService,
       ],
       exports: [

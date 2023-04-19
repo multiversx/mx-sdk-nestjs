@@ -44,7 +44,6 @@
   "peerDependencies": {
     "@nestjs/common": "^9.1.4",
     "@multiversx/sdk-nestjs-common": "*",
-    "@multiversx/sdk-nestjs-cache": "*",
     "@multiversx/sdk-nestjs-monitoring": "*"
   },
   "publishConfig": {

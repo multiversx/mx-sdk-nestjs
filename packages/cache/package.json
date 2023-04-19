@@ -46,7 +46,7 @@
     "moment": "^2.29.4"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.1.4",
+    "@nestjs/common": "^9.x",
     "@nestjs/core": "^9.1.4",
     "@multiversx/sdk-nestjs-monitoring": "*",
     "@multiversx/sdk-nestjs-common": "*",

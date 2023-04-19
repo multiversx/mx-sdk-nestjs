@@ -1,9 +1,7 @@
 import crypto from 'crypto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import Redis from 'ioredis';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { Constants, OriginLogger, SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
-import { InMemoryCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants, OriginLogger, SwappableSettingsService } from '@multiversx/sdk-nestjs-common';
 import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { RABBIT_ADDITIONAL_OPTIONS } from './entities/constants';
 import { OptionsInterface } from './entities/options.interface';
@@ -15,9 +13,7 @@ export class RabbitPublisherService {
 
   constructor(
     private readonly amqpConnection: AmqpConnection,
-    @Optional() @Inject(SWAPPABLE_SETTINGS_REDIS_CLIENT) private readonly redisService?: Redis,
-    @Optional() private readonly inMemoryCacheService?: InMemoryCacheService,
-    @Optional() private readonly swappableSettingsService?: SwappableSettingsService,
+    @Optional() private readonly storageService?: SwappableSettingsService,
     @Optional() @Inject(RABBIT_ADDITIONAL_OPTIONS) private readonly options?: OptionsInterface,
   ) { }
 
@@ -29,31 +25,19 @@ export class RabbitPublisherService {
 
   private async isExchangeDisabled(exchange: string): Promise<boolean> {
     const key = `${exchange}:disabled`;
-    if (this.swappableSettingsService && this.inMemoryCacheService) {
-      const valueFromMemory = await this.inMemoryCacheService.get(key);
-      if (valueFromMemory) {
-        return valueFromMemory === 'true';
-      }
-      const data = await this.swappableSettingsService.get(key);
-      this.inMemoryCacheService.set(key, data, Constants.oneSecond() * 10);
-      return data === 'true';
+    if (this.storageService) {
+      const isDisabled = await this.storageService.get(key);
+      return isDisabled === 'true';
     }
 
     return false;
   }
 
   private async checkForDuplicatedMessages(exchange: string, input: unknown, source?: string): Promise<void> {
-    if (this.redisService && this.inMemoryCacheService && this.options?.checkForDuplicates) {
+    if (this.storageService && this.options?.checkForDuplicates) {
       const key = this.generateDuplicateMessageKey(exchange, input);
-      const existsInMemory = await this.inMemoryCacheService.get(key);
-      let exists = existsInMemory;
-      if (!existsInMemory) {
-        const profiler = new PerformanceProfiler();
-        exists = await this.redisService.get(key);
-        profiler.stop();
-        MetricsService.setRedisCommonDuration('GET', profiler.duration);
-      }
-      if (exists) {
+      const existsInStorage = await this.storageService.get(key);
+      if (existsInStorage) {
         MetricsService.setDuplicatedMessageDetected(exchange, source || '');
         if (this.options?.logsVerbose) {
           this.logger.warn('Duplicate message detected, not publishing to RabbitMq Exchange.', {
@@ -64,18 +48,17 @@ export class RabbitPublisherService {
       } else {
         const ttl = this.options.duplicatesCheckTtl || Constants.oneMinute();
         const profiler = new PerformanceProfiler();
-        await this.redisService.set(key, '1', 'EX', ttl);
+        await this.storageService.set(key, '1', 'EX', ttl);
         profiler.stop();
         MetricsService.setRedisCommonDuration('SET', profiler.duration);
-        this.inMemoryCacheService?.set(key, '1', ttl);
       }
     }
   }
 
   public async invalidateDuplicateMessageKey(exchange: string, input: unknown): Promise<void> {
     const key = this.generateDuplicateMessageKey(exchange, input);
-    if (this.redisService) {
-      await this.redisService.del(key);
+    if (this.storageService) {
+      await this.storageService.delete(key);
     }
   }
 

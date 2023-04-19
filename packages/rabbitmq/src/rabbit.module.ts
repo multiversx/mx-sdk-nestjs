@@ -1,18 +1,16 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Module, Provider } from '@nestjs/common';
-import { InMemoryCacheModule, InMemoryCacheService } from '@multiversx/sdk-nestjs-cache';
-import { RedisModule, RedisDefaultOptions as RedisOptions, RedisModuleAsyncOptions } from '@multiversx/sdk-nestjs-redis';
 import { RabbitModuleAsyncOptions, OptionsInterface, RABBIT_ADDITIONAL_OPTIONS, RabbitModuleOptions } from './entities';
 import { RabbitPublisherService } from './publisher.service';
 import { RabbitContextCheckerService } from './rabbit-context-checker.service';
-import { SwappableSettingsModule, SwappableSettingsService, SWAPPABLE_SETTINGS_REDIS_CLIENT } from '@multiversx/sdk-nestjs-common';
+import { SwappableSettingsModule, SwappableSettingsService, SwappableSettingsStorageInterface, SwappableSettingsAsyncOptions } from '@multiversx/sdk-nestjs-common';
 
 @Module({
   providers: [RabbitContextCheckerService],
   exports: [RabbitContextCheckerService],
 })
 export class RabbitModule {
-  static forRoot(rabbitOptions: RabbitModuleOptions, redisOptions?: RedisOptions, auxOptions?: OptionsInterface): DynamicModule {
+  static forRoot(rabbitOptions: RabbitModuleOptions, rabbitStorageSettings?: SwappableSettingsStorageInterface, auxOptions?: OptionsInterface): DynamicModule {
 
     const imports = [RabbitMQModule.forRoot(RabbitMQModule, rabbitOptions)];
     const providers: Provider[] = [
@@ -23,12 +21,9 @@ export class RabbitModule {
       },
     ];
 
-    if (redisOptions) {
-      imports.push(RedisModule.forRoot({ config: redisOptions }, SWAPPABLE_SETTINGS_REDIS_CLIENT));
-      imports.push(InMemoryCacheModule.forRoot());
-      imports.push(SwappableSettingsModule.forRoot({ config: redisOptions }));
+    if (rabbitStorageSettings) {
+      imports.push(SwappableSettingsModule.forRoot(rabbitStorageSettings));
 
-      providers.push(InMemoryCacheService);
       providers.push(SwappableSettingsService);
     }
 
@@ -41,7 +36,7 @@ export class RabbitModule {
     };
   }
 
-  static forRootAsync(rabbitAsyncOptions: RabbitModuleAsyncOptions, redisAsyncOptions?: RedisModuleAsyncOptions, auxOptions?: OptionsInterface): DynamicModule {
+  static forRootAsync(rabbitAsyncOptions: RabbitModuleAsyncOptions, rabbitAsyncStorageSettings?: SwappableSettingsAsyncOptions, auxOptions?: OptionsInterface): DynamicModule {
 
     const imports = [RabbitMQModule.forRootAsync(RabbitMQModule, rabbitAsyncOptions)];
     const providers: Provider[] = [
@@ -52,12 +47,9 @@ export class RabbitModule {
       },
     ];
 
-    if (redisAsyncOptions) {
-      imports.push(RedisModule.forRootAsync(redisAsyncOptions, SWAPPABLE_SETTINGS_REDIS_CLIENT));
-      imports.push(InMemoryCacheModule.forRoot());
-      imports.push(SwappableSettingsModule.forRootAsync(redisAsyncOptions));
+    if (rabbitAsyncStorageSettings) {
+      imports.push(SwappableSettingsModule.forRootAsync(rabbitAsyncStorageSettings));
 
-      providers.push(InMemoryCacheService);
       providers.push(SwappableSettingsService);
     }
 

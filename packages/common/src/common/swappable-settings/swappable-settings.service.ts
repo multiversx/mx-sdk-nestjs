@@ -1,35 +1,25 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Redis } from 'ioredis';
-import { MetricsService, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
-import { SWAPPABLE_SETTINGS_REDIS_CLIENT } from './entities/constants';
+import { SWAPPABLE_SETTINGS_STORAGE_CLIENT } from './entities/constants';
+import { SwappableSettingsStorageInterface } from './entities/swappable-settings-storage.interface';
 
 @Injectable()
 export class SwappableSettingsService {
   private readonly prefix = 'swappable-setting:';
 
   constructor(
-    @Inject(SWAPPABLE_SETTINGS_REDIS_CLIENT) private readonly redisService: Redis,
+    @Inject(SWAPPABLE_SETTINGS_STORAGE_CLIENT) private readonly storage: SwappableSettingsStorageInterface,
   ) { }
 
   public async get(key: string): Promise<any | null> {
-    const profiler = new PerformanceProfiler();
-    const data = await this.redisService.get(`${this.prefix}${key}`);
-    profiler.stop();
-    MetricsService.setRedisCommonDuration('GET', profiler.duration);
+    const data = await this.storage.get(`${this.prefix}${key}`);
     return data;
   }
 
-  public async set(key: string, value: string): Promise<void> {
-    const profiler = new PerformanceProfiler();
-    await this.redisService.set(`${this.prefix}${key}`, value);
-    profiler.stop();
-    MetricsService.setRedisCommonDuration('SET', profiler.duration);
+  public async set(key: string, value: string, redisEx?: string, redisTtl?: number): Promise<void> {
+    await this.storage.set(`${this.prefix}${key}`, value, redisEx, redisTtl);
   }
 
   public async delete(key: string): Promise<void> {
-    const profiler = new PerformanceProfiler();
-    await this.redisService.del(`${this.prefix}${key}`);
-    profiler.stop();
-    MetricsService.setRedisCommonDuration('DEL', profiler.duration);
+    await this.storage.delete(`${this.prefix}${key}`);
   }
 }

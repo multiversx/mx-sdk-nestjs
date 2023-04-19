@@ -1,6 +1,6 @@
 import async_hooks from 'async_hooks';
 import { randomUUID } from 'crypto';
-import { OriginLogger } from '@multiversx/sdk-nestjs-common';
+import { Logger } from '@nestjs/common';
 import { PerformanceProfiler } from './performance.profiler';
 
 export class CpuProfiler {
@@ -8,7 +8,7 @@ export class CpuProfiler {
   private static readonly profilerDict: Record<string, { duration: number }> = {};
   private static hook?: async_hooks.AsyncHook;
   private readonly contextId = randomUUID();
-  private readonly logger = new OriginLogger(CpuProfiler.name);
+  private readonly logger = new Logger(CpuProfiler.name);
   private readonly performanceProfiler = new PerformanceProfiler();
 
   constructor() {

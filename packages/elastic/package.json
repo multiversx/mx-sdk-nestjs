@@ -20,7 +20,7 @@
   "keywords": [
     "multiversx",
     "nestjs",
-    "redis"
+    "elastic"
   ],
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
@@ -36,12 +36,9 @@
     "jest": "^27.5.1",
     "typescript": "^4.3.5"
   },
-  "dependencies": {
-    "@types/redis": "^2.8.32",
-    "ioredis": "^5.2.3"
-  },
+  "dependencies": {},
   "peerDependencies": {
-    "@nestjs/common": "^9.1.4"
+    "@nestjs/common": "^9.x"
   },
   "publishConfig": {
     "registry": "http://localhost:4873/"
