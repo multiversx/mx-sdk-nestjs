@@ -29,5 +29,5 @@ module.exports = {
     "comma-dangle": ["error", "always-multiline"],
     "eol-last": ["error"],
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: ['.eslintrc.js', '*.spec.ts'],
 };

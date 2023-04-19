@@ -34,10 +34,9 @@
     "importHelpers": true,
   },
   "include": [
-    "src",
+    "src"
   ],
   "exclude": [
-    "node_modules",
-    "**/__tests__/*"
+    "node_modules"
   ]
 }

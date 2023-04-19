@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./packages/common
+        working-directory: .
 
     strategy:
       matrix:
@@ -25,9 +25,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: ./packages/common/package-lock.json
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
+          cache-dependency-path: ./package-lock.json
+      - run: npx lerna bootstrap
+      - run: npx lerna run build
+      - run: npx lerna exec "jest test/* --passWithNoTests"
         env:
           CI: true
