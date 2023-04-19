@@ -42,8 +42,7 @@
     "winston-daily-rotate-file": "^4.6.1"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.x",
-    "@multiversx/sdk-nestjs-common": "*"
+    "@nestjs/common": "^9.x"
   },
   "publishConfig": {
     "registry": "http://localhost:4873/"

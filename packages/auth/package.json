@@ -37,14 +37,15 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@multiversx/sdk-core": "*",
     "@multiversx/sdk-native-auth-server": "^1.0.6",
     "@multiversx/sdk-wallet": "3.0.0",
-    "@multiversx/sdk-core": "*"
+    "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.1.4",
     "@multiversx/sdk-nestjs-common": "*",
-    "@multiversx/sdk-nestjs-monitoring": "*"
+    "@multiversx/sdk-nestjs-monitoring": "*",
+    "@nestjs/common": "^9.1.4"
   },
   "publishConfig": {
     "registry": "http://localhost:4873/"
