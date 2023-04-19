@@ -38,7 +38,8 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@nestjs/common": "^9.x"
+    "@nestjs/common": "^9.x",
+    "@multiversx/sdk-nestjs-http": "*"
   },
   "publishConfig": {
     "registry": "http://localhost:4873/"
