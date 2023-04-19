@@ -5,22 +5,24 @@ import { InMemoryCacheOptions } from './entities/in-memory-cache-options.interfa
 
 @Injectable()
 export class InMemoryCacheService {
-  private localCache: LRU<any, any>;
+  private static localCache: LRU<any, any>;
   constructor(
     @Optional() @Inject(IN_MEMORY_CACHE_OPTIONS) private readonly inMemoryCacheOptions?: InMemoryCacheOptions
   ) {
-    this.localCache = new LRU({
-      max: this.inMemoryCacheOptions?.maxItems ?? LRU_CACHE_MAX_ITEMS,
-      allowStale: false,
-      updateAgeOnGet: false,
-      updateAgeOnHas: false,
-    });
+    if (!InMemoryCacheService.localCache) {
+      InMemoryCacheService.localCache = new LRU({
+        max: this.inMemoryCacheOptions?.maxItems ?? LRU_CACHE_MAX_ITEMS,
+        allowStale: false,
+        updateAgeOnGet: false,
+        updateAgeOnHas: false,
+      });
+    }
   }
 
   get<T>(
     key: string,
   ): Promise<T | undefined> {
-    const data = this.localCache.get(key);
+    const data = InMemoryCacheService.localCache.get(key);
 
     if (this.inMemoryCacheOptions?.skipItemsSerialization) {
       return data;
@@ -71,7 +73,7 @@ export class InMemoryCacheService {
     const ttlToMilliseconds = ttl * 1000; // Convert to milliseconds
 
     if (ttlToMilliseconds > 0) { // Save only if ttl is greater than 0
-      this.localCache.set(key, writeValue, {
+      InMemoryCacheService.localCache.set(key, writeValue, {
         ttl: ttlToMilliseconds,
       });
     }
@@ -91,7 +93,7 @@ export class InMemoryCacheService {
   async delete(
     key: string,
   ): Promise<void> {
-    await this.localCache.delete(key);
+    await InMemoryCacheService.localCache.delete(key);
   }
 
   async getOrSet<T>(
