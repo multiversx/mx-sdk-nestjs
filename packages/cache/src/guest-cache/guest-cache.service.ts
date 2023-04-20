@@ -10,7 +10,7 @@ import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheOptions, REDIS_PREFIX } f
 const cacheHitsCounter: any = {};
 
 @Injectable()
-export class GuestCachingService {
+export class GuestCacheService {
   constructor(private cacheService: RedisCacheService) { }
 
   public async getOrSetRequestCache(req: any, options?: IGuestCacheOptions) {

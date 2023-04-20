@@ -1,5 +1,5 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { CachingService } from './caching.service';
+import { CacheService } from './cache.service';
 import { InMemoryCacheModule } from '../in-memory-cache/in-memory-cache.module';
 import { RedisCacheModule } from '../redis-cache/redis-cache.module';
 import { RedisCacheModuleAsyncOptions, RedisCacheModuleOptions } from '../redis-cache/options';
@@ -8,13 +8,13 @@ import { ADDITIONAL_CACHING_OPTIONS } from '../entities/common';
 
 @Global()
 @Module({})
-export class CachingModule {
+export class CacheModule {
   static forRoot(
     redisCacheModuleOptions: RedisCacheModuleOptions,
     inMemoryCacheModuleOptions?: InMemoryCacheOptions
   ): DynamicModule {
     return {
-      module: CachingModule,
+      module: CacheModule,
       imports: [
         InMemoryCacheModule.forRoot(inMemoryCacheModuleOptions),
         RedisCacheModule.forRoot(redisCacheModuleOptions),
@@ -24,10 +24,10 @@ export class CachingModule {
           provide: ADDITIONAL_CACHING_OPTIONS,
           useValue: redisCacheModuleOptions.additionalOptions,
         },
-        CachingService,
+        CacheService,
       ],
       exports: [
-        CachingService,
+        CacheService,
       ],
     };
   }
@@ -37,7 +37,7 @@ export class CachingModule {
     inMemoryCacheModuleOptions?: InMemoryCacheOptions
   ): DynamicModule {
     return {
-      module: CachingModule,
+      module: CacheModule,
       imports: [
         InMemoryCacheModule.forRoot(inMemoryCacheModuleOptions),
         RedisCacheModule.forRootAsync(redisCacheModuleAsyncOptions),
@@ -52,10 +52,10 @@ export class CachingModule {
           },
           inject: redisCacheModuleAsyncOptions.inject || [],
         },
-        CachingService,
+        CacheService,
       ],
       exports: [
-        CachingService,
+        CacheService,
       ],
     };
   }

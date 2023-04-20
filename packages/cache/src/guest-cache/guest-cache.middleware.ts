@@ -5,14 +5,13 @@ import {
   Type,
 } from '@nestjs/common';
 import { IGuestCacheOptions } from '../entities/guest.caching';
-import { GuestCachingService } from './guest-caching.service';
+import { GuestCacheService } from './guest-cache.service';
 
-
-export const GuestCachingMiddlewareCreator = (options?: IGuestCacheOptions): Type<NestMiddleware> => {
+export const GuestCacheMiddlewareCreator = (options?: IGuestCacheOptions): Type<NestMiddleware> => {
   @Injectable()
-  class GuestCachingMiddleware implements NestMiddleware {
+  class GuestCacheMiddleware implements NestMiddleware {
 
-    constructor(private guestCaching: GuestCachingService) { }
+    constructor(private guestCaching: GuestCacheService) { }
 
     async use(req: any, res: any, next: any) {
       const cacheResult = await this.guestCaching.getOrSetRequestCache(req, options);
@@ -26,5 +25,5 @@ export const GuestCachingMiddlewareCreator = (options?: IGuestCacheOptions): Typ
     }
   }
 
-  return mixin(GuestCachingMiddleware);
+  return mixin(GuestCacheMiddleware);
 };

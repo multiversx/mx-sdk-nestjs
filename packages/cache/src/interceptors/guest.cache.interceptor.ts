@@ -2,17 +2,17 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { Observable, of } from "rxjs";
 import { NoCacheOptions, DecoratorUtils } from "@multiversx/sdk-nestjs-common";
 import { IGuestCacheOptions } from "../entities/guest.caching";
-import { GuestCachingService } from "../guest-caching/guest-caching.service";
+import { GuestCacheService } from "../guest-cache/guest-cache.service";
 
 @Injectable()
-export class GuestCachingInterceptor implements NestInterceptor {
-  private guestCachingOptions;
+export class GuestCacheInterceptor implements NestInterceptor {
+  private guestCacheOptions;
 
   constructor(
-    private readonly guestCachingService: GuestCachingService,
-    guestCachingOptions?: IGuestCacheOptions
+    private readonly guestCacheService: GuestCacheService,
+    guestCacheOptions?: IGuestCacheOptions
   ) {
-    this.guestCachingOptions = guestCachingOptions;
+    this.guestCacheOptions = guestCacheOptions;
   }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
@@ -32,7 +32,7 @@ export class GuestCachingInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const cacheResult = await this.guestCachingService.getOrSetRequestCache(request, this.guestCachingOptions);
+    const cacheResult = await this.guestCacheService.getOrSetRequestCache(request, this.guestCacheOptions);
     if (cacheResult.fromCache) {
       return of(cacheResult.response);
     }

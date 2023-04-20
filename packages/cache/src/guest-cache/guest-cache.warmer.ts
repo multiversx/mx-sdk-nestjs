@@ -7,10 +7,10 @@ import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-moni
 import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheEntity, IGuestCacheWarmerOptions, REDIS_PREFIX } from '../entities/guest.caching';
 
 @Injectable()
-export class GuestCachingWarmer {
+export class GuestCacheWarmer {
 
   constructor(
-    private readonly cachingService: RedisCacheService,
+    private readonly cacheService: RedisCacheService,
   ) { }
 
   private async getReq(url: string) {
@@ -36,13 +36,13 @@ export class GuestCachingWarmer {
     const currentDate = moment().format(DATE_FORMAT);
     const previousMinute = moment().subtract(1, 'minute').format(DATE_FORMAT);
     const threshold = Number(options.cacheTriggerHitsThreshold || 100);
-    const keysToComputeCurrentMinute: string[] = await this.cachingService.zrangebyscore(`${REDIS_PREFIX}.${currentDate}.hits`, threshold, '+inf');
-    const keysToComputePreviousMinute: string[] = await this.cachingService.zrangebyscore(`${REDIS_PREFIX}.${previousMinute}.hits`, threshold, '+inf');
+    const keysToComputeCurrentMinute: string[] = await this.cacheService.zrangebyscore(`${REDIS_PREFIX}.${currentDate}.hits`, threshold, '+inf');
+    const keysToComputePreviousMinute: string[] = await this.cacheService.zrangebyscore(`${REDIS_PREFIX}.${previousMinute}.hits`, threshold, '+inf');
 
     const keysToCompute = [...keysToComputeCurrentMinute, ...keysToComputePreviousMinute].distinct();
     await Promise.allSettled(keysToCompute.map(async key => {
       const parsedKey = `${REDIS_PREFIX}.${key}.body`;
-      const keyValue: IGuestCacheEntity | undefined = await this.cachingService.get(parsedKey);
+      const keyValue: IGuestCacheEntity | undefined = await this.cacheService.get(parsedKey);
 
       if (!keyValue) {
         return Promise.resolve();
@@ -62,7 +62,7 @@ export class GuestCachingWarmer {
         }
       } catch (error) {
         console.error(`An error occurred while warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'`);
-        await this.cachingService.delete(parsedKey);
+        await this.cacheService.delete(parsedKey);
         console.error(error);
       }
 
@@ -70,7 +70,7 @@ export class GuestCachingWarmer {
 
       console.log(`Finished warming up query '${JSON.stringify(keyValue)}' for url '${options.targetUrl}'. Response size: ${JSON.stringify(data).length}. Duration: ${profiler.duration}`);
 
-      return this.cachingService.set(`${REDIS_PREFIX}.${key}.response`, data, options.cacheTtl ?? 30);
+      return this.cacheService.set(`${REDIS_PREFIX}.${key}.response`, data, options.cacheTtl ?? 30);
     }));
 
     MetricsService.setGuestHitQueries(keysToCompute.length);

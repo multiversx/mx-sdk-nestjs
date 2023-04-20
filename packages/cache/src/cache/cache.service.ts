@@ -8,9 +8,9 @@ import { CachingModuleOptions } from '../entities/caching.module.options';
 import { ADDITIONAL_CACHING_OPTIONS } from '../entities/common';
 
 @Injectable()
-export class CachingService {
+export class CacheService {
   private readonly pendingExecuter: PendingExecuter;
-  private readonly logger = new OriginLogger(CachingService.name);
+  private readonly logger = new OriginLogger(CacheService.name);
 
   constructor(
     @Optional() @Inject(ADDITIONAL_CACHING_OPTIONS) private readonly options: CachingModuleOptions,
