@@ -8,9 +8,9 @@ import { CachingModuleOptions } from '../entities/caching.module.options';
 import { ADDITIONAL_CACHING_OPTIONS } from '../entities/common';
 
 @Injectable()
-export class ElrondCachingService {
+export class CachingService {
   private readonly pendingExecuter: PendingExecuter;
-  private readonly logger = new OriginLogger(ElrondCachingService.name);
+  private readonly logger = new OriginLogger(CachingService.name);
 
   constructor(
     @Optional() @Inject(ADDITIONAL_CACHING_OPTIONS) private readonly options: CachingModuleOptions,
@@ -630,7 +630,7 @@ export class ElrondCachingService {
         return data;
       } catch (error) {
         if (error instanceof Error) {
-          this.logger.error('ElrondCaching - An error occurred while trying to load value.', {
+          this.logger.error('Caching - An error occurred while trying to load value.', {
             error: error?.toString(),
             key,
           });

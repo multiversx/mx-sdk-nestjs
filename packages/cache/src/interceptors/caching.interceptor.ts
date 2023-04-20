@@ -4,14 +4,14 @@ import { Observable, of, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
 import { NoCacheOptions, DecoratorUtils, Constants } from "@multiversx/sdk-nestjs-common";
 import { MetricsService } from "@multiversx/sdk-nestjs-monitoring";
-import { ElrondCachingService } from "../elrond-caching";
+import { CachingService } from "../caching";
 
 @Injectable()
 export class CachingInterceptor implements NestInterceptor {
   private pendingRequestsDictionary: { [key: string]: any; } = {};
 
   constructor(
-    private readonly cachingService: ElrondCachingService,
+    private readonly cachingService: CachingService,
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly metricsService: MetricsService,
   ) { }
