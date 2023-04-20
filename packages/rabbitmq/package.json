@@ -1,7 +1,7 @@
 {
   "name": "@multiversx/sdk-nestjs-rabbitmq",
-  "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs rabbitmq client module",
+  "version": "0.0.0",
+  "description": "Multiversx SDK Nestjs rabbitmq client package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -45,8 +45,5 @@
   "peerDependencies": {
     "@nestjs/common": "^9.x",
     "@multiversx/sdk-nestjs-common": "*"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
   }
 }

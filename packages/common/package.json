@@ -1,7 +1,7 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs common module",
+  "version": "0.0.0",
+  "description": "Multiversx SDK Nestjs common package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -52,8 +52,5 @@
     "@nestjs/core": "^9.x",
     "@nestjs/swagger": "^6.x",
     "@multiversx/sdk-nestjs-monitoring": "*"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
   }
 }

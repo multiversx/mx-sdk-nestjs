@@ -6,8 +6,5 @@
   ],
   "devDependencies": {
     "lerna": "^6.6.1"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
   }
 }

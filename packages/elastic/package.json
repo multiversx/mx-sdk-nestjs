@@ -1,7 +1,7 @@
 {
   "name": "@multiversx/sdk-nestjs-elastic",
-  "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs elastic client module",
+  "version": "0.0.0",
+  "description": "Multiversx SDK Nestjs elastic package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -40,8 +40,5 @@
   "peerDependencies": {
     "@nestjs/common": "^9.x",
     "@multiversx/sdk-nestjs-http": "*"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
   }
 }

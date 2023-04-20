@@ -1,7 +1,7 @@
 {
   "name": "@multiversx/sdk-nestjs-cache",
-  "version": "0.0.23",
-  "description": "Multiversx SDK Nestjs cache module",
+  "version": "0.0.0",
+  "description": "Multiversx SDK Nestjs cache package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -51,8 +51,5 @@
     "@multiversx/sdk-nestjs-monitoring": "*",
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-redis": "*"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
   }
 }

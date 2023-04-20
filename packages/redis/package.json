@@ -1,7 +1,7 @@
 {
   "name": "@multiversx/sdk-nestjs-redis",
-  "version": "0.5.2",
-  "description": "Multiversx SDK Nestjs redis client module",
+  "version": "0.0.0",
+  "description": "Multiversx SDK Nestjs redis client package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -42,8 +42,5 @@
   },
   "peerDependencies": {
     "@nestjs/common": "^9.x"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
   }
 }
