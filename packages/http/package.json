@@ -8,7 +8,7 @@
     "lib/**/*"
   ],
   "scripts": {
-    "test": "jest test/*",
+    "test": "jest --config=../../jest.config.json --passWithNoTests http/*",
     "build": "tsc",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
@@ -25,13 +25,11 @@
   "author": "MultiversX",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.16.0",
     "axios-mock-adapter": "^1.20.0",
     "@types/axios": "^0.14.0",
     "eslint": "^8.9.0",
-    "jest": "^27.5.1",
     "typescript": "^4.3.5"
   },
   "dependencies": {
