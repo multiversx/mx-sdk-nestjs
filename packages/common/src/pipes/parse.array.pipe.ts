@@ -5,8 +5,8 @@ export class ParseArrayPipe implements PipeTransform<string | undefined, Promise
   private readonly options: ParseArrayPipeOptions;
   private readonly DEFAULT_MAX_ARRAY_SIZE = 1024;
 
-  constructor(options?: ParseArrayPipeOptions) {
-    this.options = options ?? new ParseArrayPipeOptions();
+  constructor(options?: Partial<ParseArrayPipeOptions>) {
+    this.options = options ? new ParseArrayPipeOptions(options) : new ParseArrayPipeOptions();
   }
 
   transform(value: string | undefined, metadata: ArgumentMetadata): Promise<string[] | undefined> {
