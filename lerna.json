@@ -5,6 +5,5 @@
   "packages": [
     "packages/*"
   ],
-  "npmClient": "npm",
-  "registry": "http://localhost:4873"
+  "npmClient": "npm"
 }
