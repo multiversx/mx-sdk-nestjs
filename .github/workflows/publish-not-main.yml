@@ -40,4 +40,4 @@ jobs:
       - name: Publish to npmjs
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-        run: npx lerna publish from-git --yes
+        run: npx lerna publish from-git --yes --no-private
