@@ -31,7 +31,7 @@ jobs:
           echo " - [npmjs](https://www.npmjs.com/package/@multiversx/sdk-nestjs)" >> notes.txt
           echo "" >> notes.txt
 
-          RELEASE_TAG=v$(node -p "require('./package.json').version")
+          RELEASE_TAG=v$(node -p "require('./lerna.json').version")
           gh release create $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes --notes-file=notes.txt
 
       - name: Publish to npmjs

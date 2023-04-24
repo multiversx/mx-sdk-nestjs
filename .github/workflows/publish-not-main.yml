@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_TAG=v$(node -p "require('./package.json').version")
+          RELEASE_TAG=v$(node -p "require('./lerna.json').version")
           gh release create --prerelease $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes
 
       - name: Publish to npmjs
