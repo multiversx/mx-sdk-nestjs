@@ -1,9 +1,10 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
   "useWorkspaces": true,
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "packages": [
     "packages/*"
   ],
-  "npmClient": "npm"
+  "npmClient": "npm",
+  "registry": "http://localhost:4873"
 }

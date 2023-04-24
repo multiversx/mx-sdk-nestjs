@@ -3,6 +3,7 @@ export * from './api/api.service';
 export * from './api/entities/api.module.async.options';
 export * from './api/entities/api.module.options';
 export * from './api/entities/api.settings';
+export * from './auth/native.auth.signer';
 export * from './interceptors/complexity.interceptor';
 export * from './interceptors/extract.interceptor';
 export * from './interceptors/fields.interceptor';

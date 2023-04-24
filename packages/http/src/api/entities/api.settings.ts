@@ -1,4 +1,4 @@
-import { NativeAuthSigner } from "@multiversx/sdk-nestjs-auth";
+import { NativeAuthSigner } from "../../auth/native.auth.signer";
 
 export class ApiSettings {
   timeout?: number;

@@ -9,11 +9,11 @@
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
-    "**/node_modules": false,
+    "**/node_modules": true,
     "**/coverage": true,
     "**/dist": true,
     "**/config/config.yaml": true,
-    "**/lib": false,
+    "**/lib": true,
   },
   "search.exclude": {
     "**/node_modules": true,
