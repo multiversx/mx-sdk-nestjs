@@ -39,5 +39,8 @@
   "peerDependencies": {
     "@nestjs/common": "^9.x",
     "@multiversx/sdk-nestjs-common": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -46,5 +46,8 @@
     "@nestjs/core": "^9.x",
     "@nestjs/swagger": "^6.x",
     "@multiversx/sdk-nestjs-monitoring": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

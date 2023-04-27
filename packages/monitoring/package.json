@@ -37,5 +37,8 @@
   },
   "peerDependencies": {
     "@nestjs/common": "^9.x"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

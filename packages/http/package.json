@@ -39,5 +39,8 @@
     "@nestjs/common": "^9.x",
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-monitoring": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

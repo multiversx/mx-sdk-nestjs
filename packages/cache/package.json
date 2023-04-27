@@ -45,5 +45,8 @@
     "@multiversx/sdk-nestjs-monitoring": "*",
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-redis": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
