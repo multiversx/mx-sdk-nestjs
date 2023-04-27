@@ -40,4 +40,4 @@ jobs:
       - name: Publish to npmjs
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-        run: npx lerna publish from-package --yes
+        run: npx lerna publish from-package --yes --preid $RELEASE_TAG
