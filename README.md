@@ -1,3 +1,5 @@
+<a href="https://www.npmjs.com/package/@multiversx/sdk-nestjs-common" target="_blank"><img src="https://img.shields.io/npm/v/@multiversx/sdk-nestjs-common.svg" alt="NPM Version" /></a>
+
 # MultiversX NestJS Microservice Utilities
 
 This package contains a set of utilities commonly used in the MultiversX Microservice ecosystem.
@@ -6,8 +8,8 @@ It relies on the following peer dependencies which must be installed in the pare
 
 - @multiversx/sdk-core
 - @multiversx/sdk-wallet
-- @nestjs/common
-- @nestjs/swagger
+- @nestjs/common v9
+- @nestjs/swagger v9
 
 ## Documentation
 
@@ -17,16 +19,26 @@ It relies on the following peer dependencies which must be installed in the pare
 
 [CHANGELOG](CHANGELOG.md)
 
-## Distribution
+## Packages
 
-[npm](https://socket.dev/npm/package/@multiversx/sdk-nestjs)
+This monorepo contains the source code for the following packages:
+
+- @multiversx/sdk-nestjs-common [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-common)
+- @multiversx/sdk-nestjs-auth [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-auth)
+- @multiversx/sdk-nestjs-http [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-http)
+- @multiversx/sdk-nestjs-monitoring [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-monitoring)
+- @multiversx/sdk-nestjs-elastic [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-elastic)
+- @multiversx/sdk-nestjs-redis [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-redis)
+- @multiversx/sdk-nestjs-rabbitmq [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-rabbitmq)
+- @multiversx/sdk-nestjs-cache [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-cache)
+
 
 ## Installation
 
-`sdk-nestjs` is delivered via **npm** and it can be installed as follows:
+`sdk-nestjs-${package}` is delivered via **npm** and it can be installed as follows:
 
 ```
-npm install @multiversx/sdk-nestjs
+npm install @multiversx/sdk-nestjs-${package}
 ```
 
 ## Code examples
@@ -42,7 +54,7 @@ Also, if you discover a feature that is missing and might be useful, we would ap
 ### Caching
 
 Caching is one of the most important components when talking about high scalable applications that needs to serve thousands of requests per second.
-`sdk-nestjs` uses both remote (redis) and local (in-memory) cache.
+`sdk-nestjs-cache` uses both remote (redis) and local (in-memory) cache.
 
 #### Import
 
@@ -51,9 +63,9 @@ In your module:
 ```
 @Module({
   imports: [
-    CachingModule.forRootAsync({
+    CacheModule.forRootAsync({
       imports: [ApiConfigModule],
-      useFactory: (apiConfigService: ApiConfigService) => new CachingModuleOptions({
+      useFactory: (apiConfigService: ApiConfigService) => new CacheModuleOptions({
         url: apiConfigService.getRedisUrl(),
         poolLimit: apiConfigService.getPoolLimit(),
         processTtl: apiConfigService.getProcessTtl(),
@@ -69,35 +81,35 @@ export class FeatureModule{}
 In your provider:
 
 ```
-import { CachingService } from "@multiversx/sdk-nestjs";
+import { CacheService } from "@multiversx/sdk-nestjs-cache";
 
 @Injectable()
 export class FeatureService {
   constructor(
-    private readonly cachingService: CachingService,
+    private readonly cacheService: CacheService,
   ) { }
 ```
 
-#### Features
+#### Main Features
 
-`getCache`
+`get`
 
 Returns a Promise with the value stored in cache at a specific key or undefined if key isn't in cache.
 It searches the key first in local and then in remote cache.
 
 ```
-const value = await this.cachingService.getCache<ExpectedType>(key);
+const value = await this.cacheService.get<ExpectedType>(key);
 ```
 
-`setCache`
+`set`
 
 Set both local and remote cache keys with the value you provided. It also accepts a ttl value which represents the persistence time in seconds, if no value is provided it will use default ttl of 6 seconds.
 
 ```
-await this.cachingService.setCache(key, value, ttl);
+await this.cacheService.set(key, value, ttl);
 ```
 
-`getOrSetCache`
+`getOrSet`
 
 Returns a Promise with the value stored in cache at a specific key or set that key with the value you provided.
 If you don't provide a remote ttl, it will use the default value of 6 seconds.
@@ -105,7 +117,7 @@ If you don't provide a local ttl, it will use half of the remote ttl value.
 It also accepts a forceRefresh (boolean) parameter for situations you explicitly need to update the cache.
 
 ```
-const value = await this.cachingService.getOrSetCache(
+const value = await this.cacheService.getOrSet(
       key,
       async () => await rawValue,
       remoteCacheTtl,
@@ -113,8 +125,8 @@ const value = await this.cachingService.getOrSetCache(
     );
 ```
 
-These are the most used features of the CachingModule, there are some more advanced features related to batch processing.
-If you need something else please make sure to check our [CachingService](packages/common/src/common/caching/caching.service.ts).
+These are the most used features of the CacheModule, there are some more advanced features related to batch processing.
+If you need something else please make sure to check our [CacheService](packages/cache/src/cache/cache.service.ts).
 
 ### Smart Contract Interactions
 
