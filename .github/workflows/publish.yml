@@ -36,4 +36,4 @@ jobs:
       - name: Publish to npmjs
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-        run: lerna publish --force-publish=* --no-git-tag-version --no-push --yes
+        run: npx lerna publish from-package --yes
