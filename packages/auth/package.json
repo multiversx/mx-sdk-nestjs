@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-auth",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "description": "Multiversx SDK Nestjs auth package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -38,9 +38,9 @@
     "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
+    "@multiversx/sdk-nestjs-cache": "*",
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-monitoring": "*",
-    "@multiversx/sdk-nestjs-cache": "*",
     "@nestjs/common": "^9.x"
   },
   "publishConfig": {
