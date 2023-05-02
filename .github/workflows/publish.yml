@@ -27,6 +27,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo " - Split main [sdk-nestjs](https://www.npmjs.com/package/@multiversx/sdk-nestjs) package into multiple packages" >> notes.txt
+          echo "" >> notes.txt
+
           RELEASE_TAG=v$(node -p "require('./lerna.json').version")
           gh release create $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes --notes-file=notes.txt
 
