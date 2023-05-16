@@ -34,7 +34,9 @@
     "importHelpers": true,
   },
   "include": [
-    "src"
+    "src",
+    "../auth/src/decorators/jwt.ts",
+    "../cache/src/decorators/no.cache.ts"
   ],
   "exclude": [
     "node_modules"

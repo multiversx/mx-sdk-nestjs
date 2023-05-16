@@ -5,3 +5,4 @@ export * from './jitter';
 export * from './interceptors/caching.interceptor';
 export * from './interceptors/guest.cache.interceptor';
 export * from './guest-cache';
+export * from './decorators';
