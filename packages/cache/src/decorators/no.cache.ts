@@ -1,4 +1,4 @@
-import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/src/utils/decorator.utils";
+import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/lib/utils/decorator.utils";
 
 export class NoCacheOptions { }
 
