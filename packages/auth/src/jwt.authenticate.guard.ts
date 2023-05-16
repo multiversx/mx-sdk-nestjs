@@ -1,7 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { verify } from 'jsonwebtoken';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
-import { ErdnestConfigService, ERDNEST_CONFIG_SERVICE, DecoratorUtils, NoAuthOptions, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
+import { ErdnestConfigService, ERDNEST_CONFIG_SERVICE, DecoratorUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
+import { NoAuthOptions } from './decorators/no.auth';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
