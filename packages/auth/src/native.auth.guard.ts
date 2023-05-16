@@ -1,9 +1,10 @@
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@nestjs/common';
 import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { NoAuthOptions, DecoratorUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
+import { DecoratorUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
+import { NoAuthOptions } from './decorators';
 
 /**
  * This Guard protects all routes that do not have the `@NoAuth` decorator and sets the `X-Native-Auth-*` HTTP headers.
