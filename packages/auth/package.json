@@ -1,0 +1,49 @@
+{
+  "name": "@multiversx/sdk-nestjs-auth",
+  "version": "1.0.0",
+  "description": "Multiversx SDK Nestjs auth package",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "test": "jest --config=../../jest.config.json --passWithNoTests auth/*",
+    "build": "tsc",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/multiversx/mx-sdk-nestjs.git"
+  },
+  "keywords": [
+    "multiversx",
+    "nestjs",
+    "auth"
+  ],
+  "author": "MultiversX",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "eslint": "^8.9.0",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@multiversx/sdk-core": "*",
+    "@multiversx/sdk-native-auth-server": "^1.0.6",
+    "@multiversx/sdk-wallet": "3.0.0",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "peerDependencies": {
+    "@multiversx/sdk-nestjs-cache": "*",
+    "@multiversx/sdk-nestjs-common": "*",
+    "@multiversx/sdk-nestjs-monitoring": "*",
+    "@nestjs/common": "^9.x"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -4,3 +4,6 @@ tsconfig.tsbuildinfo
 
 .DS_Store
 .idea/
+.npmrc
+*.log
+*.tsbuildinfo
