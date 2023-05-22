@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import axios, { AxiosRequestConfig } from "axios";
-import Agent from 'agentkeepalive';
+import Agent from "agentkeepalive";
 import { PerformanceProfiler, MetricsService } from "@multiversx/sdk-nestjs-monitoring";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
@@ -35,7 +35,6 @@ export class ApiService {
     return this.keepaliveAgent;
   }
 
-
   private async getConfig(settings: ApiSettings): Promise<AxiosRequestConfig> {
     const timeout = settings.timeout || this.defaultTimeout;
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
@@ -57,6 +56,7 @@ export class ApiService {
       maxRedirects,
       httpAgent: this.getKeepAliveAgent(),
       responseType: settings.responseType,
+      auth: settings.auth,
       headers,
       transformResponse: [
         (data) => {
