@@ -133,6 +133,40 @@ export class ApiService {
     }
   }
 
+  async patch(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
+    const profiler = new PerformanceProfiler();
+
+    try {
+      const config = await this.getConfig(settings);
+
+      return await axios.patch(url, data, config);
+    } catch (error: any) {
+      let handled = false;
+      if (errorHandler) {
+        handled = await errorHandler(error);
+      }
+
+      if (!handled) {
+        const logger = new Logger(ApiService.name);
+        const customError = {
+          method: 'PATCH',
+          url,
+          response: error.response?.data,
+          status: error.response?.status,
+          message: error.message,
+          name: error.name,
+        };
+
+        logger.error(customError);
+
+        throw customError;
+      }
+    } finally {
+      profiler.stop();
+      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+    }
+  }
+
   async post(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     try {
