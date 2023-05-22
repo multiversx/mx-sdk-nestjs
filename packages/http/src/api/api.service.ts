@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import axios, { AxiosRequestConfig } from "axios";
-import Agent from 'agentkeepalive';
+import Agent from "agentkeepalive";
 import { PerformanceProfiler, MetricsService } from "@multiversx/sdk-nestjs-monitoring";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
@@ -35,7 +35,6 @@ export class ApiService {
     return this.keepaliveAgent;
   }
 
-
   private async getConfig(settings: ApiSettings): Promise<AxiosRequestConfig> {
     const timeout = settings.timeout || this.defaultTimeout;
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
@@ -57,6 +56,7 @@ export class ApiService {
       maxRedirects,
       httpAgent: this.getKeepAliveAgent(),
       responseType: settings.responseType,
+      auth: settings.auth,
       headers,
       transformResponse: [
         (data) => {
@@ -116,6 +116,40 @@ export class ApiService {
         const logger = new Logger(ApiService.name);
         const customError = {
           method: 'PUT',
+          url,
+          response: error.response?.data,
+          status: error.response?.status,
+          message: error.message,
+          name: error.name,
+        };
+
+        logger.error(customError);
+
+        throw customError;
+      }
+    } finally {
+      profiler.stop();
+      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+    }
+  }
+
+  async patch(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
+    const profiler = new PerformanceProfiler();
+
+    try {
+      const config = await this.getConfig(settings);
+
+      return await axios.patch(url, data, config);
+    } catch (error: any) {
+      let handled = false;
+      if (errorHandler) {
+        handled = await errorHandler(error);
+      }
+
+      if (!handled) {
+        const logger = new Logger(ApiService.name);
+        const customError = {
+          method: 'PATCH',
           url,
           response: error.response?.data,
           status: error.response?.status,
