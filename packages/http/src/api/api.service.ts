@@ -55,6 +55,7 @@ export class ApiService {
       timeout,
       maxRedirects,
       httpAgent: this.getKeepAliveAgent(),
+      httpsAgent: settings.httpsAgent,
       responseType: settings.responseType,
       auth: settings.auth,
       headers,
