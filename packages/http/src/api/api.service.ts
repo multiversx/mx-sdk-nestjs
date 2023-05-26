@@ -58,6 +58,7 @@ export class ApiService {
       httpsAgent: settings.httpsAgent,
       responseType: settings.responseType,
       auth: settings.auth,
+      params: settings.params,
       headers,
       transformResponse: [
         (data) => {
