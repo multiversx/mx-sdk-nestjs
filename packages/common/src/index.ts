@@ -37,6 +37,7 @@ export * from './pipes/parse.record.pipe';
 export * from './pipes/parse.token.pipe';
 export * from './pipes/parse.token.or.nft.pipe';
 export * from './pipes/parse.transaction.hash.pipe';
+export * from './pipes/parse.email.pipe';
 export * from './common/entities/amount';
 export * from './common/config/erdnest.config.service';
 export * from './common/swappable-settings';
