@@ -10,6 +10,7 @@ export class ApiSettings {
   skipRedirects?: boolean;
   responseType?: 'arraybuffer' | 'json';
   headers?: Record<string, string>;
+  params?: any;
   httpsAgent?: any;
   auth?: ApiSettingsBasicCredentials;
   nativeAuthSigner?: NativeAuthSigner;
