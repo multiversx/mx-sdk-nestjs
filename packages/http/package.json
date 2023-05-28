@@ -33,13 +33,13 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "agentkeepalive": "^4.3.0",
-    "axios": "^0.27.2"
+    "agentkeepalive": "^4.3.0"
   },
   "peerDependencies": {
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-monitoring": "*",
-    "@nestjs/common": "^9.x"
+    "@nestjs/common": "^9.x",
+    "axios": "*"
   },
   "publishConfig": {
     "access": "public"
