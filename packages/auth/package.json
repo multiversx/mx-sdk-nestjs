@@ -41,7 +41,8 @@
     "@multiversx/sdk-nestjs-cache": "*",
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-monitoring": "*",
-    "@nestjs/common": "^9.x"
+    "@nestjs/common": "^9.x",
+    "@multiversx/sdk-wallet": "<=3.0.0"
   },
   "publishConfig": {
     "access": "public"
