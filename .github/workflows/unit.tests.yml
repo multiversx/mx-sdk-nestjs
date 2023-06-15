@@ -26,8 +26,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: ./package-lock.json
-      - run: npx lerna bootstrap
-      - run: npx lerna run build
-      - run: npx lerna run test
+      - run: npx lerna@6 bootstrap
+      - run: npx lerna@6 run build
+      - run: npx lerna@6 run test
         env:
           CI: true

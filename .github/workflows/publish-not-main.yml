@@ -27,8 +27,8 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache-dependency-path: ./package-lock.json
 
-      - run: npx lerna bootstrap
-      - run: npx lerna run build
+      - run: npx lerna@6 bootstrap
+      - run: npx lerna@6 run build
 
       - name: Create release
         env:
