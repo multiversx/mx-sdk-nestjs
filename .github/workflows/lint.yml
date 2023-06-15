@@ -24,9 +24,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: ./package-lock.json
-      - run: npx lerna bootstrap
+      - run: npx lerna@6 bootstrap
       - run: lerna run lint
         env:
           CI: true
