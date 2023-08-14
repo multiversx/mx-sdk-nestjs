@@ -1,12 +1,11 @@
 import { ContractLoader } from "../../src/sc.interactions/contract.loader";
 import * as fs from "fs";
-import { SmartContract, AbiRegistry, SmartContractAbi } from "@multiversx/sdk-core";
+import { SmartContract, AbiRegistry } from "@multiversx/sdk-core";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";
-  const ABI_PATH: string = 'test/sc.interactions/test.abi.json';
-  const CONTRACT_INTERFACE: string = 'Metabonding';
-  const contractLoader: ContractLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE);
+  const ABI_PATH: string = 'packages/common/test/sc.interactions/test.abi.json';
+  const contractLoader: ContractLoader = new ContractLoader(ABI_PATH);
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -19,7 +18,7 @@ describe("Contract loader", () => {
   });
 
   it('Should load contract from memory once', async () => {
-    const cLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE);
+    const cLoader = new ContractLoader(ABI_PATH);
     const jsonContent: string = await fs.promises.readFile(ABI_PATH, { encoding: "utf8" });
     const json = JSON.parse(jsonContent);
 
@@ -28,7 +27,7 @@ describe("Contract loader", () => {
     const loadSpy = jest
       .spyOn(ContractLoader.prototype as any, 'load')
       // eslint-disable-next-line require-await
-      .mockImplementation(jest.fn(async () => new SmartContractAbi(abiRegistry)));
+      .mockImplementation(jest.fn(async () => abiRegistry));
 
     await cLoader.getContract(CONTRACT_ADDRESS);
 
@@ -40,13 +39,13 @@ describe("Contract loader", () => {
   });
 
   it('Should throw error, abi path is invalid', async () => {
-    const cLoader = new ContractLoader("./invalid-path", CONTRACT_INTERFACE);
+    const cLoader = new ContractLoader("./invalid-path");
 
     await expect(cLoader.getContract(CONTRACT_ADDRESS)).rejects.toThrow(Error);
   });
 
   it('should retrieve multiple contracts with same abi', async () => {
-    const cLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE);
+    const cLoader = new ContractLoader(ABI_PATH); 
 
     const c1 = await cLoader.getContract(CONTRACT_ADDRESS);
 

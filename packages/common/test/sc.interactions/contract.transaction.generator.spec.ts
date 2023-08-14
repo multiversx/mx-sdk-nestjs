@@ -23,7 +23,8 @@ describe("Contract transaction generator", () => {
 
     interaction
       .withNonce(7)
-      .withGasLimit(20000000);
+      .withGasLimit(20000000)
+      .withSender(new Address(TEST_ADDRESS));
 
     const tx = await cTxGenerator.createTransaction(interaction, new Address(TEST_ADDRESS));
 

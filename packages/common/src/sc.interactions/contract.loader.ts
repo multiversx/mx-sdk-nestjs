@@ -1,28 +1,23 @@
-import { SmartContractAbi, AbiRegistry, SmartContract, Address } from "@multiversx/sdk-core";
+import { AbiRegistry, SmartContract, Address } from "@multiversx/sdk-core";
 import * as fs from "fs";
 import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractLoader {
   private readonly logger = new OriginLogger(ContractLoader.name);
   private readonly abiPath: string;
-  private readonly contractInterface: string;
-  private abi: SmartContractAbi | undefined = undefined;
+  private abi: AbiRegistry | undefined = undefined;
 
-  constructor(abiPath: string, contractInterface: string) {
+  constructor(abiPath: string) {
     this.abiPath = abiPath;
-    this.contractInterface = contractInterface;
   }
 
-  private async load(): Promise<SmartContractAbi> {
+  private async load(): Promise<AbiRegistry> {
     try {
       const jsonContent: string = await fs.promises.readFile(this.abiPath, { encoding: "utf8" });
       const json = JSON.parse(jsonContent);
 
       const abiRegistry = AbiRegistry.create(json);
-
-      const abi = new SmartContractAbi(abiRegistry, [this.contractInterface]);
-
-      return abi;
+      return abiRegistry;
     } catch (error) {
       this.logger.log(`Unexpected error when trying to create smart contract from abi`);
       this.logger.error(error);
