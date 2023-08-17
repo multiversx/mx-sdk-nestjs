@@ -4,7 +4,7 @@ import { SmartContract, AbiRegistry } from "@multiversx/sdk-core";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";
-  const ABI_PATH: string = 'packages/common/test/sc.interactions/test.abi.json';
+  const ABI_PATH: string = 'test/sc.interactions/test.abi.json';
   const contractLoader: ContractLoader = new ContractLoader(ABI_PATH);
 
   beforeEach(() => {
