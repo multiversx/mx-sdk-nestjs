@@ -38,11 +38,11 @@ export class NativeAuthSigner {
 
     const signableMessage = this.getSignableMessage(signerAddress, signableToken);
 
-    await userSigner.sign(signableMessage);
+    await userSigner.sign(signableMessage.serializeForSigning());
 
     const signature = signableMessage.getSignature();
 
-    const token = this.nativeAuthClient.getToken(signerAddress, signableToken, signature.hex());
+    const token = this.nativeAuthClient.getToken(signerAddress, signableToken, signature.toString('hex'));
     const expiryDate = new Date().addSeconds(this.config.expirySeconds);
 
     return this.accessTokenInfo = {
