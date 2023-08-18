@@ -43,8 +43,8 @@
     "@multiversx/sdk-nestjs-common": "*",
     "@multiversx/sdk-nestjs-monitoring": "*",
     "@multiversx/sdk-nestjs-redis": "*",
-    "@nestjs/common": "^9.x",
-    "@nestjs/core": "^9.1.4"
+    "@nestjs/common": "10.1.3",
+    "@nestjs/core": "10.1.3"
   },
   "publishConfig": {
     "access": "public"
