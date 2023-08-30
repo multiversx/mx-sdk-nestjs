@@ -424,6 +424,28 @@ export class RedisCacheService {
     }
   }
 
+  async hincrby(
+    hash: string,
+    field: string,
+    value: number | string,
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.hincrby(hash, field, value);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hincrby in redis.', {
+          hash, field, value,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HINCRBY', performanceProfiler.duration);
+    }
+  }
+
   async zadd(
     key: string,
     member: string,
