@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, Optional, Inject } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Optional, Inject, Logger } from '@nestjs/common';
 import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { DecoratorUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
@@ -48,6 +48,27 @@ export class NativeAuthGuard implements CanActivate {
     });
   }
 
+  static getOrigin(headers: Record<string, string>): string {
+    const origin = headers['origin'];
+    if (origin) {
+      return origin;
+    }
+
+    const referer = headers['referer'];
+    if (referer) {
+      try {
+        const url = new URL(referer);
+        return `${url.protocol}//${url.host}`;
+      } catch (error) {
+        const logger = new Logger(NativeAuthGuard.name);
+        logger.error(`Could not parse referer '${referer}' into an URL`);
+        logger.error(error);
+      }
+    }
+
+    return '';
+  }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const noAuthMetadata = DecoratorUtils.getMethodDecorator(NoAuthOptions, context.getHandler());
     if (noAuthMetadata) {
@@ -58,7 +79,7 @@ export class NativeAuthGuard implements CanActivate {
     const response = ExecutionContextUtils.getResponse(context);
     const headers = ExecutionContextUtils.getHeaders(context);
 
-    const origin = headers['origin'];
+    const origin = NativeAuthGuard.getOrigin(headers);
 
     const authorization: string = headers['authorization'];
     if (!authorization) {
