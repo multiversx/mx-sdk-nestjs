@@ -582,6 +582,27 @@ export class RedisCacheService {
     }
   }
 
+  async sunionstore(
+    destination: string,
+    keys: string[],
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.sunionstore(destination, keys);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to sunionstore in redis.', {
+          destination, keys,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SUNIONSTORE', performanceProfiler.duration);
+    }
+  }
+
   /**
    * @deprecated As of Redis version 6.2.0, this command is regarded as deprecated. It can be replaced by ZRANGE with the REV argument when migrating or writing new code.
    */
