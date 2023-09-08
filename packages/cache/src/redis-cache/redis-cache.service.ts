@@ -424,6 +424,48 @@ export class RedisCacheService {
     }
   }
 
+  async hincrby(
+    hash: string,
+    field: string,
+    value: number | string,
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.hincrby(hash, field, value);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hincrby in redis.', {
+          hash, field, value,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HINCRBY', performanceProfiler.duration);
+    }
+  }
+
+  async hkeys(
+    hash: string,
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.hkeys(hash);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hkeys in redis.', {
+          hash,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HKEYS', performanceProfiler.duration);
+    }
+  }
+
   async zadd(
     key: string,
     member: string,
@@ -557,6 +599,47 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('SADD', performanceProfiler.duration);
+    }
+  }
+
+  async sunionstore(
+    destination: string,
+    keys: string[],
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.sunionstore(destination, keys);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to sunionstore in redis.', {
+          destination, keys,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SUNIONSTORE', performanceProfiler.duration);
+    }
+  }
+
+  async smembers(
+    key: string,
+  ): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.smembers(key);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to smembers in redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SMEMBERS', performanceProfiler.duration);
     }
   }
 
