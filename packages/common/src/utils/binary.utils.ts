@@ -23,7 +23,8 @@ export class BinaryUtils {
   }
 
   static base64ToBigInt(str: string): BigInt {
-    return BigInt('0x' + this.base64ToHex(str));
+    const hex = this.base64ToHex(str);
+    return BigInt(hex ? '0x' + hex : hex);
   }
 
   static tryBase64ToHex(str: string): string | undefined {
