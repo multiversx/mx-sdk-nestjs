@@ -15,7 +15,7 @@ describe('ParseNftArrayPipe', () => {
         expect(await target.transform(validNftIdentifier, {} as ArgumentMetadata)).toStrictEqual([validNftIdentifier]);
       });
 
-      it('should throw BadRequestException even if array contains and valid identifier', async () => {
+      it('should throw BadRequestException even if array contains a valid identifier', async () => {
         const validNftIdentifier = 'ABCDE-efb116-02';
         expect(await target.transform(validNftIdentifier, {} as ArgumentMetadata)).toStrictEqual([validNftIdentifier]);
       });
