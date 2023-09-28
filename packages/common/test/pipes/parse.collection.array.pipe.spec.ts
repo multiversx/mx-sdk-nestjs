@@ -30,7 +30,7 @@ describe('ParseCollectionArrayPipe', () => {
         await expect(target.transform(invalidCollectionIdentifier, {} as ArgumentMetadata)).rejects.toThrow(BadRequestException);
       });
 
-      it('should throw BadRequestException even if array contains an valid collection identifier', async () => {
+      it('should throw BadRequestException even if array contains a valid collection identifier', async () => {
         const invalidCollectionIdentifiers = ['ABCDE-efb116-02', 'ABCDE-efb116'];
         await expect(target.transform(invalidCollectionIdentifiers, {} as ArgumentMetadata)).rejects.toThrow(BadRequestException);
       });
