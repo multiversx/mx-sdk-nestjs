@@ -38,8 +38,8 @@
     "axios": "^0.27.2"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-common": "^2.0.0-beta.2",
-    "@multiversx/sdk-nestjs-monitoring": "^2.0.0-beta.2",
+    "@multiversx/sdk-nestjs-common": "^2.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "^2.0.0",
     "@multiversx/sdk-wallet": "<=3.0.0",
     "@nestjs/common": "^10.x",
     "@nestjs/core": "^10.x"

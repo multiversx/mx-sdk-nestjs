@@ -38,9 +38,9 @@
     "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-cache": "^2.0.0-beta.2",
-    "@multiversx/sdk-nestjs-common": "^2.0.0-beta.2",
-    "@multiversx/sdk-nestjs-monitoring": "^2.0.0-beta.2",
+    "@multiversx/sdk-nestjs-cache": "^2.0.0",
+    "@multiversx/sdk-nestjs-common": "^2.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "^2.0.0",
     "@multiversx/sdk-wallet": "<=3.0.0",
     "@nestjs/common": "^10.x"
   },
