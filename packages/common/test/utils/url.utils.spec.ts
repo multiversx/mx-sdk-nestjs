@@ -3,7 +3,7 @@ import { UrlUtils } from "../../src/utils/url.utils";
 describe('isLocalhost', () => {
   it('should return true', () => {
     expect(UrlUtils.isLocalhost('https://localhost:2000')).toBeTruthy();
-    expect(UrlUtils.isLocalhost('http://localhost:2000', false)).toBeTruthy();
+    expect(UrlUtils.isLocalhost('http://localhost:2000')).toBeTruthy();
   });
 
   it('should return false', () => {

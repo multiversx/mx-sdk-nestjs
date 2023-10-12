@@ -32,4 +32,27 @@ describe('Binary Utils', () => {
       expect(BinaryUtils.tryBase64ToHex('aliceRob')).toStrictEqual('6a589c791a1b');
     });
   });
+
+  describe('base64ToBigInt', () => {
+    it('should return correct BigInt for a valid base64 string', () => {
+      BinaryUtils.base64ToHex = jest.fn().mockReturnValue('1f');
+
+      const result = BinaryUtils.base64ToBigInt('Gw==');
+      expect(result).toEqual(BigInt('31'));
+    });
+
+    it('should return BigInt(0) for an empty string', () => {
+      BinaryUtils.base64ToHex = jest.fn().mockReturnValue('');
+
+      const result = BinaryUtils.base64ToBigInt('');
+      expect(result).toEqual(BigInt(0));
+    });
+
+    it('should return BigInt(0) for a base64 string that translates to empty hex', () => {
+      BinaryUtils.base64ToHex = jest.fn().mockReturnValue('');
+
+      const result = BinaryUtils.base64ToBigInt('AA==');
+      expect(result).toEqual(BigInt(0));
+    });
+  });
 });
