@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-monitoring",
-  "version": "1.2.7",
+  "version": "2.0.0",
   "description": "Multiversx SDK Nestjs monitoring package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -36,7 +36,7 @@
     "winston-daily-rotate-file": "^4.6.1"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.x"
+    "@nestjs/common": "^10.x"
   },
   "publishConfig": {
     "access": "public"

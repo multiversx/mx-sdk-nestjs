@@ -2,7 +2,7 @@ import moment from 'moment';
 import axios from 'axios';
 import { Injectable } from '@nestjs/common';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
-import { RedisCacheService } from '../redis-cache/redis-cache.service';
+import { RedisCacheService } from '../redis-cache';
 import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { DATE_FORMAT, GuestCacheMethodEnum, IGuestCacheEntity, IGuestCacheWarmerOptions, REDIS_PREFIX } from '../entities/guest.caching';
 
@@ -16,7 +16,7 @@ export class GuestCacheWarmer {
   private async getReq(url: string) {
     const { data } = await axios.get(url, {
       headers: {
-        'no-cache': true,
+        'Cache-Control': 'no-cache',
       },
     });
     return data;
@@ -25,7 +25,7 @@ export class GuestCacheWarmer {
   private async postReq(url: string, body: any) {
     const { data } = await axios.post(url, body, {
       headers: {
-        'no-cache': true,
+        'Cache-Control': 'no-cache',
       },
     });
     return data;

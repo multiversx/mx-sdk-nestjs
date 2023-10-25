@@ -40,4 +40,4 @@ jobs:
       - name: Publish to npmjs
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-        run: npx lerna publish from-package --yes --pre-dist-tag ${{ github.event.inputs.channel }}
+        run: npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}

@@ -1,6 +1,6 @@
-import { ContractLoader } from "../../src/sc.interactions/contract.loader";
+import { ContractLoader } from "../../src";
 import * as fs from "fs";
-import { SmartContract, AbiRegistry, SmartContractAbi } from "@multiversx/sdk-core";
+import { SmartContract, AbiRegistry } from "@multiversx/sdk-core";
 
 describe("Contract loader", () => {
   const CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqkdz87p5raf5tsyv66ld8cu49nf2dqpp9d8ss36ltf2";
@@ -28,7 +28,7 @@ describe("Contract loader", () => {
     const loadSpy = jest
       .spyOn(ContractLoader.prototype as any, 'load')
       // eslint-disable-next-line require-await
-      .mockImplementation(jest.fn(async () => new SmartContractAbi(abiRegistry)));
+      .mockImplementation(jest.fn(async () => AbiRegistry.create(abiRegistry)));
 
     await cLoader.getContract(CONTRACT_ADDRESS);
 
