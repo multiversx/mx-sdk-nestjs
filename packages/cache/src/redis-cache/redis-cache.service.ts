@@ -319,6 +319,27 @@ export class RedisCacheService {
     }
   }
 
+  async incrby(
+    key: string,
+    value: number | string
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.incrby(key, value);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('RedisCache - An error occurred while trying to incrby redis key.', {
+          cacheKey: key,
+          error: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('INCRBY', performanceProfiler.duration);
+    }
+  }
+
   async decrement(
     key: string,
     ttl: number | null = null,
