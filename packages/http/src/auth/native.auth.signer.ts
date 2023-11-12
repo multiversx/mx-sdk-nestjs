@@ -42,7 +42,9 @@ export class NativeAuthSigner {
 
     const signature = signableMessage.getSignature();
 
-    const token = this.nativeAuthClient.getToken(signerAddress, signableToken, signature.hex());
+    const signatureHex = signature instanceof Buffer ? signature.toString('hex') : signature.hex();
+
+    const token = this.nativeAuthClient.getToken(signerAddress, signableToken, signatureHex);
     const expiryDate = new Date().addSeconds(this.config.expirySeconds);
 
     return this.accessTokenInfo = {
