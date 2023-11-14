@@ -1,4 +1,3 @@
-import { ModuleMetadata } from '@nestjs/common';
 import { ConnectionOptions } from 'tls';
 
 export class RedlockModuleOptions {
@@ -30,9 +29,4 @@ export class RedlockModuleOptions {
     Object.assign(this.config, options);
     Object.assign(this.additionalOptions, additionalOptions);
   }
-}
-
-export interface RedlockModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (...args: any[]) => Promise<RedlockModuleOptions> | RedlockModuleOptions;
-  inject?: any[];
 }

@@ -4,10 +4,14 @@ import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-moni
 import { OriginLogger } from '@multiversx/sdk-nestjs-common';
 import { REDIS_CLIENT_TOKEN } from '@multiversx/sdk-nestjs-redis';
 import { RedlockConfiguration } from './redlock.configuration';
+import { LockTimeoutError } from './errors/lock.timeout.error';
+import { RedlockLogLevel } from './entities/redlock.log.level';
 
 @Injectable()
 export class RedlockService {
   private readonly logger = new OriginLogger(RedlockService.name);
+
+  static logLevel: RedlockLogLevel = RedlockLogLevel.WARNING;
 
   constructor(
     @Inject(REDIS_CLIENT_TOKEN) private readonly redis: Redis,
@@ -42,7 +46,7 @@ export class RedlockService {
     if (retryTimes > 0) {
       const duration = profiler.stop();
 
-      this.logger.warn(`Acquired lock for resource '${lockKey}' after ${retryTimes} retries and ${duration}ms`);
+      this.logWarning(`Acquired lock for resource '${lockKey}' after ${retryTimes} retries and ${duration.toFixed(0)}ms`);
       this.metricsService.setRedlockAcquireDuration(type, duration);
     }
 
@@ -74,8 +78,8 @@ export class RedlockService {
 
     const isLocked = await this.lock(type, key, configuration);
     if (!isLocked) {
-      this.logger.error(`Could not acquire lock for resource '${lockKey}'`);
-      throw new Error(`Could not acquire lock for resource '${lockKey}'`);
+      this.logError(`Timeout out while attempting to acquire lock for resource '${lockKey}'`);
+      throw new LockTimeoutError(lockKey);
     }
 
     const signal = {
@@ -99,14 +103,14 @@ export class RedlockService {
     }
 
     function applyExtension(self: RedlockService, isFirstRun: boolean = true) {
-      const waitTime = isFirstRun ? Math.round(configuration.keyExpiration * 0.9) : Math.round((configuration.extendTtl ?? configuration.keyExpiration) * 0.9);
+      const waitTime = isFirstRun || !configuration.extendTtl ? Math.round(configuration.keyExpiration * 0.9) : Math.round((configuration.extendTtl ?? configuration.keyExpiration) * 0.9);
 
       extensionId = setTimeout(async () => {
         signal.aborted = true;
         await self.redis.pexpire(lockKey, configuration.extendTtl ?? configuration.keyExpiration);
         applyExtension(self, false);
         self.metricsService.incrementRedlockFailure(type, 'EXTEND');
-        self.logger.warn(`Applying extension for resource '${lockKey}'`);
+        self.logWarning(`Applying extension for resource '${lockKey}'`);
       }, waitTime);
     }
   }
@@ -123,4 +127,16 @@ export class RedlockService {
     return keyExpiration;
   }
 
+  private logWarning(message: string): void {
+    if (RedlockService.logLevel === RedlockLogLevel.WARNING) {
+      this.logger.warn(message);
+    }
+  }
+
+
+  private logError(message: string): void {
+    if ([RedlockLogLevel.WARNING, RedlockLogLevel.ERROR].includes(RedlockService.logLevel)) {
+      this.logger.error(message);
+    }
+  }
 }
