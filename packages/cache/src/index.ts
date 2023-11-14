@@ -1,4 +1,5 @@
 export * from './redis-cache';
+export * from './redlock';
 export * from './in-memory-cache';
 export * from './cache';
 export * from './jitter';
