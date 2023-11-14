@@ -32,6 +32,12 @@ export class RedlockService {
     do {
       result = await this.lockOnce(lockKey, config.keyExpiration);
       if (result) {
+        if (retryTimes > 0) {
+          const duration = profiler.stop();
+
+          this.metricsService.setRedlockAcquireDuration(type, duration);
+        }
+
         return result;
       }
 
