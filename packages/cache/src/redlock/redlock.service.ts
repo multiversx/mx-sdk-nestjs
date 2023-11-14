@@ -58,12 +58,11 @@ export class RedlockService {
   }
 
   private async lockOnce(key: string, keyExpiration: number): Promise<boolean> {
-    const result = await this.redis.setnx(key, '1');
-    if (result === 1) {
-      await this.redis.pexpire(key, keyExpiration);
-    }
+    // Using SET command with NX and PX options
+    const result = await this.redis.set(key, '1', 'PX', keyExpiration, 'NX');
 
-    return result === 1;
+    // The SET command with NX returns null if the key already exists
+    return result !== null;
   }
 
   private sleep(ms: number): Promise<void> {
