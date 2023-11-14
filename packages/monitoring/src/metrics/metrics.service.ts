@@ -26,7 +26,7 @@ export class MetricsService {
   private static duplicateQueueMessagesDetected: Gauge<string>;
   private static redlockAcquireDurationHistogram: Histogram<string>;
   private static redlockProcessDurationHistogram: Histogram<string>;
-  private static redlockFailureHistogram: Gauge<string>;
+  private static redlockFailureGauge: Gauge<string>;
   private static isDefaultMetricsRegistered: boolean = false;
 
   constructor() {
@@ -218,10 +218,10 @@ export class MetricsService {
       });
     }
 
-    if (!MetricsService.redlockFailureHistogram) {
-      MetricsService.redlockFailureHistogram = new Gauge({
-        name: 'redlock_process_duration',
-        help: 'Redlock process duration',
+    if (!MetricsService.redlockFailureGauge) {
+      MetricsService.redlockFailureGauge = new Gauge({
+        name: 'redlock_failures',
+        help: 'Redlock failures',
         labelNames: ['type', 'failure'],
       });
     }
@@ -328,7 +328,7 @@ export class MetricsService {
   }
 
   incrementRedlockFailure(type: string, failure: string): void {
-    MetricsService.redlockFailureHistogram.labels(type, failure).inc();
+    MetricsService.redlockFailureGauge.labels(type, failure).inc();
   }
 
   async getMetrics(): Promise<string> {
