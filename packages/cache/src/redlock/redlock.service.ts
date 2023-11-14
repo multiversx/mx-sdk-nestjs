@@ -32,23 +32,17 @@ export class RedlockService {
     do {
       result = await this.lockOnce(lockKey, config.keyExpiration);
       if (result) {
-        if (retryTimes > 0) {
-          const duration = profiler.stop();
-
-          this.metricsService.setRedlockAcquireDuration(type, duration);
-        }
-
-        return result;
+        break;
       }
 
       retryTimes++;
       await this.sleep(config.retryInterval);
-      this.logger.warn(`Retrying lock #${retryTimes} for resource '${lockKey}'`);
     } while (retryTimes <= config.maxRetries);
 
     if (retryTimes > 0) {
       const duration = profiler.stop();
 
+      this.logger.warn(`Acquired lock for resource '${lockKey}' after ${retryTimes} retries and ${duration}ms`);
       this.metricsService.setRedlockAcquireDuration(type, duration);
     }
 
@@ -88,7 +82,6 @@ export class RedlockService {
       aborted: false,
     };
 
-    const extensionTime = Math.round(configuration.keyExpiration * 0.9);
     let extensionId: NodeJS.Timeout | undefined = undefined;
     applyExtension(this);
 
@@ -105,14 +98,16 @@ export class RedlockService {
       this.metricsService.setRedlockProcessDuration(type, duration);
     }
 
-    function applyExtension(self: RedlockService) {
+    function applyExtension(self: RedlockService, isFirstRun: boolean = true) {
+      const waitTime = isFirstRun ? Math.round(configuration.keyExpiration * 0.9) : Math.round((configuration.extendTtl ?? configuration.keyExpiration) * 0.9);
+
       extensionId = setTimeout(async () => {
         signal.aborted = true;
-        await self.redis.pexpire(lockKey, configuration.keyExpiration);
-        applyExtension(self);
+        await self.redis.pexpire(lockKey, configuration.extendTtl ?? configuration.keyExpiration);
+        applyExtension(self, false);
         self.metricsService.incrementRedlockFailure(type, 'EXTEND');
-        self.logger.warn(`Applying extension for resource resource '${lockKey}'`);
-      }, extensionTime);
+        self.logger.warn(`Applying extension for resource '${lockKey}'`);
+      }, waitTime);
     }
   }
 
