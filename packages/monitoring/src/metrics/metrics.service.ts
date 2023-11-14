@@ -24,6 +24,9 @@ export class MetricsService {
   private static queuePublishGauge: Gauge<string>;
   private static queueConsumeGauge: Gauge<string>;
   private static duplicateQueueMessagesDetected: Gauge<string>;
+  private static redlockAcquireDurationHistogram: Histogram<string>;
+  private static redlockProcessDurationHistogram: Histogram<string>;
+  private static redlockFailureGauge: Gauge<string>;
   private static isDefaultMetricsRegistered: boolean = false;
 
   constructor() {
@@ -197,6 +200,32 @@ export class MetricsService {
       });
     }
 
+    if (!MetricsService.redlockAcquireDurationHistogram) {
+      MetricsService.redlockAcquireDurationHistogram = new Histogram({
+        name: 'redlock_acquire_duration',
+        help: 'Redlock acquire duration',
+        labelNames: ['type'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsService.redlockProcessDurationHistogram) {
+      MetricsService.redlockProcessDurationHistogram = new Histogram({
+        name: 'redlock_process_duration',
+        help: 'Redlock process duration',
+        labelNames: ['type'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsService.redlockFailureGauge) {
+      MetricsService.redlockFailureGauge = new Gauge({
+        name: 'redlock_failures',
+        help: 'Redlock failures',
+        labelNames: ['type', 'failure'],
+      });
+    }
+
     if (!MetricsService.isDefaultMetricsRegistered) {
       MetricsService.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
@@ -288,6 +317,18 @@ export class MetricsService {
 
   setConsumer(consumer: string, duration: number): void {
     MetricsService.consumerHistogram.labels(consumer).observe(duration);
+  }
+
+  setRedlockAcquireDuration(type: string, duration: number): void {
+    MetricsService.redlockAcquireDurationHistogram.labels(type).observe(duration);
+  }
+
+  setRedlockProcessDuration(type: string, duration: number): void {
+    MetricsService.redlockProcessDurationHistogram.labels(type).observe(duration);
+  }
+
+  incrementRedlockFailure(type: string, failure: string): void {
+    MetricsService.redlockFailureGauge.labels(type, failure).inc();
   }
 
   async getMetrics(): Promise<string> {
