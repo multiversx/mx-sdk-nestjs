@@ -2,15 +2,15 @@ import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { MetricsModule } from '@multiversx/sdk-nestjs-monitoring';
 import { RedisModule } from '@multiversx/sdk-nestjs-redis';
 import { RedlockService } from './redlock.service';
-import { RedlockModuleAsyncOptions, RedlockModuleOptions } from './entities';
+import { RedlockConnectionAsyncOptions, RedlockConnectionOptions } from './entities';
 import Redis from 'ioredis';
 
 @Module({})
 export class RedlockModule {
-  static forRoot(redisOptionsArray: RedlockModuleOptions[]): DynamicModule {
+  static forRoot(...redisOptionsArray: RedlockConnectionOptions[]): DynamicModule {
     const redisProviders: Provider[] = redisOptionsArray.map((option, index) => ({
       provide: `REDIS_CLIENT_${index}`,
-      useFactory: () => new Redis(option.config),
+      useFactory: () => new Redis(option),
     }));
 
     const redisClientsProvider: Provider = {
@@ -37,32 +37,25 @@ export class RedlockModule {
     };
   }
 
-  static forRootAsync(asyncOptionsArray: RedlockModuleAsyncOptions[]): DynamicModule {
-    const asyncProviders: Provider[] = asyncOptionsArray.map((asyncOptions, index) => ({
-      provide: `REDIS_CLIENT_${index}`,
-      useFactory: async (...args: any[]) => {
-        const options = await asyncOptions.useFactory(...args);
-        return new Redis(options.config);
+  static forRootAsync(asyncOptions: RedlockConnectionAsyncOptions): DynamicModule {
+    const asyncProviders: Provider[] = [{
+      provide: 'REDIS_CLIENTS',
+      useFactory: async (...args: any[]): Promise<Redis[]> => {
+        const optionsArray = await asyncOptions.useFactory(...args);
+        return optionsArray.map(options => new Redis(options));
       },
       inject: asyncOptions.inject || [],
-    }));
-
-    const redisClientsAsyncProvider: Provider = {
-      provide: 'REDIS_CLIENTS',
-      useFactory: (...clients: Redis[]) => clients,
-      inject: asyncProviders.map((_, index) => `REDIS_CLIENT_${index}`),
-    };
+    }];
 
     return {
       module: RedlockModule,
       imports: [
-        RedisModule, // Import RedisModule normally
+        RedisModule,
         MetricsModule,
-        ...asyncOptionsArray.map(ao => ao.imports).flat(),
+        ...(asyncOptions.imports || []),
       ],
       providers: [
         ...asyncProviders,
-        redisClientsAsyncProvider,
         RedlockService,
       ],
       exports: [
@@ -71,4 +64,5 @@ export class RedlockModule {
       ],
     };
   }
+
 }
