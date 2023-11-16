@@ -30,76 +30,71 @@ export class RedlockService {
     const quorumSize = Math.floor(this.redisArray.length / 2) + 1;
     let successCount = 0;
     let settledCount = 0;
-
-    return await new Promise<boolean>((resolve) => {
-      const checkQuorum = () => {
-        if (successCount >= quorumSize) {
-          resolve(true);
-        } else if (settledCount - successCount >= quorumSize) {
-          // When it's impossible to reach quorum due to too many failures
-          resolve(false);
-        }
-      };
-
-      for (const redis of this.redisArray) {
-        this.lockSingle(redis, type, key, config)
-          .then(result => {
-            if (result === true) {
-              successCount++;
-            }
-            settledCount++;
-            checkQuorum();
-          })
-          .catch(_ => {
-            settledCount++;
-            checkQuorum();
-          });
-      }
-    });
-  }
-
-  async lockSingle(
-    redis: Redis,
-    type: string,
-    key: string,
-    config: RedlockConfiguration,
-  ): Promise<boolean> {
-    let retryTimes = 0;
-    let result = false;
     const lockKey = `${type}:${key}`;
+    let retryTimes = 0;
 
     const profiler = new PerformanceProfiler();
 
     do {
-      result = await this.lockOnce(redis, lockKey, config.keyExpiration);
-      if (result) {
-        break;
+      const successInstances: Redis[] = [];
+
+      const lockResult = await new Promise<boolean>((resolve) => {
+        const checkQuorum = () => {
+          if (successCount >= quorumSize) {
+            resolve(true);
+          } else if (settledCount - successCount >= quorumSize) {
+            // When it's impossible to reach quorum due to too many failures
+            resolve(false);
+          }
+        };
+
+
+        for (const redis of this.redisArray) {
+          this.lockOnce(redis, lockKey, config.keyExpiration)
+            .then(({ result, redis }) => {
+              if (result === true) {
+                successCount++;
+                successInstances.push(redis);
+              }
+              settledCount++;
+              checkQuorum();
+            })
+            .catch(_ => {
+              settledCount++;
+              checkQuorum();
+            });
+        }
+      });
+
+      if (lockResult) {
+        if (retryTimes > 0) {
+          const duration = profiler.stop();
+          this.logWarning(`Acquired lock for resource '${lockKey}' after ${retryTimes} retries and ${duration.toFixed(0)}ms`);
+          this.metricsService.setRedlockAcquireDuration(type, duration);
+        }
+
+        return lockResult;
       }
 
-      retryTimes++;
+      const releasePromise = async (redis: Redis) => await redis.del(key);
+      await Promise.allSettled(successInstances.map(releasePromise));
+
       await this.sleep(config.retryInterval);
-    } while (retryTimes <= config.maxRetries);
 
-    if (retryTimes > 0 && result) {
-      const duration = profiler.stop();
+      retryTimes++;
+    } while (retryTimes <= config.maxRetries && profiler.peek() < config.keyExpiration);
 
-      this.logWarning(`Acquired lock for resource '${lockKey}' after ${retryTimes} retries and ${duration.toFixed(0)}ms with result ${result}`);
-      this.metricsService.setRedlockAcquireDuration(type, duration);
-    }
+    this.metricsService.incrementRedlockFailure(type, 'ACQUIRE');
 
-    if (!result) {
-      this.metricsService.incrementRedlockFailure(type, 'ACQUIRE');
-    }
-
-    return result;
+    return false;
   }
 
-  private async lockOnce(redis: Redis, key: string, keyExpiration: number): Promise<boolean> {
+  private async lockOnce(redis: Redis, key: string, keyExpiration: number): Promise<{ result: boolean, redis: Redis }> {
     // Using SET command with NX and PX options
     const result = await redis.set(key, '1', 'PX', keyExpiration, 'NX');
 
     // The SET command with NX returns null if the key already exists
-    return result !== null;
+    return { result: result !== null, redis };
   }
 
   private sleep(ms: number): Promise<void> {
@@ -114,7 +109,7 @@ export class RedlockService {
 
     const isLocked = await this.lock(type, key, configuration);
     if (!isLocked) {
-      this.logError(`Timeout out while attempting to acquire lock for resource '${lockKey}'`);
+      this.logError(`Timed out while attempting to acquire lock for resource '${lockKey}'`);
       throw new LockTimeoutError(lockKey);
     }
 
@@ -132,7 +127,9 @@ export class RedlockService {
         clearTimeout(extensionId);
       }
 
-      await this.release(lockKey);
+      this.release(lockKey).catch(error => {
+        this.logError(`Failed to release lock for resource '${lockKey}': ${error.message}`);
+      });
 
       const duration = profiler.stop();
       this.metricsService.setRedlockProcessDuration(type, duration);
