@@ -1,2 +1,2 @@
-export * from './redlock.module.options';
-export * from './redlock.module.async.options';
+export * from './redlock.connection.options';
+export * from './redlock.connection.async.options';
