@@ -34,11 +34,9 @@ export class RedlockService {
     return await new Promise<boolean>((resolve) => {
       const checkQuorum = () => {
         if (successCount >= quorumSize) {
-          console.log({ result: true, successCount, quorumSize, settledCount });
           resolve(true);
         } else if (settledCount - successCount >= quorumSize) {
           // When it's impossible to reach quorum due to too many failures
-          console.log({ result: false, successCount, quorumSize, settledCount });
           resolve(false);
         }
       };
