@@ -25,6 +25,10 @@ export class PerformanceProfiler {
     return this.duration;
   }
 
+  peek(): number {
+    return this.now() - this.started;
+  }
+
   private now() {
     const hrTime = process.hrtime();
     return hrTime[0] * 1000 + hrTime[1] / 1000000;
