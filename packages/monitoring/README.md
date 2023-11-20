@@ -21,53 +21,52 @@ npm install @multiversx/sdk-nestjs-monitoring
 The package exports **performance profilers**, **interceptors** and **metrics**.
 
 ### Performance profiler
-`PerformanceProfiler` is a class exported by the package which allows you to measure the execution time of parts of your code.
+`PerformanceProfiler` is a class exported by the package which allows you to measure the execution time of your code.
 
 ```typescript
-import { PerformanceProfiler } from "@multiversx/monitoring";
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 
 const profiler = new PerformanceProfiler();
 await doSomething();
 const profilerDurationInMs = profiler.stop();
 
-console.log(`doSomething() method exection time lasted ${profilerDurationInMs} ms`)
+console.log(`doSomething() method exection time lasted ${profilerDurationInMs} ms`);
 ```
 
 The `.stop()` method can receive two optional parameters:
 - `description` - text used for default loggin. Default: `undefined`
-- `log` - boolean to determine if log should be printed. If `log` is set to true, the logging class used will be `Logger` from `"@nestjs/common"`.` `Default: `false`
+- `log` - boolean to determine if log should be printed. If `log` is set to true, the logging class used to print will be `Logger` from `"@nestjs/common"`.` `Default: `false`
 
 
 ```typescript
-import { PerformanceProfiler } from "@multiversx/monitoring";
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 
 const profiler = new PerformanceProfiler();
 await doSomething();
 profiler.stop(`doSomething() execution time`, true);
 ```
-The output of the code above will be "`doSomething() execution time: 10ms`"
+The output of the code above will be "`doSomething() execution time: 1.532ms`"
 
 ---
 
 ### Cpu Profiler
-`CpuProfiler` is a class exported by the package which allows you to measure the CPU execution time of parts of your code. Javascript being single threaded you must be careful how much CPU you spend on some operations, but finding the pars of the code which consume CPU can be difficult without profilers. It has aslo a `PerformanceProfiler` built in.
-
+`CpuProfiler` is a class exported by the package which allows you to measure the CPU execution time of your code. Javascript being single threaded you must be careful how much CPU time you spend on some operations because it can slow down your process or even block it.
 
 ```typescript
-import { CpuProfiler } from "@multiversx/monitoring";
+import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
 
 const profiler = new CpuProfiler();
 await doHttpRequest()
 const profilerDurationInMs = profiler.stop();
 
-console.log(`doHttpRequest() method exection time lasted ${profilerDurationInMs} ms`)
+console.log(`doHttpRequest() method exection time lasted ${profilerDurationInMs} ms`);
 ```
 
 The `.stop()` method can receive two optional parameters:
-- `description` - text used for default loggin. When setting the description it will automatically print also the value of `PerformanceProfiler`. Default: `undefined`
+- `description` - text used for default loggin. Setting the description will trigger automatically printing the value of `PerformanceProfiler`. Default: `undefined`
 
 ```typescript
-import { CpuProfiler } from "@multiversx/monitoring";
+import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
 
 const httpReqCpuProfiler = new CpuProfiler();
 await doHttpRequest();
@@ -82,16 +81,16 @@ The output of the code above will be <br/>
 `doHttpRequest() execution time: 100ms, CPU time: 1ms`
 `doSomethingCpuIntensive() execution time: 20ms, CPU time 18ms`
 
-*Note that a big execution time does not necessarly have impact on the CPU load of the application, that means that while waiting for an HTTP request for example, the Javascript thread can process things. That is not the case for CPU time. When a method consumes a lot of CPU time, Javascript will not be able to process other things meanwhile and it can freeze until the CPU consuming task is done.*
+*Note that a big execution time does not necessarly have impact on the CPU load of the application, that means that for exemple while waiting for an HTTP request for example, the Javascript thread can process other things. That is not the case for CPU time because when a method consumes a lot of CPU time, Javascript will not be able to process other things meanwhile and it can freeze until the CPU consuming task is done.*
 
 ---
 
 ## Interceptors
-The package provides a series of [Nestjs Interceptors](https://docs.nestjs.com/interceptors) which will automatically log and set the CPU duration and overall duration for each request in a prom histogram ready to be scrapped by Prometheus.
+The package provides a series of [Nestjs Interceptors](https://docs.nestjs.com/interceptors) which will automatically log and set the CPU and overall duration for each request in a prom histogram ready to be scrapped by Prometheus.
 
-`LoggingInterceptor` interceptor is responsable for setting in a prometheus histogram the request execution time of each request. See [Performance Profiler](#performance-profiler).
+`LoggingInterceptor` interceptor will set in a prometheus histogram the request execution time of each request using [performance profilers](#performance-profiler).
 
-`RequestCpuTimeInterceptor` interceptor is responsable for setting in a prometheus histogram the request CPU execution time of each request. See [Cpu Profiler](#cpu-profiler).
+`RequestCpuTimeInterceptor` interceptor will set in a prometheus histogram the request CPU execution time of each request using [cpu profiler](#cpu-profiler).
 
 *Both interceptors expect as an argument an instance of `metricsService` class.*
 
@@ -113,11 +112,11 @@ async function bootstrap() {
 
 ## MetricsModule and MetricsService
 
-`MetricsModule` is a [Nestjs Module](https://docs.nestjs.com/modules) responsible for aggregating metrics data through `MetricsService` and exposing them for Prometheus. `MetricsService` is extensible, you can define and aggregate your own metrics and expose them. By default it exposes a set of metrics created by the interceptors defined [here](#interceptors). Most of the Multiversx packages expose metrics by default through this service like [@multiversx/sdk-nestjs-redis](https://www.npmjs.com/package/@multiversx/sdk-nestjs-redis) which automatically tracks the execution time of each redis query, overall redis health and much more, and expose them for Prometheus.
+`MetricsModule` is a [Nestjs Module](https://docs.nestjs.com/modules) responsible for aggregating metrics data through `MetricsService` and exposing them to be consumed by Prometheus. `MetricsService` is extensible, you can define and aggregate your own metrics and expose them. By default it exposes a set of metrics created by the interceptors specified [here](#interceptors). Most of the Multiversx packages expose metrics by default through this service, for example [@multiversx/sdk-nestjs-redis](https://www.npmjs.com/package/@multiversx/sdk-nestjs-redis) automatically tracks the execution time of each redis query, overall redis health and much more, and expose sends them to `metricsService`.
 
 ### How to instantiate the MetricsModule and expose metrics endpoints for Prometheus
 
-In our example we will showcase request response time and response CPU time. Make sure you have the interceptors in place as shown [here](#interceptors). After the interceptors are in place, as requests comes through, the metrics are being populated and we just have to expose the output of the `.getMetrics()` method on `MetricsService` through a controller.
+In our example we will showcase how to expose response time and CPU time of HTTP requests. Make sure you have the interceptors in place as shown [here](#interceptors). After the interceptors are in place, as requests comes through your application, the metrics are being populated into `MetricsService` class and we just have to expose the output of the `.getMetrics()` method on `MetricsService` through a controller.
 
 ```typescript
 import { Controller, Get } from '@nestjs/common';
@@ -175,7 +174,7 @@ export class ApiMetricsService {
 }
 ```
 
-The only change we have to do is that we need to instantiate this class and call `.getMetrics()` method on it to return to us both default and our new custom metric.
+The only change we have to do is that we need to instantiate this class and call `.getMetrics()` method on it to return to us both default and our new custom metrics.
 
 The `.setHearthbeatDuration()` method will be used in our business logic whenever we want to add a new value to that histogram.
 
