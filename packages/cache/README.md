@@ -19,8 +19,13 @@ npm install @multiversx/sdk-nestjs-cache
 ## Utility
 The package exports **in memory cache service** and **remote cache service**.
 
+## Table of contents
+- [In Memory Cache](#in-memory-cache) - super fast in memory caching system based on [LRU cache](https://www.npmjs.com/package/lru-cache)
+- [Redis Cache](#redis-cache) - Caching system based on [Redis](https://www.npmjs.com/package/@multiversx/sdk-nestjs-redis)
+- [Cache Service](#cache-service) - MultiversX caching system with combines in memory an readis cache forming a two layers caching system
+
 ## In memory cache
-In memory cache is used to read and write data from and into the memory storage of your Node.js instance.
+In memory cache, available through `InMemoryCacheService`, is used to read and write data from and into the memory storage of your Node.js instance.
 
 
 *Note that if you have multiple instances of you application you must sync local cache across all your instances.*
@@ -108,14 +113,37 @@ When the `.loadConfiguration()` method is called for the first time, the `.getCo
 - **Returns:** A `Promise` that resolves to the updated or newly created value.
 
 ## Redis Cache
-Redis cache is a caching system build ontop of Reids. It is used to share cache related information among multiple microservices.
+Redis cache, available through `RedisCacheService`, is a caching system build ontop of Reids. It is used to share cache related information among multiple microservices.
 
+Let's build the same config loader class but with data shared across multiple clusters using Redis. The implementation is almost identical since both `InMemoryCache` and `RedisCache` have similar class structure.
 
 Usage example:
 
 ```typescript
-import {} from '
+import { Injectable } from '@nestjs/common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+
+@Injectable()
+export class ConfigService {
+ constructor(
+    private readonly redisCacheService: RedisCacheService
+  ){}
+
+  async loadConfiguration(){
+    return await this.RedisCacheService.getOrSet(
+      'configurationKey',
+      () => this.getConfigurationFromDb(),
+      10 * 1000 
+    )
+  }
+
+  private async getConfigurationFromDb(){
+    // fetch configuration from db
+  }
+}
+
 ```
+### Methods
 
 #### `get<T>(key: string): Promise<T | undefined>`
 
@@ -160,4 +188,7 @@ import {} from '
   - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
 
 **Note:** These are just some of the methods available in the `RedisCacheService` class.
+
+## Cache Service
+Cache service is using both [In Memory Cache](#in-memory-cache) and [Redis Cache](#redis-cache) to form a two layer caching system.
 
