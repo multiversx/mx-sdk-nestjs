@@ -5,10 +5,6 @@
 This package contains a set of utilities commonly used for monitoring purposes in the MultiversX Microservice ecosystem. 
 The package relies on prometheus to aggregate the metrics and it is using [prom-client](https://www.npmjs.com/package/prom-client) as a client for it.
 
-## CHANGELOG
-
-[CHANGELOG](CHANGELOG.md)
-
 ## Installation
 
 `sdk-nestjs-monitoring` is delivered via **npm** and it can be installed as follows:
@@ -21,7 +17,7 @@ npm install @multiversx/sdk-nestjs-monitoring
 The package exports **performance profilers**, **interceptors** and **metrics**.
 
 ### Performance profiler
-`PerformanceProfiler` is a class exported by the package which allows you to measure the execution time of your code.
+`PerformanceProfiler` is a class exported by the package that allows you to measure the execution time of your code.
 
 ```typescript
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
@@ -50,7 +46,7 @@ The output of the code above will be "`doSomething() execution time: 1.532ms`"
 ---
 
 ### Cpu Profiler
-`CpuProfiler` is a class exported by the package which allows you to measure the CPU execution time of your code. Javascript being single threaded you must be careful how much CPU time you spend on some operations because it can slow down your process or even block it.
+`CpuProfiler` is a class exported by the package that allows you to measure the CPU execution time of your code. Javascript being single threaded you must be careful how much CPU time you spend on some operations because it can slow down your process or even block it.
 
 ```typescript
 import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
@@ -81,7 +77,7 @@ The output of the code above will be <br/>
 `doHttpRequest() execution time: 100ms, CPU time: 1ms`
 `doSomethingCpuIntensive() execution time: 20ms, CPU time 18ms`
 
-*Note that a big execution time does not necessarly have impact on the CPU load of the application, that means that for exemple while waiting for an HTTP request for example, the Javascript thread can process other things. That is not the case for CPU time because when a method consumes a lot of CPU time, Javascript will not be able to process other things meanwhile and it can freeze until the CPU consuming task is done.*
+*Note that a big execution time does not necessarily have an impact on the CPU load of the application, that means that for example while waiting for an HTTP request for example, the Javascript thread can process other things. That is not the case for CPU time because when a method consumes a lot of CPU time, Javascript will not be able to process other things meanwhile and it can freeze until the CPU consuming task is done.*
 
 ---
 
