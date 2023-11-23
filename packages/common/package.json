@@ -44,6 +44,7 @@
   "peerDependencies": {
     "@multiversx/sdk-nestjs-monitoring": "*",
     "@nestjs/common": "^9.x",
+    "@nestjs/config": "^3.x",
     "@nestjs/core": "^9.x",
     "@nestjs/swagger": "^6.x"
   },
