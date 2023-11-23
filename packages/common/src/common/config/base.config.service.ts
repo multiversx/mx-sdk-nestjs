@@ -7,7 +7,7 @@ export class BaseConfigService {
 
   get<T = any>(key: string): T | undefined {
     const envOverride = this.tryGetEnvOverride<T>(key);
-    if (envOverride) {
+    if (envOverride || envOverride === false) {
       return envOverride;
     }
 
@@ -25,17 +25,18 @@ export class BaseConfigService {
   }
 
   private tryGetEnvOverride<T>(key: string): T | undefined {
+    const overridePrefix = 'MVX_OVERRIDE_';
     const envKey = key
       // Replace any non-uppercase sequence before an uppercase letter or number with that letter/number prefixed by an underscore
-      .replace(/([a-z0-9])([A-Z0-9])/g, '$1_$2')
-      // Replace any sequence of uppercase letters and numbers followed by a lowercase letter with an underscore in between
-      .replace(/([A-Z0-9]+)([a-z])/g, '$1_$2')
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      // Handle the scenario where a group of uppercase letters is followed by a lowercase letter
+      .replace(/([A-Z])([A-Z])([a-z])/g, '$1_$2$3')
       // Replace non-alphanumeric characters with underscores
       .replace(/[^a-zA-Z0-9]/g, '_')
       // Convert the whole string to uppercase
       .toUpperCase();
 
-    const envValue = this.configService.get(envKey);
+    const envValue = this.configService.get(overridePrefix + envKey);
     if (!envValue) {
       return undefined;
     }
