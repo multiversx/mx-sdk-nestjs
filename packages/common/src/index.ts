@@ -38,7 +38,7 @@ export * from './pipes/parse.token.pipe';
 export * from './pipes/parse.token.or.nft.pipe';
 export * from './pipes/parse.transaction.hash.pipe';
 export * from './common/entities/amount';
-export * from './common/config/erdnest.config.service';
+export * from './common/config';
 export * from './common/swappable-settings';
 export * from './common/logging/logging.module';
 export * from './common/complexity/apply.complexity';
