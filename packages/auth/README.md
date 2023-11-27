@@ -13,6 +13,24 @@ The package relies on [@multiversx/sdk-native-auth-server](https://www.npmjs.com
 npm install @multiversx/sdk-nestjs-auth
 ```
 
+## Obtaining a Native Auth token
+
+This package validates a payload signed by a MultiversX wallet. You can use the MultiversX Utils website to get a token you can use for testing.
+
+![image](https://github.com/multiversx/mx-sdk-nestjs/assets/6889483/374a4e3a-f7d3-4bd9-a212-a8615c89ab53)
+
+1. Navigate to [https://utils.multiversx.com/auth](https://utils.multiversx.com/auth) and choose the desired network from the select located in the upper right corner of the page
+2. Click the **Generate** button
+3. Select a wallet you prefer to use from the modal dialog, and give it access to the page
+4. **Done!** You can now copy the token and use it as a Bearer token in your requests.
+
+To use it in your requests, you need to have an `Authorization` header with the value :  
+`Bearer <your_token_goes_here>`.  
+
+You also need to add an `origin` header with the value `https://utils.multiversx.com`. 
+
+*Note: these steps are only needed while testing. In production, a frontend application will handle token generation*
+
 ## Utility
 
 The package provides a series of [NestJS Guards](https://docs.nestjs.com/guards) that can be used for easy authorization on endpoints in your application.  
