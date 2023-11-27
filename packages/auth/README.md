@@ -20,7 +20,10 @@ It also provides some [NestJS Decorators](https://docs.nestjs.com/custom-decorat
 
 ## Configuration
 
-The `Auth` package requires an implementation of the `ErdnestConfigService` interface. 
+The authentication guards need 2 parameters on instantiation.  
+The fist parameter needs to be an instance of a class implementing the `ErdnestConfigService` interface.  
+The second one, needs to be an instance of a [Caching service](https://www.npmjs.com/package/@multiversx/sdk-nestjs-cache)
+
 
 ```typescript
 import { Injectable } from "@nestjs/common";
