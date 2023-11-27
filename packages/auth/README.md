@@ -20,7 +20,58 @@ It also provides some [NestJS Decorators](https://docs.nestjs.com/custom-decorat
 
 ## Configuration
 
-// TODO
+The `Auth` package requires an implementation of the `ErdnestConfigService` interface. 
+
+```typescript
+import { Injectable } from "@nestjs/common";
+import { ApiConfigService } from "./api.config.service";
+import { ErdnestConfigService } from "@multiversx/sdk-nestjs-common";
+
+@Injectable()
+export class SdkNestjsConfigServiceImpl implements ErdnestConfigService {
+  constructor(
+    private readonly apiConfigService: ApiConfigService,
+  ) { }
+
+  getSecurityAdmins(): string[] {
+    return this.apiConfigService.getSecurityAdmins();
+  }
+
+  getJwtSecret(): string {
+    return this.apiConfigService.getJwtSecret();
+  }
+
+  getApiUrl(): string {
+    return this.apiConfigService.getApiUrl();
+  }
+
+  getNativeAuthMaxExpirySeconds(): number {
+    return this.apiConfigService.getNativeAuthMaxExpirySeconds();
+  }
+
+  getNativeAuthAcceptedOrigins(): string[] {
+    return this.apiConfigService.getNativeAuthAcceptedOrigins();
+  }
+}
+```
+
+You can register it as a provider, and the DI mechanism of NestJS will handle instantiation for you. 
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ERDNEST_CONFIG_SERVICE } from "@multiversx/sdk-nestjs-common";
+
+@Module({
+  providers: [
+    {
+      provide: ERDNEST_CONFIG_SERVICE,
+      useClass: SdkNestjsConfigServiceImpl,
+    },
+  ],
+})
+export class AppModule {}
+```
+
 
 ## Using the Auth Guards
 
@@ -112,6 +163,14 @@ export class AdminController {
 
 `JwtOrNativeAuthGuard` guard will authorize requests containing either JWT or a native auth access token. The package will first look for a valid JWT. If that fails, it will look for a valid native auth access token.
 
+### Global-scoped guards
+
+```typescript
+const app = await NestFactory.create(AppModule);
+app.useGlobalGuards(new NativeAuthGuard(new SdkNestjsConfigServiceImpl(apiConfigService), cachingService));
+```
+
+
 ## Using the Auth Decorators
 
 The package exposes 3 decorators : `NativeAuth`, `Jwt` and `NoAuth`
@@ -149,7 +208,7 @@ The `Jwt` decorator works just like `NativeAuth`. The fields accessible inside i
 
 ### No Auth Decorator
 
-The `NoAuth` decorator is used in applications where the Auth guards have been enabled globally. It allows you to exclude certain methods from the verification process.
+The `NoAuth` decorator can be used to skip authorization on a specific method. This is useful when a guard is scoped globally or at the controller level.
 
 ```typescript
 import { NoAuth } from "@multiversx/sdk-nestjs-auth";
