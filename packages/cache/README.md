@@ -215,9 +215,9 @@ export class ConfigService {
 }
 ```
 
-Whenever `.loadConfigurationMethod()` is called, the service will first look into the in memory cache if there is a value stored for the specified key and return it. If the value is not found in the in memory cache it will look for the same key in Redis cache and return it if found. If the value if not found in Redis, the `.getConfigurationFromDb()` method is called and the returned value is stored in memory for 5 seconds (the TTL provided in the third parameter) and in Redis for 10 seconds (the value provided in the forth parameter).
+Whenever `.loadConfigurationMethod()` is called, the service will first look into the in memory cache if there is a value stored for the specified key and return it. If the value is not found in the in memory cache it will look for the same key in Redis cache and return it if found. If the value is not found in Redis, the `.getConfigurationFromDb()` method is called and the returned value is stored in memory for 5 seconds (the TTL provided in the third parameter) and in Redis for 10 seconds (the value provided in the fourth parameter).
 
-*Note: that we ussualy use smaller TTL for in memory cache because when it comes for in memory cache it takes longer to syncronize all instances and it is better to fallback to Redis and lose a bit of reading speed than to have inconsistent data.*
+*Note: we usually use smaller TTL for in memory cache because when it comes to in memory cache it takes longer to synchronize all instances and it is better to fall back to Redis and lose a bit of reading speed than to have inconsistent data.*
 
 All methods from `CacheService` use the two layer caching system except the ones that contains `local` and `remote` in their name. Those methods refer strictly to in memory cache and Redis cache.
 
