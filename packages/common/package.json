@@ -33,8 +33,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "12.6.1",
-    "@multiversx/sdk-network-providers": "^1.3.0",
+    "@multiversx/sdk-core": "^12.15.0",
+    "@multiversx/sdk-network-providers": "^2.2.0",
     "nest-winston": "^1.6.2",
     "uuid": "^8.3.2",
     "winston": "^3.7.2"
