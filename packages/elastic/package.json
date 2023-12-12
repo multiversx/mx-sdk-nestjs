@@ -1,6 +1,10 @@
 {
   "name": "@multiversx/sdk-nestjs-elastic",
+<<<<<<< HEAD
   "version": "3.0.1-beta.0",
+=======
+  "version": "3.0.1-beta",
+>>>>>>> ce81155 (Update versions)
   "description": "Multiversx SDK Nestjs elastic package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
