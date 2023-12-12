@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^12.15.0",
-    "@multiversx/sdk-native-auth-server": "^1.0.6",
+    "@multiversx/sdk-native-auth-server": "^1.0.11",
     "@multiversx/sdk-wallet": "3.0.0",
     "jsonwebtoken": "^9.0.0"
   },

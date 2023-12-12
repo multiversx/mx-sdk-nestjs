@@ -33,7 +33,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-native-auth-client": "^1.0.5",
+    "@multiversx/sdk-native-auth-client": "^1.0.6",
     "agentkeepalive": "^4.3.0",
     "axios": "^0.27.2"
   },
