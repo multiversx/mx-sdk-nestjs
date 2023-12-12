@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-cache",
-  "version": "3.0.1",
+  "version": "3.0.1-beta",
   "description": "Multiversx SDK Nestjs cache package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -40,9 +40,9 @@
     "uuid": "^8.3.2"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-common": "^3.0.0",
-    "@multiversx/sdk-nestjs-monitoring": "^3.0.0",
-    "@multiversx/sdk-nestjs-redis": "^3.0.0",
+    "@multiversx/sdk-nestjs-common": "^3.0.1-beta",
+    "@multiversx/sdk-nestjs-monitoring": "^3.0.1-beta",
+    "@multiversx/sdk-nestjs-redis": "^3.0.1-beta",
     "@nestjs/common": "^10.x",
     "@nestjs/core": "^10.x"
   },
