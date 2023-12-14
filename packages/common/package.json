@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "3.0.1-beta.2",
+  "version": "3.0.0",
   "description": "Multiversx SDK Nestjs common package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -40,7 +40,7 @@
     "winston": "^3.7.2"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-monitoring": "^3.0.1-beta.0",
+    "@multiversx/sdk-nestjs-monitoring": "^3.0.0",
     "@nestjs/common": "^10.x",
     "@nestjs/config": "^3.x",
     "@nestjs/core": "^10.x",
