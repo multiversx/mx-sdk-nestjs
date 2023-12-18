@@ -5,6 +5,7 @@ import { PerformanceProfiler, MetricsService } from "@multiversx/sdk-nestjs-moni
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
 import { PendingExecuter } from "@multiversx/sdk-nestjs-common";
+import crypto from 'crypto';
 
 @Injectable()
 export class ApiService {
@@ -80,7 +81,9 @@ export class ApiService {
     const config = await this.getConfig(settings);
 
     try {
-      return await this.requestsExecuter.execute(url, async () => await axios.get(url, config));
+      const params = this.getParamsAsString(settings.params);
+      const requestHash = this.generateHash(`${url}-${params}`);
+      return await this.requestsExecuter.execute(requestHash, async () => await axios.get(url, config));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -269,5 +272,29 @@ export class ApiService {
       name: error.name,
       stack: error.stack,
     };
+  }
+
+  private generateHash(key: string): string {
+    return crypto.createHash('sha256')
+      .update(key)
+      .digest('hex');
+  }
+
+  private getParamsAsString(params?: any): string {
+    if (!params) {
+      return '';
+    }
+    if (typeof params === 'string') {
+      return params;
+    }
+
+    if (typeof params === 'object') {
+      try {
+        return JSON.stringify(params);
+      } catch (e) {
+        return '';
+      }
+    }
+    return '';
   }
 }
