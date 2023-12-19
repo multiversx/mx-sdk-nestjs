@@ -1,5 +1,5 @@
-import {CallHandler, ExecutionContext, Injectable, NestInterceptor} from "@nestjs/common";
-import {HttpAdapterHost} from "@nestjs/core";
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
+import { HttpAdapterHost } from "@nestjs/core";
 import { Observable } from "rxjs";
 
 @Injectable()
@@ -30,7 +30,7 @@ export class QueryCheckInterceptor implements NestInterceptor {
     const supportedQueryNames = Object.values(metadata).map((x: any) => x.data);
 
     for (const paramName of Object.keys(request.query)) {
-      if (!['fields', 'extract'].includes(paramName) && !supportedQueryNames.includes(paramName)) {
+      if (!['fields', 'extract', 'excludeFields'].includes(paramName) && !supportedQueryNames.includes(paramName)) {
         delete request.query[paramName];
         // throw new BadRequestException(`Unsupported parameter '${paramName}'. Supported parameters are: ${supportedQueryNames.join(', ')}`);
         // const origin = request.headers['origin'];
