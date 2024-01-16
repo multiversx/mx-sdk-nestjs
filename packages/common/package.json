@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^12.15.0",
-    "@multiversx/sdk-network-providers": "^2.2.0",
+    "@multiversx/sdk-network-providers": "^2.2.1",
     "nest-winston": "^1.6.2",
     "uuid": "^8.3.2",
     "winston": "^3.7.2"
