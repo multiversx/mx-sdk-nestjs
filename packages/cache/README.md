@@ -43,7 +43,7 @@ export class ConfigService {
     return await this.inMemoryCacheService.getOrSet(
       'configurationKey',
       () => this.getConfigurationFromDb(),
-      10 * 1000 // 10 seconds
+      10, // 10 seconds
     )
   }
 
@@ -122,15 +122,15 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 @Injectable()
 export class ConfigService {
  constructor(
-    private readonly redisCacheService: RedisCacheService
+    private readonly redisCacheService: RedisCacheService,
   ){}
 
   async loadConfiguration(){
     return await this.redisCacheService.getOrSet(
       'configurationKey',
       () => this.getConfigurationFromDb(),
-      10 * 1000 
-    )
+      10,
+    );
   }
 
   private async getConfigurationFromDb(){
@@ -197,16 +197,16 @@ import { CacheService } from '@multiversx/sdk-nestjs-cache';
 @Injectable()
 export class ConfigService {
  constructor(
-    private readonly cacheService: RedisCacheService
+    private readonly cacheService: CacheService,
   ){}
 
   async loadConfiguration(){
     return await this.cacheService.getOrSet(
       'configurationKey',
       () => this.getConfigurationFromDb(),
-      5 * 1000, // in memory TTL
-      10 * 1000, // redis TTL
-    )
+      5, // in memory TTL
+      10, // redis TTL
+    );
   }
 
   private async getConfigurationFromDb(){
