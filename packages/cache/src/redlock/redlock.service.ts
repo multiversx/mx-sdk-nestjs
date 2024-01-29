@@ -17,8 +17,9 @@ export class RedlockService {
     private readonly metricsService: MetricsService,
   ) { }
 
-  async release(key: string): Promise<void> {
-    const promise = async (redis: Redis) => await redis.del(key);
+  async release(type: string, key: string): Promise<void> {
+    const lockKey = `${type}:${key}`;
+    const promise = async (redis: Redis) => await redis.del(lockKey);
     await Promise.allSettled(this.redisArray.map(promise));
   }
 
@@ -76,7 +77,7 @@ export class RedlockService {
         return lockResult;
       }
 
-      const releasePromise = async (redis: Redis) => await redis.del(key);
+      const releasePromise = async (redis: Redis) => await redis.del(lockKey);
       await Promise.allSettled(successInstances.map(releasePromise));
 
       await this.sleep(config.retryInterval);
@@ -127,7 +128,7 @@ export class RedlockService {
         clearTimeout(extensionId);
       }
 
-      this.release(lockKey).catch(error => {
+      this.release(type, key).catch(error => {
         this.logError(`Failed to release lock for resource '${lockKey}': ${error.message}`);
       });
 
