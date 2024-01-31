@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-auth",
-  "version": "2.1.0",
+  "version": "3.1.4",
   "description": "Multiversx SDK Nestjs auth package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -32,16 +32,15 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "12.6.1",
-    "@multiversx/sdk-native-auth-server": "^1.0.6",
-    "@multiversx/sdk-wallet": "3.0.0",
+    "@multiversx/sdk-core": "^12.15.0",
+    "@multiversx/sdk-native-auth-server": "^1.0.12",
+    "@multiversx/sdk-wallet": "^4.2.0",
     "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-cache": "^2.0.0",
-    "@multiversx/sdk-nestjs-common": "^2.0.0",
-    "@multiversx/sdk-nestjs-monitoring": "^2.0.0",
-    "@multiversx/sdk-wallet": "<=3.0.0",
+    "@multiversx/sdk-nestjs-cache": "^3.0.0",
+    "@multiversx/sdk-nestjs-common": "^3.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "^3.0.0",
     "@nestjs/common": "^10.x"
   },
   "publishConfig": {

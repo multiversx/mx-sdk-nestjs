@@ -13,7 +13,7 @@ It relies on the following peer dependencies which must be installed in the pare
 
 ## Documentation
 
-- [Multiversx Docs](https://docs.multiversx.com/sdk-and-tools/erdnest/)
+- [Multiversx Docs](https://docs.multiversx.com/sdk-and-tools/sdk-nestjs)
 
 ## CHANGELOG
 

@@ -4,10 +4,6 @@
 
 This package contains a set of utilities commonly used for caching purposes in the MultiversX Microservice ecosystem. 
 
-## CHANGELOG
-
-[CHANGELOG](CHANGELOG.md)
-
 ## Installation
 
 `sdk-nestjs-cache` is delivered via **npm** and it can be installed as follows:
@@ -47,7 +43,7 @@ export class ConfigService {
     return await this.inMemoryCacheService.getOrSet(
       'configurationKey',
       () => this.getConfigurationFromDb(),
-      10 * 1000 
+      10, // 10 seconds
     )
   }
 
@@ -56,7 +52,7 @@ export class ConfigService {
   }
 }
 ```
-When the `.loadConfiguration()` method is called for the first time, the `.getConfigurationFromDb()` method will be executed and the value returned from it will be set in cache under `configurationKey` key. If another `.loadConfiguration()` call comes in 10 seconds interval, the data will be returned from cache and `.getConfigurationFromDb()` will not be executed again.
+When the `.loadConfiguration()` method is called for the first time, the `.getConfigurationFromDb()` method will be executed and the value returned from it will be set in cache with `configurationKey` key. If another `.loadConfiguration()` call comes in 10 seconds interval, the data will be returned from cache and `.getConfigurationFromDb()` will not be executed again.
 
 ### Methods
 
@@ -78,7 +74,7 @@ When the `.loadConfiguration()` method is called for the first time, the `.getCo
   - `key`: The key under which to store the value.
   - `value`: The value to store in the cache.
   - `ttl`: Time-to-live for the cached item in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 
 #### `.setMany<T>(keys: string[], values: T[], ttl: number, cacheNullable?: boolean): Promise<void>`
 
@@ -86,7 +82,7 @@ When the `.loadConfiguration()` method is called for the first time, the `.getCo
   - `keys`: An array of keys under which to store the values.
   - `values`: An array of values to store in the cache.
   - `ttl`: Time-to-live for the cached items in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 
 #### `.delete(key: string): Promise<void>`
 
@@ -100,7 +96,7 @@ When the `.loadConfiguration()` method is called for the first time, the `.getCo
   - `key`: The key of the item to retrieve or create.
   - `createValueFunc`: A function that creates the value if the key is not present in the cache.
   - `ttl`: Time-to-live for the cached item in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 - **Returns:** A `Promise` that resolves to the cached or newly created value.
 
 #### `.setOrUpdate<T>(key: string, createValueFunc: () => Promise<T>, ttl: number, cacheNullable?: boolean): Promise<T>`
@@ -109,7 +105,7 @@ When the `.loadConfiguration()` method is called for the first time, the `.getCo
   - `key`: The key of the item to update or create.
   - `createValueFunc`: A function that creates the new value for the key.
   - `ttl`: Time-to-live for the cached item in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 - **Returns:** A `Promise` that resolves to the updated or newly created value.
 
 ## Redis Cache
@@ -126,15 +122,15 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 @Injectable()
 export class ConfigService {
  constructor(
-    private readonly redisCacheService: RedisCacheService
+    private readonly redisCacheService: RedisCacheService,
   ){}
 
   async loadConfiguration(){
-    return await this.RedisCacheService.getOrSet(
+    return await this.redisCacheService.getOrSet(
       'configurationKey',
       () => this.getConfigurationFromDb(),
-      10 * 1000 
-    )
+      10,
+    );
   }
 
   private async getConfigurationFromDb(){
@@ -163,7 +159,7 @@ export class ConfigService {
   - `key`: The key under which to store the value.
   - `value`: The value to store in the cache.
   - `ttl`: Time-to-live for the cached item in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 
 #### `setMany<T>(keys: string[], values: T[], ttl: number, cacheNullable?: boolean): void`
 
@@ -171,7 +167,7 @@ export class ConfigService {
   - `keys`: An array of keys for the items to update or create.
   - `values`: An array of values to set in the cache.
   - `ttl`: Time-to-live for the cached items in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 
 #### `delete(key: string): void`
 
@@ -185,10 +181,100 @@ export class ConfigService {
   - `key`: The key of the item to retrieve or create.
   - `createValueFunc`: A function that creates the new value for the key.
   - `ttl`: Time-to-live for the cached item in seconds.
-  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 
 **Note:** These are just some of the methods available in the `RedisCacheService` class.
 
 ## Cache Service
 Cache service is using both [In Memory Cache](#in-memory-cache) and [Redis Cache](#redis-cache) to form a two-layer caching system.
 
+Usage example:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
+
+@Injectable()
+export class ConfigService {
+ constructor(
+    private readonly cacheService: CacheService,
+  ){}
+
+  async loadConfiguration(){
+    return await this.cacheService.getOrSet(
+      'configurationKey',
+      () => this.getConfigurationFromDb(),
+      5, // in memory TTL
+      10, // redis TTL
+    );
+  }
+
+  private async getConfigurationFromDb(){
+    // fetch configuration from db
+  }
+}
+```
+
+Whenever `.loadConfigurationMethod()` is called, the service will first look into the in memory cache if there is a value stored for the specified key and return it. If the value is not found in the in memory cache it will look for the same key in Redis cache and return it if found. If the value is not found in Redis, the `.getConfigurationFromDb()` method is called and the returned value is stored in memory for 5 seconds (the TTL provided in the third parameter) and in Redis for 10 seconds (the value provided in the fourth parameter).
+
+*Note: we usually use smaller TTL for in memory cache because when it comes to in memory cache it takes longer to synchronize all instances and it is better to fall back to Redis and lose a bit of reading speed than to have inconsistent data.*
+
+All methods from `CacheService` use the two layer caching system except the ones that contains `local` and `remote` in their name. Those methods refer strictly to in memory cache and Redis cache.
+
+Examples:
+- `.getLocal()`, `.setLocal()`, `.getOrSetLocal()` are the same methods as [In Memory Cache](#in-memory-cache) 
+- `.getRemote()`, `.setRemove()`, `.getOrSetRemove()` are the same methods as [Redis Cache](#redis-cache) 
+
+## Methods
+
+#### `get<T>(key: string): Promise<T | undefined>`
+
+- **Parameters:**
+  - `key`: The key of the item to retrieve. The method first checks the local in-memory cache, and if not found, it retrieves the value from the Redis cache.
+- **Returns:** A `Promise` that resolves to the cached value or `undefined` if the key is not found.
+
+#### `getMany<T>(keys: string[]): Promise<(T | undefined)[]>`
+
+- **Parameters:**
+  - `keys`: An array of keys to retrieve. The method first checks the local in-memory cache, and for missing keys, it retrieves values from the Redis cache.
+- **Returns:** A `Promise` that resolves to an array of cached values corresponding to the input keys. Values may be `undefined` if not found.
+
+#### `set<T>(key: string, value: T, ttl: number, cacheNullable?: boolean): Promise<void>`
+
+- **Parameters:**
+  - `key`: The key under which to store the value. The method sets the value in both the local in-memory cache and the Redis cache.
+  - `value`: The value to store in the cache.
+  - `ttl`: Time-to-live for the cached item in seconds.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
+
+#### `setMany<T>(keys: string[], values: T[], ttl: number, cacheNullable?: boolean): Promise<void>`
+
+- **Parameters:**
+  - `keys`: An array of keys for the items to update or create. The method sets values in both the local in-memory cache and the Redis cache.
+  - `values`: An array of values to set in the cache.
+  - `ttl`: Time-to-live for the cached items in seconds.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
+
+#### `delete(key: string): Promise<void>`
+
+- **Parameters:**
+  - `key`: The key of the item to delete. The method deletes the item from both the local in-memory cache and the Redis cache.
+- **Returns:** A `Promise` that resolves when the item is successfully deleted from both caches.
+
+#### `deleteMany(keys: string[]): Promise<void>`
+
+- **Parameters:**
+  - `keys`: An array of keys for the items to delete. The method deletes items from both the local in-memory cache and the Redis cache.
+- **Returns:** A `Promise` that resolves when all items are successfully deleted from both caches.
+
+#### `getOrSet<T>(key: string, createValueFunc: () => Promise<T>, ttl: number, cacheNullable?: boolean): Promise<T>`
+
+- **Parameters:**
+  - `key`: The key of the item to retrieve or create. The method first checks the local in-memory cache, and if not found, it retrieves the value from the Redis cache or creates it using the provided function.
+  - `createValueFunc`: A function that creates the new value for the key.
+  - `ttl`: Time-to-live for the cached item in seconds.
+  - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
+
+#### ... (and many more)
+
+**Note:** These are just some of the methods available in the `CacheService` class. For a comprehensive list of methods and their descriptions, refer to the class implementation.

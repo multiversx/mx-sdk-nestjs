@@ -16,7 +16,7 @@ export class GuestCacheWarmer {
   private async getReq(url: string) {
     const { data } = await axios.get(url, {
       headers: {
-        'Cache-Control': 'no-cache',
+        'no-cache': true,
       },
     });
     return data;
@@ -25,7 +25,7 @@ export class GuestCacheWarmer {
   private async postReq(url: string, body: any) {
     const { data } = await axios.post(url, body, {
       headers: {
-        'Cache-Control': 'no-cache',
+        'no-cache': true,
       },
     });
     return data;

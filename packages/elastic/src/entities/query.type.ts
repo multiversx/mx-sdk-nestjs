@@ -27,7 +27,7 @@ export class QueryType {
     return new WildcardQuery(key, value);
   };
 
-  static Nested = (key: string, value: any | undefined): NestedQuery => {
+  static Nested = (key: string, value: MatchQuery[]): NestedQuery => {
     return new NestedQuery(key, value);
   };
 
