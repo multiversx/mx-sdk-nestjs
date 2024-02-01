@@ -27,7 +27,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo " - Split main [sdk-nestjs](https://www.npmjs.com/package/@multiversx/sdk-nestjs) package into multiple packages" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-common [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-common)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-auth [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-auth)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-http [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-http)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-monitoring [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-monitoring)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-elastic [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-elastic)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-redis [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-redis)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-rabbitmq [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-rabbitmq)" >> notes.txt
+          echo " - @multiversx/sdk-nestjs-cache [npm](https://www.npmjs.com/package/@multiversx/sdk-nestjs-cache)" >> notes.txt
           echo "" >> notes.txt
 
           RELEASE_TAG=v$(node -p "require('./lerna.json').version")
