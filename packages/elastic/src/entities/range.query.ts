@@ -10,7 +10,7 @@ export class RangeQuery extends AbstractQuery {
   }
 
   getQuery(): any {
-    const conditions: Record<string, number> = {};
+    const conditions: Record<string, string | number> = {};
 
     for (const range of this.ranges) {
       conditions[range.key] = range.value;

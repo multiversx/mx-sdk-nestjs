@@ -150,7 +150,7 @@ export class ElasticQuery {
     }
 
     const afterValue = after !== null && after !== void 0 ? after.toString() : '0';
-    const beforeValue = before !== null && before !== void 0 ? before.toString() : Math.floor(Date.now() / 1000).toString();
+    const beforeValue = before ?? Math.floor(Date.now() / 1000);
 
     return this.withFilter(QueryType.Range(
       key,
