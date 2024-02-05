@@ -12,6 +12,7 @@ import { RangeGreaterThanOrEqual } from "./range.greater.than.or.equal";
 import { RangeLowerThanOrEqual } from "./range.lower.than.or.equal";
 import { RangeQuery } from "./range.query";
 import { TermsQuery } from "./terms.query";
+import { RangeDataType } from "./range.data.type.enum";
 
 function buildElasticIndexerSort(sorts: ElasticSortProperty[]): any[] {
   if (!sorts) {
@@ -148,7 +149,14 @@ export class ElasticQuery {
       return this;
     }
 
-    return this.withFilter(QueryType.Range(key, new RangeGreaterThanOrEqual(after ?? 0), new RangeLowerThanOrEqual(before ?? Date.now())));
+    const afterValue = after !== null && after !== void 0 ? after.toString() : '0';
+    const beforeValue = before !== null && before !== void 0 ? before.toString() : Math.floor(Date.now() / 1000).toString();
+
+    return this.withFilter(QueryType.Range(
+      key,
+      new RangeGreaterThanOrEqual(afterValue, RangeDataType.string),
+      new RangeLowerThanOrEqual(beforeValue, RangeDataType.string)
+    ));
   }
 
   withFilter(filter: RangeQuery): ElasticQuery {
