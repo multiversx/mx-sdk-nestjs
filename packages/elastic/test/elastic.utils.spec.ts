@@ -82,12 +82,12 @@ describe('Elastic Query', () => {
 
     elasticQuery1.withRangeFilter('test', new RangeLowerThanOrEqual(100));
     expect(elasticQuery1.filter.length).toEqual(1);
-    expect(elasticQuery1.filter[0].getQuery()).toMatchObject({ range: { test: { lte: 100 } } });
+    expect(elasticQuery1.filter[0].getQuery()).toMatchObject({ range: { test: { lte: '100' } } });
 
     const elasticQuery2 = ElasticQuery.create();
     elasticQuery2.withRangeFilter('test', new RangeGreaterThanOrEqual(1), new RangeLowerThanOrEqual(100));
     expect(elasticQuery2.filter.length).toEqual(1);
-    expect(elasticQuery2.filter[0].getQuery()).toMatchObject({ range: { test: { lte: 100, gte: 1 } } });
+    expect(elasticQuery2.filter[0].getQuery()).toMatchObject({ range: { test: { lte: '100', gte: '1' } } });
 
     expect(elasticQuery2.toJson().query.bool.filter).toBeDefined();
   });
