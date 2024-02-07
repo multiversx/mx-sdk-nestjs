@@ -149,14 +149,13 @@ export class ElasticQuery {
       return this;
     }
 
-    const afterValue = after !== null && after !== void 0 ? after.toString() : '0';
-    const beforeValue = before ?? Math.floor(Date.now() / 1000);
-
-    return this.withFilter(QueryType.Range(
+    const filter = QueryType.Range(
       key,
-      new RangeGreaterThanOrEqual(afterValue, RangeDataType.string),
-      new RangeLowerThanOrEqual(beforeValue, RangeDataType.string)
-    ));
+      new RangeGreaterThanOrEqual(after ?? 0, RangeDataType.string),
+      new RangeLowerThanOrEqual(before ?? Math.floor(Date.now() / 1000), RangeDataType.string)
+    );
+
+    return this.withFilter(filter);
   }
 
   withFilter(filter: RangeQuery): ElasticQuery {
