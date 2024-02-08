@@ -26,6 +26,6 @@ export class NativeAuthAdminGuard implements CanActivate {
 
     const request = ExecutionContextUtils.getRequest(context);
 
-    return admins.includes(request.nativeAuth.address);
+    return admins.includes(request.nativeAuth.signerAddress);
   }
 }
