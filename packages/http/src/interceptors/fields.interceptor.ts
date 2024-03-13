@@ -13,8 +13,13 @@ export class FieldsInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const disableFieldsInterceptorMetadata = DecoratorUtils.getMethodDecorator(DisableFieldsInterceptorOptions, context.getHandler());
-    if (disableFieldsInterceptorMetadata) {
+    const disableFieldsInterceptorMethodMetadata = DecoratorUtils.getMethodDecorator(DisableFieldsInterceptorOptions, context.getHandler());
+    if (disableFieldsInterceptorMethodMetadata) {
+      return next.handle();
+    }
+
+    const disableFieldsInterceptorClassMetadata = DecoratorUtils.getClassDecorator(DisableFieldsInterceptorOptions, context.getClass());
+    if (disableFieldsInterceptorClassMetadata) {
       return next.handle();
     }
 
