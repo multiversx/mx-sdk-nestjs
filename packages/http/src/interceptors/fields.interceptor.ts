@@ -1,6 +1,8 @@
+import { DecoratorUtils } from "@multiversx/sdk-nestjs-common";
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { map } from 'rxjs/operators';
+import { DisableFieldsInterceptorOptions } from "./entities";
 
 @Injectable()
 export class FieldsInterceptor implements NestInterceptor {
@@ -8,6 +10,11 @@ export class FieldsInterceptor implements NestInterceptor {
     const contextType: string = context.getType();
 
     if (!["http", "https"].includes(contextType)) {
+      return next.handle();
+    }
+
+    const disableFieldsInterceptorMetadata = DecoratorUtils.getMethodDecorator(DisableFieldsInterceptorOptions, context.getHandler());
+    if (disableFieldsInterceptorMetadata) {
       return next.handle();
     }
 

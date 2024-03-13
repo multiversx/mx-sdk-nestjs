@@ -13,3 +13,4 @@ export * from './interceptors/query.check.interceptor';
 export * from './interceptors/cleanup.interceptor';
 export * from './interceptors/exclude.fields.interceptor';
 export * from './api.utils';
+export * from './interceptors/entities';
