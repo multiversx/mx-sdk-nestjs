@@ -2,4 +2,6 @@ import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/lib/utils/decorato
 
 export class DisableFieldsInterceptorOnControllerOptions { }
 
-export const DisableFieldsInterceptorOnController = DecoratorUtils.registerClassDecorator(Object, DisableFieldsInterceptorOnControllerOptions);
+export function DisableFieldsInterceptorOnController() {
+  return DecoratorUtils.registerClassDecorator(DisableFieldsInterceptorOnControllerOptions, DisableFieldsInterceptorOnControllerOptions);
+} 
