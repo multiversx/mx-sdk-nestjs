@@ -73,8 +73,10 @@ export class ElasticService {
     return documents.map((document: any) => this.formatItem(document, key));
   }
 
-  async getScrollableList(collection: string, key: string, elasticQuery: ElasticQuery, action: (items: any[]) => Promise<void>): Promise<void> {
-    const url = `${this.options.url}/${collection}/_search?scroll=1m`;
+  async getScrollableList(collection: string, key: string, elasticQuery: ElasticQuery, action: (items: any[]) => Promise<void>, options?: { scrollTimeout?: string, delayBetweenScrolls?: number }): Promise<void> {
+    const scrollTimeout = options?.scrollTimeout ?? '1m';
+
+    const url = `${this.options.url}/${collection}/_search?scroll=${scrollTimeout}`;
 
     const profiler = new PerformanceProfiler();
 
@@ -93,7 +95,7 @@ export class ElasticService {
         const scrollProfiler = new PerformanceProfiler();
 
         const scrollResult = await this.post(`${this.options.url}/_search/scroll`, {
-          scroll: '1m',
+          scroll: scrollTimeout,
           scroll_id: scrollId,
         });
 
@@ -106,6 +108,10 @@ export class ElasticService {
         }
 
         await action(scrollDocuments.map((document: any) => this.formatItem(document, key)));
+
+        if (options?.delayBetweenScrolls) {
+          await new Promise(resolve => setTimeout(resolve, options.delayBetweenScrolls));
+        }
       }
     } finally {
       await this.delete(`${this.options.url}/_search/scroll`, {
