@@ -53,7 +53,6 @@ export class ApiService {
 
     const context = ContextTracker.get();
     if (context && context.requestId) {
-      console.log(`setting request id to ${context.requestId} to perform request`);
       headers['x-request-id'] = context.requestId;
     }
 
