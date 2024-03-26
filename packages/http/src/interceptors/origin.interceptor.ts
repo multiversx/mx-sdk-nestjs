@@ -13,16 +13,27 @@ export class OriginInterceptor implements NestInterceptor {
     }
 
     const apiFunction = context.getClass().name + '.' + context.getHandler().name;
-    const requestId = context.switchToHttp().getRequest().headers['x-request-id'] ?? crypto.randomUUID();
+    const request = context.switchToHttp().getRequest();
+    const requestId = request.headers['x-request-id'] ?? crypto.randomUUID();
 
     ContextTracker.assign({ origin: apiFunction, requestId });
 
     return next
       .handle()
       .pipe(
-        tap(() => ContextTracker.unassign()),
+        tap(() => {
+          ContextTracker.unassign();
+
+          if (!request.res.headersSent) {
+            request.res.set('X-Request-Id', requestId);
+          }
+        }),
         catchError(err => {
           ContextTracker.unassign();
+
+          if (!request.res.headersSent) {
+            request.res.set('X-Request-Id', requestId);
+          }
 
           return throwError(() => err);
         })
