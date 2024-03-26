@@ -31,7 +31,7 @@
     "typescript": "^4.3.5"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-http": "^3.0.0",
+    "@multiversx/sdk-nestjs-http": "^3.2.1",
     "@nestjs/common": "^10.x"
   },
   "publishConfig": {
