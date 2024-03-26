@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-auth",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Multiversx SDK Nestjs auth package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^12.15.0",
-    "@multiversx/sdk-native-auth-server": "^1.0.14",
+    "@multiversx/sdk-native-auth-server": "^1.0.17",
     "@multiversx/sdk-wallet": "^4.2.0",
     "jsonwebtoken": "^9.0.0"
   },
