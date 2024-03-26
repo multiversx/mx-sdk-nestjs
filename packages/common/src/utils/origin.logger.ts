@@ -14,8 +14,14 @@ export class OriginLogger implements LoggerService {
     let actualContext = this.context;
 
     const trackedContext = ContextTracker.get();
-    if (trackedContext && trackedContext.origin) {
-      actualContext += ':' + trackedContext.origin;
+    if (trackedContext) {
+      if (trackedContext.origin) {
+        actualContext += ':' + trackedContext.origin;
+      }
+
+      if (trackedContext.requestId) {
+        actualContext += ':' + trackedContext.requestId;
+      }
     }
 
     return actualContext;

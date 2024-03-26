@@ -2,6 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { Observable, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
 import { ContextTracker } from "@multiversx/sdk-nestjs-common";
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class OriginInterceptor implements NestInterceptor {
@@ -13,15 +14,27 @@ export class OriginInterceptor implements NestInterceptor {
     }
 
     const apiFunction = context.getClass().name + '.' + context.getHandler().name;
+    const request = context.switchToHttp().getRequest();
+    const requestId = request.headers['x-request-id'] ?? randomUUID();
 
-    ContextTracker.assign({ origin: apiFunction });
+    ContextTracker.assign({ origin: apiFunction, requestId });
 
     return next
       .handle()
       .pipe(
-        tap(() => ContextTracker.unassign()),
+        tap(() => {
+          ContextTracker.unassign();
+
+          if (!request.res.headersSent) {
+            request.res.set('X-Request-Id', requestId);
+          }
+        }),
         catchError(err => {
           ContextTracker.unassign();
+
+          if (!request.res.headersSent) {
+            request.res.set('X-Request-Id', requestId);
+          }
 
           return throwError(() => err);
         })

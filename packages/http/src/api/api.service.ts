@@ -4,7 +4,7 @@ import Agent from "agentkeepalive";
 import { PerformanceProfiler, MetricsService } from "@multiversx/sdk-nestjs-monitoring";
 import { ApiSettings } from "./entities/api.settings";
 import { ApiModuleOptions } from "./entities/api.module.options";
-import { PendingExecuter } from "@multiversx/sdk-nestjs-common";
+import { ContextTracker, PendingExecuter } from "@multiversx/sdk-nestjs-common";
 
 @Injectable()
 export class ApiService {
@@ -49,6 +49,11 @@ export class ApiService {
     if (settings.nativeAuthSigner) {
       const accessTokenInfo = await settings.nativeAuthSigner.getToken();
       headers['authorization'] = `Bearer ${accessTokenInfo.token}`;
+    }
+
+    const context = ContextTracker.get();
+    if (context && context.requestId) {
+      headers['x-request-id'] = context.requestId;
     }
 
     return {
