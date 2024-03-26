@@ -13,8 +13,9 @@ export class OriginInterceptor implements NestInterceptor {
     }
 
     const apiFunction = context.getClass().name + '.' + context.getHandler().name;
+    const requestId = context.switchToHttp().getRequest().headers['x-request-id'] ?? crypto.randomUUID();
 
-    ContextTracker.assign({ origin: apiFunction });
+    ContextTracker.assign({ origin: apiFunction, requestId });
 
     return next
       .handle()
