@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Multiversx SDK Nestjs common package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
