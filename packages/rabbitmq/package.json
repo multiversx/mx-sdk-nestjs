@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-rabbitmq",
-  "version": "3.2.2",
+  "version": "3.2.4",
   "description": "Multiversx SDK Nestjs rabbitmq client package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
