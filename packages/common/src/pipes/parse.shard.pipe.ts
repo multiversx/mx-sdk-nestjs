@@ -1,6 +1,6 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from '@nestjs/common';
 
-export class ParseShardIdPipe implements PipeTransform<string | undefined, Promise<number | undefined>> {
+export class ParseShardPipe implements PipeTransform<string | undefined, Promise<number | undefined>> {
   transform(value: string | undefined, metadata: ArgumentMetadata): Promise<number | undefined> {
     return new Promise((resolve, reject) => {
       if (value === undefined || value === '') {

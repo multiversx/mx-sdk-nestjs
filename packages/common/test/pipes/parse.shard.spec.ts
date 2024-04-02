@@ -1,11 +1,11 @@
-import { ParseShardIdPipe } from "../../../common/src/pipes/parse.shardid.pipe";
+import { ParseShardPipe } from "../../src/pipes/parse.shard.pipe";
 import { ArgumentMetadata, BadRequestException } from '@nestjs/common';
 
-describe('ParseShardIdPipe', () => {
-  let pipe: ParseShardIdPipe;
+describe('ParseShardPipe', () => {
+  let pipe: ParseShardPipe;
 
   beforeEach(() => {
-    pipe = new ParseShardIdPipe();
+    pipe = new ParseShardPipe();
   });
 
   it('should return undefined for undefined value', async () => {
