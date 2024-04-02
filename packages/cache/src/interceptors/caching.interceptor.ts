@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
+import { CallHandler, ExecutionContext, HttpException, Injectable, NestInterceptor } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 import { Observable, of, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
@@ -51,7 +51,11 @@ export class CachingInterceptor implements NestInterceptor {
         const result = await pendingRequest;
         this.metricsService.incrementPendingApiHit(apiFunction);
 
-        return of(result);
+        if (result instanceof HttpException) {
+          return throwError(() => result);
+        } else {
+          return of(result);
+        }
       }
 
       const cachedValue = await this.cachingService.getLocal(cacheKey);
@@ -61,13 +65,9 @@ export class CachingInterceptor implements NestInterceptor {
       }
 
       let pendingRequestResolver: (value: any) => null;
-      let pendingRequestRejecter: (value: any) => null;
-      this.pendingRequestsDictionary[cacheKey] = new Promise((resolve, reject) => {
+      this.pendingRequestsDictionary[cacheKey] = new Promise((resolve) => {
         // @ts-ignore
         pendingRequestResolver = resolve;
-
-        // @ts-ignore
-        pendingRequestRejecter = reject;
       });
 
       return next
@@ -82,7 +82,7 @@ export class CachingInterceptor implements NestInterceptor {
           }),
           catchError((err) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];
-            pendingRequestRejecter(err);
+            pendingRequestResolver(err);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
             return throwError(() => err);
