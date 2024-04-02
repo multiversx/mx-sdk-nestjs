@@ -1,4 +1,4 @@
-import { ParseShardIdPipe } from "../../src/pipes/parse.shardid.pipe";
+import { ParseShardIdPipe } from "../../../common/src/pipes/parse.shardid.pipe";
 import { ArgumentMetadata, BadRequestException } from '@nestjs/common';
 
 describe('ParseShardIdPipe', () => {
