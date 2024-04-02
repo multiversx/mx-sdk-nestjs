@@ -524,7 +524,7 @@ export class CacheService {
     elements: TIN[],
     cacheKeyFunc: (element: TIN) => string,
     getter: (element: TIN) => Promise<TOUT>,
-    setter: (element: TIN, value: TOUT) => void,
+    setter: (element: TIN, value: TOUT, fromGetter: boolean) => void,
     ttl: number,
     chunkSize: number = 100,
   ): Promise<void> {
@@ -542,14 +542,23 @@ export class CacheService {
     elements: TIN[],
     cacheKeyFunc: (element: TIN) => string,
     getter: (elements: TIN[]) => Promise<{ [key: string]: TOUT; }>,
-    setter: (element: TIN, value: TOUT) => void,
+    setter: (element: TIN, value: TOUT, fromGetter: boolean) => void,
     ttl: number,
     chunkSize: number = 100,
   ): Promise<void> {
+    const keysFromGetter = new Set<string>();
+
     const batchGetResult = await this.batchGet(
       elements,
       cacheKeyFunc,
-      getter,
+      async (elements: TIN[]) => {
+        const results = await getter(elements);
+        for (const key of Object.keys(results)) {
+          keysFromGetter.add(key);
+        }
+
+        return results;
+      },
       ttl,
       chunkSize,
     );
@@ -570,7 +579,7 @@ export class CacheService {
         continue;
       }
 
-      setter(element, value);
+      setter(element, value, keysFromGetter.has(key));
     }
   }
 
