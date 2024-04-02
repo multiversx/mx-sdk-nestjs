@@ -39,7 +39,6 @@ export * from './pipes/parse.token.or.nft.pipe';
 export * from './pipes/parse.transaction.hash.pipe';
 export * from './pipes/parse.nft.array.pipe';
 export * from './pipes/parse.collection.array.pipe';
-export * from './pipes/parse.shard.pipe';
 export * from './common/entities/amount';
 export * from './common/config';
 export * from './common/swappable-settings';
