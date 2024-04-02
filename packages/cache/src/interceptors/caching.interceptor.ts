@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, HttpException, Injectable, NestInterceptor } from "@nestjs/common";
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 import { Observable, of, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
@@ -51,7 +51,7 @@ export class CachingInterceptor implements NestInterceptor {
         const result = await pendingRequest;
         this.metricsService.incrementPendingApiHit(apiFunction);
 
-        if (result instanceof HttpException) {
+        if (result instanceof Error) {
           return throwError(() => result);
         } else {
           return of(result);
