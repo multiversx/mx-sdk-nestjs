@@ -1,6 +1,6 @@
 import '../../src/utils/extensions/string.extensions';
 
-describe('Number Extensions', () => {
+describe('String Extensions', () => {
   it('removePrefix', () => {
     expect('helloworld'.removePrefix('hello')).toEqual('world');
     expect('helloworld'.removePrefix('hello2')).toEqual('helloworld');

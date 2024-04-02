@@ -60,6 +60,10 @@ Date.prototype.addDays = function (days: number): Date {
   return new Date(this.getTime() + (days * 24 * 60 * 60 * 1000));
 };
 
+Date.prototype.getTimeInSeconds = function (): number {
+  return Math.floor(this.getTime() / 1000);
+};
+
 declare interface Date {
   toISODateString(): string;
   isToday(): boolean;
@@ -73,4 +77,5 @@ declare interface Date {
   addMinutes(minutes: number): Date;
   addHours(hours: number): Date;
   addDays(days: number): Date;
+  getTimeInSeconds(): number;
 }
