@@ -1,5 +1,5 @@
 export class BaseConfigUtils {
-  static getKeyOverride(key: string): any | undefined {
+  static getKeyOverride(key: string, valueGetter?: (key: string) => any): any | undefined {
     const overridePrefix = 'MVX_OVERRIDE_';
     const envKey = key
       // Replace any non-uppercase sequence before an uppercase letter or number with that letter/number prefixed by an underscore
@@ -11,7 +11,7 @@ export class BaseConfigUtils {
       // Convert the whole string to uppercase
       .toUpperCase();
 
-    const envValue = process.env[overridePrefix + envKey];
+    const envValue = this.getConfigValue(overridePrefix + envKey, valueGetter);
     if (!envValue) {
       return undefined;
     }
@@ -57,7 +57,7 @@ export class BaseConfigUtils {
     return undefined;
   }
 
-  static getValueOverride(key: string, value: any): any | undefined {
+  static getValueOverride(key: string, value: any, valueGetter?: (key: string) => any): any | undefined {
     if (value === undefined) {
       return undefined;
     }
@@ -81,7 +81,7 @@ export class BaseConfigUtils {
     }
 
     if (keySegments.length === 1) {
-      return process.env[keyName];
+      return this.getConfigValue(keyName, valueGetter);
     }
 
     keyName = keySegments.pop() as string;
@@ -89,7 +89,7 @@ export class BaseConfigUtils {
       throw new Error(`Could not parse config key ${key}`);
     }
 
-    const envValue = process.env[keyName];
+    const envValue = this.getConfigValue(keyName, valueGetter);
 
     if (keySegments[0] === 'arr') {
       const expectedType = keySegments.length === 1 ? 'str' : keySegments[1];
@@ -164,5 +164,13 @@ export class BaseConfigUtils {
     const result = elements.map(element => this.parseValue(element, valueType));
 
     return result;
+  }
+
+  private static getConfigValue(key: string, valueGetter?: (key: string) => any): any {
+    if (valueGetter) {
+      return valueGetter(key);
+    }
+
+    return process.env[key];
   }
 }
