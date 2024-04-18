@@ -1,12 +1,12 @@
-export class ConfigurationLoadError extends Error {
+export class ConfigurationLoaderError extends Error {
   constructor(readonly errors: any[]) {
-    const message = ConfigurationLoadError.getConsolidatedErrorMessage(errors);
+    const message = ConfigurationLoaderError.getConsolidatedErrorMessage(errors);
 
     super(message);
   }
 
   private static getConsolidatedErrorMessage(errors: any[]) {
-    return errors.map((error) => ConfigurationLoadError.getErrorMessage(error)).join('\n');
+    return errors.map((error) => ConfigurationLoaderError.getErrorMessage(error)).join('\n');
   }
 
   private static getErrorMessage(error: any) {

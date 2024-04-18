@@ -3,7 +3,7 @@ import * as yaml from 'js-yaml';
 import Ajv from 'ajv';
 import fs from 'fs';
 import { ConfigurationLoaderSettings } from './configuration.loader.settings';
-import { ConfigurationLoadError } from './configuration.load.error';
+import { ConfigurationLoaderError } from './configuration.loader.error';
 import { ConfigurationLoaderSchemaType } from './configuration.loader.schema.type';
 import { ConfigurationSchemaExpander } from './configuration.loader.schema.expander';
 import { BaseConfigUtils } from './base.config.utils';
@@ -46,7 +46,7 @@ export class ConfigurationLoader {
     const validate = ajv.compile(schema);
 
     if (!validate(configuration)) {
-      throw new ConfigurationLoadError(validate.errors ?? []);
+      throw new ConfigurationLoaderError(validate.errors ?? []);
     }
   }
 
