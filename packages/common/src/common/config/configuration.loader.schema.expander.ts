@@ -67,7 +67,9 @@ export class ConfigurationSchemaExpander {
 
   private static setAdditionalPropertiesFalse(input: any) {
     if (input.type === "object") {
-      input.additionalProperties = false;
+      if (input.additionalProperties !== true) {
+        input.additionalProperties = false;
+      }
 
       if (input.properties) {
         for (const key of Object.keys(input.properties)) {
