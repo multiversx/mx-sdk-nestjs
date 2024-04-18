@@ -6,7 +6,6 @@ import { ConfigurationLoaderSettings } from './configuration.loader.settings';
 import { ConfigurationLoadError } from './configuration.load.error';
 import { ConfigurationLoaderSchemaType } from './configuration.loader.schema.type';
 import { ConfigurationSchemaExpander } from './configuration.loader.schema.expander';
-import { OriginLogger } from '../../utils/origin.logger';
 import { BaseConfigUtils } from './base.config.utils';
 
 export class ConfigurationLoader {
@@ -47,8 +46,6 @@ export class ConfigurationLoader {
     const validate = ajv.compile(schema);
 
     if (!validate(configuration)) {
-      const logger = new OriginLogger(ConfigurationLoader.name);
-      logger.error('Validation errors:', validate.errors);
       throw new ConfigurationLoadError(validate.errors ?? []);
     }
   }
