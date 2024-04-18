@@ -6,6 +6,7 @@ export class ConfigurationLoaderSettings {
   }
 
   configPath: string = '';
+  applyEnvOverrides: boolean = true;
 
   schemaPath?: string;
   schemaType: ConfigurationLoaderSchemaType = ConfigurationLoaderSchemaType.yaml;

@@ -22,7 +22,9 @@ export class ConfigurationLoader {
   private static loadConfiguration(settings: ConfigurationLoaderSettings): Record<string, any> {
     const configuration = yaml.load(readFileSync(settings.configPath, 'utf8')) as Record<string, any>;
 
-    this.applyEnvironmentVariables(configuration);
+    if (settings.applyEnvOverrides) {
+      this.applyEnvOverrides(configuration);
+    }
 
     if (settings.schemaPath) {
       this.validateConfiguration(configuration, settings.schemaPath, settings);
@@ -61,12 +63,12 @@ export class ConfigurationLoader {
     }
   }
 
-  private static applyEnvironmentVariables(obj: any, fullKey: string = ''): void {
+  private static applyEnvOverrides(obj: any, fullKey: string = ''): void {
     for (const [key, value] of Object.entries(obj)) {
       const newFullKey = fullKey ? `${fullKey}.${key}` : key;
 
       if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-        this.applyEnvironmentVariables(value, newFullKey);
+        this.applyEnvOverrides(value, newFullKey);
         continue;
       }
 
