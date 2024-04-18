@@ -11,7 +11,7 @@ export class ConfigurationSchemaExpander {
   }
 
   private static setTypeForPrimitives(input: any) {
-    const primitiveTypes = ["string", "boolean", "integer", "array"];
+    const primitiveTypes = ["string", "boolean", "integer", "number", "array", "object"];
 
     for (const key of Object.keys(input)) {
       if (primitiveTypes.includes(input[key]) && key !== 'type') {
