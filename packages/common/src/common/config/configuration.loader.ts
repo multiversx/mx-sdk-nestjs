@@ -44,7 +44,7 @@ export class ConfigurationLoader {
       ConfigurationSchemaExpander.expand(schema);
     }
 
-    const ajv = new Ajv({ allErrors: true });
+    const ajv = new Ajv({ allErrors: true, useDefaults: true });
     const validate = ajv.compile(schema);
 
     if (!validate(configuration)) {
