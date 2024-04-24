@@ -1,3 +1,3 @@
-export * from './critical-path.handler';
-export * from './critical-path';
+export * from './shutdown-aware.handler';
+export * from './shutdown-aware';
 export * from './shutting-down.error';
