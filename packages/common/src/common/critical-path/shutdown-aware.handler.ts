@@ -1,7 +1,7 @@
 import { INestApplication, INestMicroservice } from "@nestjs/common";
 import { ShuttingDownError } from "./shutting-down.error";
 import * as readline from 'readline';
-import { OriginLogger } from "src/utils/origin.logger";
+import { OriginLogger } from "../../utils/origin.logger";
 
 export class ShutdownAwareHandler {
   private static pendingTasks: Promise<any>[] = [];
