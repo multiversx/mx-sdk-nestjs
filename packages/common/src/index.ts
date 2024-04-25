@@ -50,4 +50,4 @@ export * from './common/complexity/exceptions/complexity.exceeded.exception';
 export * from './decorators';
 export * from './sc.interactions';
 export * from './utils/pending.executer';
-export * from './common/critical-path';
+export * from './common/shutdown-aware';
