@@ -1,11 +1,11 @@
-import { CriticalPathHandler } from "./critical-path.handler";
+import { ShutdownAwareHandler } from "./shutdown-aware.handler";
 
-export function CriticalPath() {
+export function ShutdownAware() {
   return (_target: Object, _key: string | symbol, descriptor: PropertyDescriptor) => {
     const childMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
-      await CriticalPathHandler.execute(async () => await childMethod.apply(this, args));
+      await ShutdownAwareHandler.executeCriticalTask(async () => await childMethod.apply(this, args));
     };
 
     return descriptor;
