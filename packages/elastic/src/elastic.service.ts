@@ -65,6 +65,12 @@ export class ElasticService {
     // attempt to get scroll settings
     const scrollSettings = ContextTracker.get()?.scrollSettings;
 
+    console.log({
+      scrollSettings,
+      collection,
+      query: JSON.stringify(elasticQuery.toJson()),
+    });
+
     const profiler = new PerformanceProfiler();
 
     const elasticQueryJson: any = elasticQuery.toJson();
