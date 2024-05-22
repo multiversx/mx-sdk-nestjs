@@ -3,6 +3,7 @@ import { ApiService } from "@multiversx/sdk-nestjs-http";
 import { MetricsService, ElasticMetricType, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticModuleOptions } from "./entities/elastic.module.options";
+import { ContextTracker } from "@multiversx/sdk-nestjs-common";
 
 @Injectable()
 export class ElasticService {
@@ -11,7 +12,7 @@ export class ElasticService {
     @Inject(forwardRef(() => ApiService))
     private readonly apiService: ApiService,
     @Inject(forwardRef(() => MetricsService))
-    private readonly metricsService: MetricsService
+    private readonly metricsService: MetricsService,
   ) { }
 
   async getCount(collection: string, elasticQuery: ElasticQuery | undefined = undefined) {
@@ -61,7 +62,16 @@ export class ElasticService {
   async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {
     const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
 
+    // attempt to get scroll settings
+    const scrollSettings = ContextTracker.get()?.scrollSettings;
+
     const profiler = new PerformanceProfiler();
+
+    const elasticQueryJson: any = elasticQuery.toJson();
+    if (scrollSettings?.scrollCollection === collection && scrollSettings?.scrollAfter) {
+      elasticQueryJson.scroll_after = scrollSettings.scrollAfter;
+      elasticQueryJson.size += scrollSettings.ids.length;
+    }
 
     const result = await this.post(url, elasticQuery.toJson());
 
@@ -69,7 +79,50 @@ export class ElasticService {
 
     this.metricsService.setElasticDuration(collection, ElasticMetricType.list, profiler.duration);
 
-    const documents = result.data.hits.hits;
+    let documents = result.data.hits.hits;
+
+    if (documents.length > 0 && scrollSettings?.scrollCollection === collection) {
+      if (scrollSettings?.scrollAfter) {
+        // elliminate all elements with the ids matching scrollSettings.ids
+        const ids = scrollSettings.ids;
+        documents = documents.filter((document: any) => !ids.includes(document._id));
+      }
+
+      if (scrollSettings?.scrollCreate) {
+        // if scrollCreate, create a new guid for it
+        // then take the last element (if exists)
+        const lastDocument = documents[documents.length - 1];
+        const lastDocumentSort = lastDocument.sort;
+        const lastDocumentSortJson = JSON.stringify(lastDocumentSort);
+
+        const firstDocument = documents[0];
+        const firstDocumentSort = firstDocument.sort;
+
+        // then take the ids of all elements that have the same sort
+        const ids: string[] = [];
+
+        for (let index = documents[documents.length - 1]; index >= 0; index--) {
+          const document = documents[index];
+
+          if (JSON.stringify(document.sort) === lastDocumentSortJson) {
+            ids.push(document._id);
+          } else {
+            break;
+          }
+        }
+
+        // and store this in cache on a specific key
+        ContextTracker.assign({
+          scrollResult: {
+            query: elasticQuery.toJson(),
+            lastIds: ids,
+            lastSort: lastDocumentSort,
+            firstSort: firstDocumentSort,
+          },
+        });
+      }
+    }
+
     return documents.map((document: any) => this.formatItem(document, key));
   }
 
