@@ -101,6 +101,8 @@ export class ElasticService {
         const lastDocumentSort = lastDocument.sort;
         const lastDocumentSortJson = JSON.stringify(lastDocumentSort);
 
+        console.log({ lastDocument, lastDocumentSort, lastDocumentSortJson });
+
         const firstDocument = documents[0];
         const firstDocumentSort = firstDocument.sort;
 
@@ -110,7 +112,11 @@ export class ElasticService {
         for (let index = documents[documents.length - 1]; index >= 0; index--) {
           const document = documents[index];
 
-          if (JSON.stringify(document.sort) === lastDocumentSortJson) {
+          const documentSortJson = JSON.stringify(document.sort);
+
+          console.log({ documentSortJson });
+
+          if (documentSortJson === lastDocumentSortJson) {
             ids.push(document._id);
           } else {
             break;
