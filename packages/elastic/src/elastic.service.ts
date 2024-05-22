@@ -109,7 +109,7 @@ export class ElasticService {
         // then take the ids of all elements that have the same sort
         const ids: string[] = [];
 
-        for (let index = documents[documents.length - 1]; index >= 0; index--) {
+        for (let index = documents.length - 1; index >= 0; index--) {
           const document = documents[index];
 
           const documentSortJson = JSON.stringify(document.sort);
