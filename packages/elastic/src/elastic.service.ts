@@ -74,9 +74,15 @@ export class ElasticService {
     const profiler = new PerformanceProfiler();
 
     const elasticQueryJson: any = elasticQuery.toJson();
-    if (scrollSettings?.scrollCollection === collection && scrollSettings?.scrollAfter) {
-      elasticQueryJson.scroll_after = scrollSettings.scrollAfter;
-      elasticQueryJson.size += scrollSettings.ids.length;
+    if (scrollSettings?.scrollCollection === collection) {
+      if (scrollSettings?.scrollAfter) {
+        elasticQueryJson.scroll_after = scrollSettings.scrollAfter;
+        elasticQueryJson.size += scrollSettings.ids.length;
+      }
+
+      if (scrollSettings?.scrollAt) {
+        elasticQueryJson.search_after = scrollSettings.scrollAt;
+      }
     }
 
     const result = await this.post(url, elasticQuery.toJson());
