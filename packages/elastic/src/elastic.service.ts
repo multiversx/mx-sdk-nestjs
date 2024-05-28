@@ -101,7 +101,7 @@ export class ElasticService {
       if (scrollSettings?.scrollAfter) {
         // elliminate all elements with the ids matching scrollSettings.ids
         const ids = scrollSettings.ids;
-        documents = documents.filter((document: any) => !ids.includes(document._id));
+        documents = documents.filter((document: any) => !ids.includes(document._id)).slice(0, elasticQuery.pagination?.size ?? 25);
       }
 
       if (scrollSettings?.scrollCreate) {
