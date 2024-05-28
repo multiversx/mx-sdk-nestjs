@@ -78,7 +78,7 @@ export class ElasticService {
       console.log('collection match');
       if (scrollSettings?.scrollAfter) {
         console.log('applying scroll_after and size');
-        elasticQueryJson.scroll_after = scrollSettings.scrollAfter;
+        elasticQueryJson.search_after = scrollSettings.scrollAfter;
         elasticQueryJson.size += scrollSettings.ids.length;
 
         console.log({ elasticQueryJson: JSON.stringify(elasticQueryJson) });
