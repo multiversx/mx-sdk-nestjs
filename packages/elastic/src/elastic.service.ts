@@ -78,6 +78,8 @@ export class ElasticService {
       if (scrollSettings?.scrollAfter) {
         elasticQueryJson.scroll_after = scrollSettings.scrollAfter;
         elasticQueryJson.size += scrollSettings.ids.length;
+
+        console.log({ elasticQueryJson: JSON.stringify(elasticQueryJson) });
       }
 
       if (scrollSettings?.scrollAt) {
@@ -85,7 +87,7 @@ export class ElasticService {
       }
     }
 
-    const result = await this.post(url, elasticQuery.toJson());
+    const result = await this.post(url, elasticQueryJson);
 
     profiler.stop();
 
