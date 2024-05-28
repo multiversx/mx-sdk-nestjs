@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-redis",
-  "version": "3.7.6",
+  "version": "3.7.7",
   "description": "Multiversx SDK Nestjs redis client package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
