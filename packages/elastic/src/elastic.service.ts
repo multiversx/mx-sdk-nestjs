@@ -59,93 +59,133 @@ export class ElasticService {
     return { ...item, ..._source };
   }
 
-  async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {
-    const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
-
-    // attempt to get scroll settings
+  private async getListResult(url: string, collection: string, elasticQuery: ElasticQuery) {
     const scrollSettings = ContextTracker.get()?.scrollSettings;
 
-    console.log({
-      scrollSettings,
-      collection,
-      query: JSON.stringify(elasticQuery.toJson()),
-    });
-
-    const profiler = new PerformanceProfiler();
-
     const elasticQueryJson: any = elasticQuery.toJson();
-    if (scrollSettings?.scrollCollection === collection) {
-      console.log('collection match');
-      if (scrollSettings?.scrollAfter) {
-        console.log('applying scroll_after and size');
-        elasticQueryJson.search_after = scrollSettings.scrollAfter;
-        elasticQueryJson.size += scrollSettings.ids.length;
-
-        console.log({ elasticQueryJson: JSON.stringify(elasticQueryJson) });
-      }
-
-      if (scrollSettings?.scrollAt) {
-        elasticQueryJson.search_after = scrollSettings.scrollAt;
+    if (scrollSettings && scrollSettings.scrollCollection === collection) {
+      if (scrollSettings.scrollAfter) {
+        return await this.getScrollAfterResult(url, elasticQuery, scrollSettings.scrollAfter, scrollSettings.ids, elasticQuery.pagination?.size ?? 25);
+      } else if (scrollSettings.scrollAt) {
+        return await this.getScrollAtResult(url, elasticQuery, scrollSettings.scrollAt);
+      } else if (scrollSettings.scrollCreate) {
+        return await this.getScrollCreateResult(url, elasticQuery);
+      } else {
+        throw new Error('Invalid scroll settings');
       }
     }
 
     const result = await this.post(url, elasticQueryJson);
+    return result.data.hits.hits;
+  }
+
+  private async getScrollCreateResult(url: string, elasticQuery: ElasticQuery) {
+    const result = await this.post(url, elasticQuery.toJson());
+    const documents = result.data.hits.hits;
+
+    if (documents.length === 0) {
+      return documents;
+    }
+
+    const ids = this.getLastIds(documents);
+    const firstDocumentSort = documents[0].sort;
+    const lastDocumentSort = documents[documents.length - 1].sort;
+
+    // and store this in cache on a specific key
+    ContextTracker.assign({
+      scrollResult: {
+        query: elasticQuery.toJson(),
+        lastIds: ids,
+        lastSort: lastDocumentSort,
+        firstSort: firstDocumentSort,
+      },
+    });
+
+    return documents;
+  }
+
+  private async getScrollAtResult(url: string, elasticQuery: ElasticQuery, scrollAt: any) {
+    const elasticQueryJson: any = elasticQuery.toJson();
+    elasticQueryJson.search_after = scrollAt;
+
+    const result = await this.post(url, elasticQueryJson);
+    return result.data.hits.hits;
+  }
+
+  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, scrollAfter: any, ids: string[], size: number) {
+    const MAX_SIZE = 10000;
+
+    const elasticQueryJson: any = elasticQuery.toJson();
+    elasticQueryJson.search_after = scrollAfter;
+    elasticQueryJson.size += ids.length;
+
+    let remainingSize = 0;
+    if (elasticQueryJson.size > MAX_SIZE) {
+      remainingSize = elasticQueryJson.size - MAX_SIZE;
+      elasticQueryJson.size = MAX_SIZE;
+    }
+
+    const result = await this.post(url, elasticQueryJson);
+    const allDocuments = this.excludeIds(result.data.hits.hits, ids, elasticQuery.pagination?.size);
+
+    if (remainingSize && allDocuments.length > 0) {
+      ids = this.getLastIds(allDocuments);
+      const lastDocumentSort = allDocuments[allDocuments.length - 1].sort;
+
+      elasticQueryJson.size = remainingSize + ids.length;
+      elasticQueryJson.search_after = lastDocumentSort;
+
+      const remainingResult = await this.post(url, elasticQueryJson);
+      const remainingDocuments = this.excludeIds(remainingResult.data.hits.hits, ids, remainingSize);
+
+      return allDocuments.concat(remainingDocuments);
+    }
+
+    return allDocuments.slice(0, size);
+  }
+
+  private excludeIds(documents: any[], ids: string[], maxSize: number | undefined) {
+    return documents.filter((document: any) => !ids.includes(document._id)).slice(0, maxSize ?? 25);
+  }
+
+  async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {
+    const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
+
+    // attempt to get scroll settings
+    const profiler = new PerformanceProfiler();
+
+    const documents = await this.getListResult(url, collection, elasticQuery);
 
     profiler.stop();
 
     this.metricsService.setElasticDuration(collection, ElasticMetricType.list, profiler.duration);
 
-    let documents = result.data.hits.hits;
+    return documents.map((document: any) => this.formatItem(document, key));
+  }
 
-    if (documents.length > 0 && scrollSettings?.scrollCollection === collection) {
-      if (scrollSettings?.scrollAfter) {
-        // elliminate all elements with the ids matching scrollSettings.ids
-        const ids = scrollSettings.ids;
-        documents = documents.filter((document: any) => !ids.includes(document._id)).slice(0, elasticQuery.pagination?.size ?? 25);
-      }
+  private getLastIds(documents: any[]) {
+    // if scrollCreate, create a new guid for it
+    // then take the last element (if exists)
+    const lastDocument = documents[documents.length - 1];
+    const lastDocumentSort = lastDocument.sort;
+    const lastDocumentSortJson = JSON.stringify(lastDocumentSort);
 
-      if (scrollSettings?.scrollCreate) {
-        // if scrollCreate, create a new guid for it
-        // then take the last element (if exists)
-        const lastDocument = documents[documents.length - 1];
-        const lastDocumentSort = lastDocument.sort;
-        const lastDocumentSortJson = JSON.stringify(lastDocumentSort);
+    // then take the ids of all elements that have the same sort
+    const ids: string[] = [];
 
-        console.log({ lastDocument, lastDocumentSort, lastDocumentSortJson });
+    for (let index = documents.length - 1; index >= 0; index--) {
+      const document = documents[index];
 
-        const firstDocument = documents[0];
-        const firstDocumentSort = firstDocument.sort;
+      const documentSortJson = JSON.stringify(document.sort);
 
-        // then take the ids of all elements that have the same sort
-        const ids: string[] = [];
-
-        for (let index = documents.length - 1; index >= 0; index--) {
-          const document = documents[index];
-
-          const documentSortJson = JSON.stringify(document.sort);
-
-          console.log({ documentSortJson });
-
-          if (documentSortJson === lastDocumentSortJson) {
-            ids.push(document._id);
-          } else {
-            break;
-          }
-        }
-
-        // and store this in cache on a specific key
-        ContextTracker.assign({
-          scrollResult: {
-            query: elasticQuery.toJson(),
-            lastIds: ids,
-            lastSort: lastDocumentSort,
-            firstSort: firstDocumentSort,
-          },
-        });
+      if (documentSortJson === lastDocumentSortJson) {
+        ids.push(document._id);
+      } else {
+        break;
       }
     }
 
-    return documents.map((document: any) => this.formatItem(document, key));
+    return ids;
   }
 
   async getScrollableList(collection: string, key: string, elasticQuery: ElasticQuery, action: (items: any[]) => Promise<void>, options?: { scrollTimeout?: string, delayBetweenScrolls?: number }): Promise<void> {
