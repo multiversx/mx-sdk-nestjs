@@ -174,8 +174,6 @@ export class ElasticService {
   }
 
   private getLastIds(documents: any[]) {
-    // if scrollCreate, create a new guid for it
-    // then take the last element (if exists)
     const lastDocument = documents[documents.length - 1];
     const lastDocumentSort = lastDocument.sort;
     const lastDocumentSortJson = JSON.stringify(lastDocumentSort);
