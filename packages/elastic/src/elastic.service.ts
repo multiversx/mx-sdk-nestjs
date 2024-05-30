@@ -87,6 +87,12 @@ export class ElasticService {
       return documents;
     }
 
+    this.storeScrollResult(documents, elasticQuery);
+
+    return documents;
+  }
+
+  private storeScrollResult(documents: any[], elasticQuery: ElasticQuery) {
     const ids = this.getLastIds(documents);
     const firstDocumentSort = documents[0].sort;
     const lastDocumentSort = documents[documents.length - 1].sort;
@@ -100,8 +106,6 @@ export class ElasticService {
         firstSort: firstDocumentSort,
       },
     });
-
-    return documents;
   }
 
   private async getScrollAtResult(url: string, elasticQuery: ElasticQuery, scrollAt: any) {
@@ -125,8 +129,10 @@ export class ElasticService {
       elasticQueryJson.size = MAX_SIZE;
     }
 
-    const result = await this.post(url, elasticQueryJson);
-    const allDocuments = this.excludeIds(result.data.hits.hits, ids, elasticQuery.pagination?.size);
+    const queryResult = await this.post(url, elasticQueryJson);
+    const allDocuments = this.excludeIds(queryResult.data.hits.hits, ids, elasticQuery.pagination?.size);
+
+    let result: any[] = [];
 
     if (remainingSize && allDocuments.length > 0) {
       ids = this.getLastIds(allDocuments);
@@ -138,10 +144,14 @@ export class ElasticService {
       const remainingResult = await this.post(url, elasticQueryJson);
       const remainingDocuments = this.excludeIds(remainingResult.data.hits.hits, ids, remainingSize);
 
-      return allDocuments.concat(remainingDocuments);
+      result = allDocuments.concat(remainingDocuments);
+    } else {
+      result = allDocuments.slice(0, size);
     }
 
-    return allDocuments.slice(0, size);
+    this.storeScrollResult(result, elasticQuery);
+
+    return result;
   }
 
   private excludeIds(documents: any[], ids: string[], maxSize: number | undefined) {
