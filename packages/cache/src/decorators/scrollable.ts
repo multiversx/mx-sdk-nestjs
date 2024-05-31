@@ -1,4 +1,4 @@
-import { DecoratorUtils } from "@multiversx/sdk-nestjs-common/lib/utils/decorator.utils";
+import { DecoratorUtils } from "@multiversx/sdk-nestjs-common";
 
 export class ScrollableOptions {
   collection: string = '';
