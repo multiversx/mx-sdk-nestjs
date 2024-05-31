@@ -28,6 +28,7 @@ export class ScrollInterceptor implements NestInterceptor {
 
     const scrollCreate = request.query.scrollCreate;
     const scrollAfter = request.query.scrollAfter;
+    const scrollAt = request.query.scrollAt;
 
     const queryParams = JSON.parse(JSON.stringify(request.query));
     delete queryParams.scrollCreate;
@@ -82,12 +83,37 @@ export class ScrollInterceptor implements NestInterceptor {
               scrollCollection: scrollCollection,
               scrollAfter: scrollInfo.lastSort,
               ids: scrollInfo.lastIds,
-              queryParams,
             },
           });
         }
       } else {
         throw new Error('Invalid scrollAfter value');
+      }
+    }
+
+    if (scrollAt) {
+      if (guidRegex.test(scrollAt)) {
+        scrollId = scrollAt;
+
+        const scrollInfo: any = await this.cacheService.get(`scrollInfo:${scrollId}`);
+        if (!scrollInfo) {
+          throw new BadRequestException(`Could not find scroll info for '${scrollId}'`);
+        }
+
+        if (scrollInfo.queryParams.sort !== queryParams.sort) {
+          throw new BadRequestException('Invalid query params');
+        }
+
+        if (scrollInfo) {
+          ContextTracker.assign({
+            scrollSettings: {
+              scrollCollection: scrollCollection,
+              scrollAt: scrollInfo.firstSort,
+            },
+          });
+        }
+      } else {
+        throw new Error('Invalid scrollAt value');
       }
     }
 
@@ -102,10 +128,12 @@ export class ScrollInterceptor implements NestInterceptor {
               response.setHeader('X-Scroll-Id', scrollId);
             }
 
-            await this.cacheService.set(`scrollInfo:${scrollId}`, {
+            const scrollResultToSave = {
               ...scrollResult,
               queryParams,
-            }, Constants.oneHour());
+            };
+
+            await this.cacheService.set(`scrollInfo:${scrollId}`, scrollResultToSave, Constants.oneMinute() * 10);
           }
         }),
         catchError((err) => {
