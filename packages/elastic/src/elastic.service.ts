@@ -127,8 +127,6 @@ export class ElasticService {
     elasticQueryJson.search_after = scrollAfter;
     elasticQueryJson.size += ids.length;
 
-    console.log({ elasticQueryJson: JSON.stringify(elasticQueryJson) });
-
     let remainingSize = 0;
     if (elasticQueryJson.size > MAX_SIZE) {
       remainingSize = elasticQueryJson.size - MAX_SIZE;
