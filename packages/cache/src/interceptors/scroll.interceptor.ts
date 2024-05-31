@@ -2,8 +2,8 @@ import { Constants, ContextTracker, DecoratorUtils } from "@multiversx/sdk-nestj
 import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, catchError, tap, throwError } from "rxjs";
 import { randomUUID } from "crypto";
-import { ScrollableOptions } from "src/decorators";
-import { CacheService } from "src/cache";
+import { ScrollableOptions } from "../decorators";
+import { CacheService } from "../cache";
 
 @Injectable()
 export class ScrollInterceptor implements NestInterceptor {
