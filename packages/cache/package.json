@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-cache",
-  "version": "3.7.24",
+  "version": "3.7.25",
   "description": "Multiversx SDK Nestjs cache package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

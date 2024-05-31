@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-auth",
-  "version": "3.7.24",
+  "version": "3.7.25",
   "description": "Multiversx SDK Nestjs auth package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
