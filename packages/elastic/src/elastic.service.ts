@@ -64,16 +64,6 @@ export class ElasticService {
 
     const elasticQueryJson: any = elasticQuery.toJson();
     if (scrollSettings && scrollSettings.scrollCollection === collection) {
-      const scrollQueryJson: any = scrollSettings.query.toJson();
-
-      if (JSON.stringify(elasticQueryJson) !== JSON.stringify(scrollQueryJson)) {
-        console.log({
-          elasticQueryJson: JSON.stringify(elasticQueryJson),
-          scrollQueryJson: JSON.stringify(scrollQueryJson),
-        });
-        throw new Error('Scroll query does not match the original query');
-      }
-
       let documents: any[] = [];
 
       if (scrollSettings.scrollAfter) {
@@ -86,7 +76,7 @@ export class ElasticService {
         throw new Error('Invalid scroll settings');
       }
 
-      this.storeScrollResult(documents, elasticQuery);
+      this.storeScrollResult(documents);
     }
 
     const result = await this.post(url, elasticQueryJson);
@@ -104,7 +94,7 @@ export class ElasticService {
     return documents;
   }
 
-  private storeScrollResult(documents: any[], elasticQuery: ElasticQuery) {
+  private storeScrollResult(documents: any[]) {
     const ids = this.getLastIds(documents);
     const firstDocumentSort = documents[0].sort;
     const lastDocumentSort = documents[documents.length - 1].sort;
@@ -112,7 +102,6 @@ export class ElasticService {
     // and store this in cache on a specific key
     ContextTracker.assign({
       scrollResult: {
-        query: elasticQuery.toJson(),
         lastIds: ids,
         lastSort: lastDocumentSort,
         firstSort: firstDocumentSort,
