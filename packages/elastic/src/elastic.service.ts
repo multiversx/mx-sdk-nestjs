@@ -64,15 +64,29 @@ export class ElasticService {
 
     const elasticQueryJson: any = elasticQuery.toJson();
     if (scrollSettings && scrollSettings.scrollCollection === collection) {
+      const scrollQueryJson: any = scrollSettings.query.toJson();
+
+      if (JSON.stringify(elasticQueryJson) !== JSON.stringify(scrollQueryJson)) {
+        console.log({
+          elasticQueryJson: JSON.stringify(elasticQueryJson),
+          scrollQueryJson: JSON.stringify(scrollQueryJson),
+        });
+        throw new Error('Scroll query does not match the original query');
+      }
+
+      let documents: any[] = [];
+
       if (scrollSettings.scrollAfter) {
-        return await this.getScrollAfterResult(url, elasticQuery, scrollSettings.scrollAfter, scrollSettings.ids, elasticQuery.pagination?.size ?? 25);
+        documents = await this.getScrollAfterResult(url, elasticQuery, scrollSettings.scrollAfter, scrollSettings.ids, elasticQuery.pagination?.size ?? 25);
       } else if (scrollSettings.scrollAt) {
-        return await this.getScrollAtResult(url, elasticQuery, scrollSettings.scrollAt);
+        documents = await this.getScrollAtResult(url, elasticQuery, scrollSettings.scrollAt);
       } else if (scrollSettings.scrollCreate) {
-        return await this.getScrollCreateResult(url, elasticQuery);
+        documents = await this.getScrollCreateResult(url, elasticQuery);
       } else {
         throw new Error('Invalid scroll settings');
       }
+
+      this.storeScrollResult(documents, elasticQuery);
     }
 
     const result = await this.post(url, elasticQueryJson);
@@ -86,8 +100,6 @@ export class ElasticService {
     if (documents.length === 0) {
       return documents;
     }
-
-    this.storeScrollResult(documents, elasticQuery);
 
     return documents;
   }
@@ -120,6 +132,7 @@ export class ElasticService {
     const MAX_SIZE = 10000;
 
     const elasticQueryJson: any = elasticQuery.toJson();
+
     elasticQueryJson.search_after = scrollAfter;
     elasticQueryJson.size += ids.length;
 
@@ -148,8 +161,6 @@ export class ElasticService {
     } else {
       result = allDocuments.slice(0, size);
     }
-
-    this.storeScrollResult(result, elasticQuery);
 
     return result;
   }
