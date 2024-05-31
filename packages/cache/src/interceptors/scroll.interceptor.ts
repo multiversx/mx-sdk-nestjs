@@ -68,6 +68,9 @@ export class ScrollInterceptor implements NestInterceptor {
         scrollId = scrollAfter;
 
         const scrollInfo: any = await this.cacheService.get(`scrollInfo:${scrollId}`);
+        if (!scrollInfo) {
+          throw new BadRequestException(`Could not find scroll info for '${scrollId}'`);
+        }
 
         if (JSON.stringify(scrollInfo.queryParams) !== JSON.stringify(queryParams)) {
           throw new BadRequestException('Invalid query params');
