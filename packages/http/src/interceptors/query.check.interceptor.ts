@@ -31,7 +31,6 @@ export class QueryCheckInterceptor implements NestInterceptor {
 
     for (const paramName of Object.keys(request.query)) {
       if (!['fields', 'extract', 'excludeFields', 'scrollCreate', 'scrollAt', 'scrollAfter'].includes(paramName) && !supportedQueryNames.includes(paramName)) {
-        console.log(`Deleting unsupported parameter '${paramName}'`);
         delete request.query[paramName];
         // throw new BadRequestException(`Unsupported parameter '${paramName}'. Supported parameters are: ${supportedQueryNames.join(', ')}`);
         // const origin = request.headers['origin'];

@@ -138,7 +138,7 @@ export class ElasticService {
     const queryResult = await this.post(url, elasticQueryJson);
     const allDocuments = this.excludeIds(queryResult.data.hits.hits, ids, elasticQuery.pagination?.size);
 
-    let result: any[] = [];
+    let result = allDocuments;
 
     if (remainingSize && allDocuments.length > 0) {
       ids = this.getLastIds(allDocuments);
@@ -151,11 +151,9 @@ export class ElasticService {
       const remainingDocuments = this.excludeIds(remainingResult.data.hits.hits, ids, remainingSize);
 
       result = allDocuments.concat(remainingDocuments);
-    } else {
-      result = allDocuments.slice(0, size);
     }
 
-    return result;
+    return result.slice(0, size);
   }
 
   private excludeIds(documents: any[], ids: string[], maxSize: number | undefined) {
