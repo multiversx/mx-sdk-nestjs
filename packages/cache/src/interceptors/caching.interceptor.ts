@@ -42,6 +42,7 @@ export class CachingInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    console.log({ params: Object.keys(request.query) });
     for (const paramName of Object.keys(request.query)) {
       if (['scrollCreate', 'scrollAt', 'scrollAfter'].includes(paramName)) {
         return next.handle();
