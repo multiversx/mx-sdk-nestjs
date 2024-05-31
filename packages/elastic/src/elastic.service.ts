@@ -77,6 +77,8 @@ export class ElasticService {
       }
 
       this.storeScrollResult(documents);
+
+      return documents;
     }
 
     const result = await this.post(url, elasticQueryJson);
