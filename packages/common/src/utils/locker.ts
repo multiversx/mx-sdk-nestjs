@@ -3,17 +3,17 @@ import { MetricsService, CpuProfiler, PerformanceProfiler } from "@multiversx/sd
 import { ContextTracker } from "./context.tracker";
 
 export class Locker {
-  private static lockArray: string[] = [];
+  private static lockSet: Set<string> = new Set();
 
   static async lock(key: string, func: () => Promise<void>, log: boolean = false): Promise<LockResult> {
     const logger = new Logger('Lock');
 
-    if (Locker.lockArray.includes(key)) {
+    if (Locker.lockSet.has(key)) {
       logger.log(`${key} is already running`);
       return LockResult.ALREADY_RUNNING;
     }
 
-    Locker.lockArray.push(key);
+    Locker.lockSet.add(key);
 
     const profiler = new PerformanceProfiler();
     const cpuProfiler = log ? new CpuProfiler() : undefined;
@@ -40,7 +40,7 @@ export class Locker {
 
       return LockResult.ERROR;
     } finally {
-      Locker.lockArray.remove(key);
+      Locker.lockSet.delete(key);
     }
   }
 }
