@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-http",
-  "version": "3.7.25",
+  "version": "3.7.26",
   "description": "Multiversx SDK Nestjs http package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
