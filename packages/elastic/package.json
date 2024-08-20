@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-elastic",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "description": "Multiversx SDK Nestjs elastic package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -31,7 +31,7 @@
     "typescript": "^4.3.5"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-http": "^3.2.1",
+    "@multiversx/sdk-nestjs-http": "^3.7.2",
     "@nestjs/common": "^10.x"
   },
   "publishConfig": {
