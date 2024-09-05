@@ -905,7 +905,7 @@ export class RedisCacheService {
    * @param {string} key - The key where the list is stored.
    * @param {number} start - The offset of the first element to be returned. 0 means the first.
    * @param {number} stop - The offset of the last element to be returned. -1 means the last.
-   * @returns {number} The sum of the two numbers.
+   * @returns The list values from the starting point to the stop point.
    */
   async lrange(key: string, start: number = 0, stop: number = -1): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
