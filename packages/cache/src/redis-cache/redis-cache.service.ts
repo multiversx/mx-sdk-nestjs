@@ -321,7 +321,7 @@ export class RedisCacheService {
 
   async incrby(
     key: string,
-    value: number | string
+    value: number | string,
   ): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
@@ -702,7 +702,7 @@ export class RedisCacheService {
     stop: number | string,
     options?: {
       withScores?: boolean,
-    }
+    },
   ): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
@@ -735,7 +735,7 @@ export class RedisCacheService {
     options?: {
       order?: 'REV' | undefined,
       withScores?: boolean,
-    }
+    },
   ): Promise<string[]> {
     const performanceProfiler = new PerformanceProfiler();
     try {
@@ -791,7 +791,7 @@ export class RedisCacheService {
   }
 
   async scard(
-    key: string
+    key: string,
   ): Promise<number> {
     const performanceProfiler = new PerformanceProfiler();
     try {
@@ -840,7 +840,7 @@ export class RedisCacheService {
       lua: string;
       numberOfKeys?: number;
       readOnly?: boolean;
-    }
+    },
   ): void {
     const performanceProfiler = new PerformanceProfiler();
     try {
@@ -896,6 +896,32 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('RPUSH', performanceProfiler.duration);
+    }
+  }
+
+  /**
+   * Wrapper over Redis List range operation.
+   *
+   * @param {string} key - The key where the list is stored.
+   * @param {number} start - The offset of the first element to be returned. 0 means the first.
+   * @param {number} stop - The offset of the last element to be returned. -1 means the last.
+   * @returns {number} The sum of the two numbers.
+   */
+  async lrange(key: string, start: number = 0, stop: number = -1): Promise<string[]> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.lrange(key, start, stop);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to execute lrange into redis.', {
+          exception: error?.toString(),
+          key,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('LRANGE', performanceProfiler.duration);
     }
   }
 
