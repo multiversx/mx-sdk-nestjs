@@ -17,12 +17,12 @@ export class ApiService {
     private readonly metricsService: MetricsService,
   ) {
     axios.interceptors.request.use(request => {
-      console.log('Request Headers:', request.headers);
+      console.log(`URL: ${request.url}, Request Headers: ${request.headers['connection'] ?? 'Not set'}`);
       return request;
     });
 
     axios.interceptors.response.use(response => {
-      console.log('Response Headers:', response.headers);
+      console.log(`URL: ${response.config?.url}, Request Headers: ${response.headers['connection'] ?? 'Not set'}`);
       return response;
     });
   }
