@@ -52,6 +52,7 @@ export class ApiService {
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
 
     const headers = settings.headers ?? {};
+    headers['connection'] = 'keep-alive';
 
     const rateLimiterSecret = this.options.rateLimiterSecret;
     if (rateLimiterSecret) {
