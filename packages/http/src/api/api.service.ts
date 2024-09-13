@@ -16,6 +16,8 @@ export class ApiService {
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
   ) {
+    console.log({ options });
+
     axios.interceptors.request.use(request => {
       console.log(`URL: ${request.url}, Request Headers: ${request.headers['connection'] ?? 'Not set'}`);
       return request;
