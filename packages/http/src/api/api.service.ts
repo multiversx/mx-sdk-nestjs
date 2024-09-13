@@ -37,7 +37,7 @@ export class ApiService {
         this.keepaliveAgent = new Agent({
           keepAlive: true,
           maxSockets: Infinity,
-          maxFreeSockets: 10,
+          maxFreeSockets: this.options.keepAliveMaxFreeSockets ?? 10,
           timeout: this.options.axiosTimeout, // active socket keepalive
           freeSocketTimeout: 30000, // free socket keepalive for 30 seconds
         });

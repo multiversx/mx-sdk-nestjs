@@ -14,4 +14,6 @@ export class ApiModuleOptions {
   logConnectionKeepAlive: boolean = false;
 
   useKeepAliveHeader: boolean = false;
+
+  keepAliveMaxFreeSockets?: number;
 }
