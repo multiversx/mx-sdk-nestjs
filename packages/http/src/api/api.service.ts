@@ -16,17 +16,19 @@ export class ApiService {
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
   ) {
-    console.log({ options });
+    if (options.logConnectionKeepAlive) {
+      const logger = new Logger(ApiService.name);
 
-    axios.interceptors.request.use(request => {
-      console.log(`URL: ${request.url}, Request Headers: ${request.headers['connection'] ?? 'Not set'}`);
-      return request;
-    });
+      axios.interceptors.request.use(request => {
+        logger.log(`URL: ${request.url}, Request Headers: ${request.headers['connection'] ?? 'Not set'}`);
+        return request;
+      });
 
-    axios.interceptors.response.use(response => {
-      console.log(`URL: ${response.config?.url}, Response Headers: ${response.headers['connection'] ?? 'Not set'}`);
-      return response;
-    });
+      axios.interceptors.response.use(response => {
+        logger.log(`URL: ${response.config?.url}, Response Headers: ${response.headers['connection'] ?? 'Not set'}`);
+        return response;
+      });
+    }
   }
 
   private getKeepAliveAgent(): Agent | undefined {
@@ -52,7 +54,10 @@ export class ApiService {
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
 
     const headers = settings.headers ?? {};
-    headers['connection'] = 'keep-alive';
+
+    if (this.options.useKeepAliveHeader) {
+      headers['connection'] = 'keep-alive';
+    }
 
     const rateLimiterSecret = this.options.rateLimiterSecret;
     if (rateLimiterSecret) {
