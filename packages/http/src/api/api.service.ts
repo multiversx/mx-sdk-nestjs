@@ -15,7 +15,17 @@ export class ApiService {
     private readonly options: ApiModuleOptions,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
-  ) { }
+  ) {
+    axios.interceptors.request.use(request => {
+      console.log('Request Headers:', request.headers);
+      return request;
+    });
+
+    axios.interceptors.response.use(response => {
+      console.log('Response Headers:', response.headers);
+      return response;
+    });
+  }
 
   private getKeepAliveAgent(): Agent | undefined {
     if (this.keepaliveAgent === null) {
