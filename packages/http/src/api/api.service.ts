@@ -15,7 +15,21 @@ export class ApiService {
     private readonly options: ApiModuleOptions,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
-  ) { }
+  ) {
+    if (options.logConnectionKeepAlive) {
+      const logger = new Logger(ApiService.name);
+
+      axios.interceptors.request.use(request => {
+        logger.log(`URL: ${request.url}, Request Headers: ${request.headers['connection'] ?? 'Not set'}`);
+        return request;
+      });
+
+      axios.interceptors.response.use(response => {
+        logger.log(`URL: ${response.config?.url}, Response Headers: ${response.headers['connection'] ?? 'Not set'}`);
+        return response;
+      });
+    }
+  }
 
   private getKeepAliveAgent(): Agent | undefined {
     if (this.keepaliveAgent === null) {
@@ -23,7 +37,7 @@ export class ApiService {
         this.keepaliveAgent = new Agent({
           keepAlive: true,
           maxSockets: Infinity,
-          maxFreeSockets: 10,
+          maxFreeSockets: this.options.keepAliveMaxFreeSockets ?? 10,
           timeout: this.options.axiosTimeout, // active socket keepalive
           freeSocketTimeout: 30000, // free socket keepalive for 30 seconds
         });
@@ -40,6 +54,10 @@ export class ApiService {
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
 
     const headers = settings.headers ?? {};
+
+    if (this.options.useKeepAliveHeader) {
+      headers['connection'] = 'keep-alive';
+    }
 
     const rateLimiterSecret = this.options.rateLimiterSecret;
     if (rateLimiterSecret) {
