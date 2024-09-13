@@ -25,7 +25,7 @@ export class ApiService {
       });
 
       axios.interceptors.response.use(response => {
-        logger.log(`URL: ${response.config?.url}, Response Headers: ${response.headers['connection'] ?? 'Not set'}`);
+        logger.log(`URL: ${response.config?.url}, Response Headers: ${response.headers['connection'] ?? 'Not set'}, Version: ${response.request.res.httpVersion}`);
         return response;
       });
     }
