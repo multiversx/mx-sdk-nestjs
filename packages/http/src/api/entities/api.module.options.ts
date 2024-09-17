@@ -16,4 +16,6 @@ export class ApiModuleOptions {
   useKeepAliveHeader: boolean = false;
 
   keepAliveMaxFreeSockets?: number;
+
+  keepAliveFreeSocketTimeout?: number;
 }

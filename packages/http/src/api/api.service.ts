@@ -39,7 +39,7 @@ export class ApiService {
           maxSockets: Infinity,
           maxFreeSockets: this.options.keepAliveMaxFreeSockets ?? 10,
           timeout: this.options.axiosTimeout, // active socket keepalive
-          freeSocketTimeout: 30000, // free socket keepalive for 30 seconds
+          freeSocketTimeout: this.options.keepAliveFreeSocketTimeout ?? 30000, // free socket keepalive for 30 seconds
         });
       } else {
         this.keepaliveAgent = undefined;
