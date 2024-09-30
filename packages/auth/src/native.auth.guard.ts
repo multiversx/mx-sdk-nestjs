@@ -48,9 +48,8 @@ export class NativeAuthGuard implements CanActivate {
       },
     };
 
-    const shouldAllowAllOrigins = erdnestConfigService.getNativeAuthAcceptedOrigins() &&
-      erdnestConfigService.getNativeAuthAcceptedOrigins().length === 1 &&
-      erdnestConfigService.getNativeAuthAcceptedOrigins()[0] === '*';
+    const acceptedOrigins = erdnestConfigService.getNativeAuthAcceptedOrigins();
+    const shouldAllowAllOrigins = acceptedOrigins && acceptedOrigins.length === 1 && acceptedOrigins[0] === '*';
     if (shouldAllowAllOrigins) {
       nativeAuthServerConfig.isOriginAccepted = () => true; // allow all origins
     }
