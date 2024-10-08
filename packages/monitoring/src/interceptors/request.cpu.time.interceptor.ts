@@ -7,7 +7,8 @@ import { CpuProfiler } from "../profilers/cpu.profiler";
 @Injectable()
 export class RequestCpuTimeInterceptor implements NestInterceptor {
   constructor(
-    private readonly metricsService: MetricsService
+    private readonly metricsService: MetricsService,
+    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -29,6 +30,10 @@ export class RequestCpuTimeInterceptor implements NestInterceptor {
           const duration = profiler.stop();
           this.metricsService.setApiCpuTime(apiFunction, duration);
 
+          if (this.onRequest) {
+            this.onRequest(apiFunction, duration, context);
+          }
+
           if (!request.res.headersSent) {
             request.res.set('X-Request-Cpu-Time', duration);
           }
@@ -37,10 +42,13 @@ export class RequestCpuTimeInterceptor implements NestInterceptor {
           const duration = profiler.stop();
           this.metricsService.setApiCpuTime(apiFunction, duration);
 
+          if (this.onRequest) {
+            this.onRequest(apiFunction, duration, context);
+          }
+
           if (!request.res.headersSent) {
             request.res.set('X-Request-Cpu-Time', duration);
           }
-
           return throwError(() => err);
         })
       );
