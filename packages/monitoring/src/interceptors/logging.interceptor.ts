@@ -8,6 +8,7 @@ import { PerformanceProfiler } from "../profilers/performance.profiler";
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
     private readonly metricsService: MetricsService,
+    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -38,12 +39,20 @@ export class LoggingInterceptor implements NestInterceptor {
           const res = http.getResponse();
 
           this.metricsService.setApiCall(apiFunction, origin, res.statusCode, profiler.duration);
+
+          if (this.onRequest) {
+            this.onRequest(apiFunction, profiler.duration, context);
+          }
         }),
         catchError(err => {
           profiler.stop();
 
           const statusCode = err.status ?? HttpStatus.INTERNAL_SERVER_ERROR;
           this.metricsService.setApiCall(apiFunction, origin, statusCode, profiler.duration);
+
+          if (this.onRequest) {
+            this.onRequest(apiFunction, profiler.duration, context);
+          }
 
           return throwError(() => err);
         })
