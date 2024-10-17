@@ -1,11 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
-import { ExecutionContextUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE } from '@multiversx/sdk-nestjs-common';
+import { ExecutionContextUtils, MxnestConfigService, MXNEST_CONFIG_SERVICE } from '@multiversx/sdk-nestjs-common';
 
 @Injectable()
 export class JwtAdminGuard implements CanActivate {
   constructor(
-    @Inject(ERDNEST_CONFIG_SERVICE)
-    private readonly erdnestConfigService: ErdnestConfigService
+    @Inject(MXNEST_CONFIG_SERVICE)
+    private readonly mxnestConfigService: MxnestConfigService
   ) { }
 
   // eslint-disable-next-line require-await
@@ -14,7 +14,7 @@ export class JwtAdminGuard implements CanActivate {
   ): Promise<boolean> {
 
 
-    const admins = this.erdnestConfigService.getSecurityAdmins();
+    const admins = this.mxnestConfigService.getSecurityAdmins();
     if (!admins) {
       return false;
     }

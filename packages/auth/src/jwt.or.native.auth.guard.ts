@@ -1,19 +1,19 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, Optional } from '@nestjs/common';
 import { CacheService } from '@multiversx/sdk-nestjs-cache';
-import { ErdnestConfigService, ERDNEST_CONFIG_SERVICE } from '@multiversx/sdk-nestjs-common';
+import { MxnestConfigService, MXNEST_CONFIG_SERVICE } from '@multiversx/sdk-nestjs-common';
 import { JwtAuthenticateGuard } from './jwt.authenticate.guard';
 import { NativeAuthGuard } from './native.auth.guard';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {
   constructor(
-    @Inject(ERDNEST_CONFIG_SERVICE) private readonly erdnestConfigService: ErdnestConfigService,
+    @Inject(MXNEST_CONFIG_SERVICE) private readonly mxnestConfigService: MxnestConfigService,
     @Optional() private readonly cacheService?: CacheService,
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const jwtGuard = new JwtAuthenticateGuard(this.erdnestConfigService);
-    const nativeAuthGuard = new NativeAuthGuard(this.erdnestConfigService, this.cacheService);
+    const jwtGuard = new JwtAuthenticateGuard(this.mxnestConfigService);
+    const nativeAuthGuard = new NativeAuthGuard(this.mxnestConfigService, this.cacheService);
 
     try {
       const result = await jwtGuard.canActivate(context);

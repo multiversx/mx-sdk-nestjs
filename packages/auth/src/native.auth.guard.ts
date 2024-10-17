@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject, Logger } from '@nestjs/common';
 import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { DecoratorUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
+import { DecoratorUtils, MxnestConfigService, MXNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 import { NoAuthOptions } from './decorators';
@@ -17,13 +17,13 @@ export class NativeAuthGuard implements CanActivate {
   private readonly authServer: NativeAuthServer;
 
   constructor(
-    @Inject(ERDNEST_CONFIG_SERVICE) erdnestConfigService: ErdnestConfigService,
+    @Inject(MXNEST_CONFIG_SERVICE) mxnestConfigService: MxnestConfigService,
     @Optional() cacheService?: CacheService,
   ) {
     const nativeAuthServerConfig: NativeAuthServerConfig = {
-      apiUrl: erdnestConfigService.getApiUrl(),
-      maxExpirySeconds: erdnestConfigService.getNativeAuthMaxExpirySeconds(),
-      acceptedOrigins: erdnestConfigService.getNativeAuthAcceptedOrigins(),
+      apiUrl: mxnestConfigService.getApiUrl(),
+      maxExpirySeconds: mxnestConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: mxnestConfigService.getNativeAuthAcceptedOrigins(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
@@ -48,7 +48,7 @@ export class NativeAuthGuard implements CanActivate {
       },
     };
 
-    const acceptedOrigins = erdnestConfigService.getNativeAuthAcceptedOrigins();
+    const acceptedOrigins = mxnestConfigService.getNativeAuthAcceptedOrigins();
     const shouldAllowAllOrigins = acceptedOrigins && acceptedOrigins.length === 1 && acceptedOrigins[0] === '*';
     if (shouldAllowAllOrigins) {
       nativeAuthServerConfig.isOriginAccepted = () => true; // allow all origins
