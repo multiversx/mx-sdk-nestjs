@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject, Logger } from '@nestjs/common';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
+import { CacheService, InMemoryCacheService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { DecoratorUtils, MxnestConfigService, MXNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
@@ -129,6 +129,8 @@ export class NativeAuthGuard implements CanActivate {
           request.res.set('X-Native-Auth-Error-Message', message);
           request.res.set('X-Native-Auth-Duration', profiler.duration);
         }
+      }else {
+        throw error;
       }
 
       return false;
