@@ -132,9 +132,6 @@ export class NativeAuthGuard implements CanActivate {
         return false;
       }
         throw error;
-      
-
-      
     }
   }
 }
