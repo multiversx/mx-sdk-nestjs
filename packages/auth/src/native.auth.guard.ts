@@ -129,11 +129,12 @@ export class NativeAuthGuard implements CanActivate {
           request.res.set('X-Native-Auth-Error-Message', message);
           request.res.set('X-Native-Auth-Duration', profiler.duration);
         }
-      }else {
-        throw error;
+        return false;
       }
+        throw error;
+      
 
-      return false;
+      
     }
   }
 }
