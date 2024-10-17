@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-http",
-  "version": "3.7.8",
+  "version": "4.0.0",
   "description": "Multiversx SDK Nestjs http package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -38,8 +38,8 @@
     "axios": "^1.7.4"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-common": "^3.7.2",
-    "@multiversx/sdk-nestjs-monitoring": "^3.7.2",
+    "@multiversx/sdk-nestjs-common": "^4.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "^4.0.0",
     "@nestjs/common": "^10.x",
     "@nestjs/core": "^10.x"
   },

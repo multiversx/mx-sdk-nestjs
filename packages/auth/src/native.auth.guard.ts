@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, Optional, Inject, Logger } from '@nestjs/common';
 import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { NativeAuthError, NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { DecoratorUtils, ErdnestConfigService, ERDNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
+import { DecoratorUtils, MxnestConfigService, MXNEST_CONFIG_SERVICE, UrlUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { NativeAuthInvalidOriginError } from './errors/native.auth.invalid.origin.error';
 import { NoAuthOptions } from './decorators';
@@ -17,13 +17,13 @@ export class NativeAuthGuard implements CanActivate {
   private readonly authServer: NativeAuthServer;
 
   constructor(
-    @Inject(ERDNEST_CONFIG_SERVICE) erdnestConfigService: ErdnestConfigService,
+    @Inject(MXNEST_CONFIG_SERVICE) mxnestConfigService: MxnestConfigService,
     @Optional() cacheService?: CacheService,
   ) {
     const nativeAuthServerConfig: NativeAuthServerConfig = {
-      apiUrl: erdnestConfigService.getApiUrl(),
-      maxExpirySeconds: erdnestConfigService.getNativeAuthMaxExpirySeconds(),
-      acceptedOrigins: erdnestConfigService.getNativeAuthAcceptedOrigins(),
+      apiUrl: mxnestConfigService.getApiUrl(),
+      maxExpirySeconds: mxnestConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: mxnestConfigService.getNativeAuthAcceptedOrigins(),
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
@@ -35,20 +35,19 @@ export class NativeAuthGuard implements CanActivate {
           if (cacheService) {
             return await cacheService.get<T>(key);
           }
-
-          throw new Error('CacheService is not available in the context');
+          return undefined;
         },
         setValue: async function <T>(key: string, value: T, ttl: number): Promise<void> {
           if (cacheService) {
             return await cacheService.set<T>(key, value, ttl);
           }
 
-          throw new Error('CacheService is not available in the context');
+          return undefined;
         },
       },
     };
 
-    const acceptedOrigins = erdnestConfigService.getNativeAuthAcceptedOrigins();
+    const acceptedOrigins = mxnestConfigService.getNativeAuthAcceptedOrigins();
     const shouldAllowAllOrigins = acceptedOrigins && acceptedOrigins.length === 1 && acceptedOrigins[0] === '*';
     if (shouldAllowAllOrigins) {
       nativeAuthServerConfig.isOriginAccepted = () => true; // allow all origins
@@ -130,9 +129,9 @@ export class NativeAuthGuard implements CanActivate {
           request.res.set('X-Native-Auth-Error-Message', message);
           request.res.set('X-Native-Auth-Duration', profiler.duration);
         }
+        return false;
       }
-
-      return false;
+        throw error;
     }
   }
 }

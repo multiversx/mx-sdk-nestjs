@@ -1,14 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { verify } from 'jsonwebtoken';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
-import { ErdnestConfigService, ERDNEST_CONFIG_SERVICE, DecoratorUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
+import { MxnestConfigService, MXNEST_CONFIG_SERVICE, DecoratorUtils, ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 import { NoAuthOptions } from './decorators/no.auth';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
   constructor(
-    @Inject(ERDNEST_CONFIG_SERVICE)
-    private readonly erdnestConfigService: ErdnestConfigService
+    @Inject(MXNEST_CONFIG_SERVICE)
+    private readonly mxnestConfigService: MxnestConfigService
   ) { }
 
   async canActivate(
@@ -31,7 +31,7 @@ export class JwtAuthenticateGuard implements CanActivate {
     const profiler = new PerformanceProfiler();
 
     try {
-      const jwtSecret = this.erdnestConfigService.getJwtSecret();
+      const jwtSecret = this.mxnestConfigService.getJwtSecret();
 
       request.jwt = await new Promise((resolve, reject) => {
         verify(jwt, jwtSecret, (err: any, decoded: any) => {

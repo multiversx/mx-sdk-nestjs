@@ -1,4 +1,4 @@
-export interface ErdnestConfigService {
+export interface MxnestConfigService {
   getSecurityAdmins(): string[];
 
   getJwtSecret(): string;
