@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "3.7.26",
+  "version": "4.0.0",
   "description": "Multiversx SDK Nestjs common package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -33,14 +33,14 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^13.1.0",
-    "@multiversx/sdk-network-providers": "^2.4.3",
+    "@multiversx/sdk-core": "^13.4.1",
+    "@multiversx/sdk-network-providers": "^2.6.0",
     "nest-winston": "^1.6.2",
     "uuid": "^8.3.2",
     "winston": "^3.7.2"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-monitoring": "^3.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "^4.0.0",
     "@nestjs/common": "^10.x",
     "@nestjs/config": "^3.x",
     "@nestjs/core": "^10.x",

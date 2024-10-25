@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import Agent from "agentkeepalive";
 import { PerformanceProfiler, MetricsService } from "@multiversx/sdk-nestjs-monitoring";
 import { ApiSettings } from "./entities/api.settings";
@@ -11,11 +11,41 @@ export class ApiService {
   private readonly defaultTimeout: number = 30000;
   private keepaliveAgent: Agent | undefined | null = null;
 
+  private readonly axiosInstance: AxiosInstance;
+  private static concurrentRequests: number = 0;
+
   constructor(
     private readonly options: ApiModuleOptions,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
-  ) { }
+  ) {
+    this.axiosInstance = axios.create({
+      httpAgent: this.getKeepAliveAgent(),
+      transformResponse: [
+        (data) => {
+          try {
+            return JSON.parse(data);
+          } catch (error) {
+            return data;
+          }
+        },
+      ],
+    });
+
+    if (options.logConnectionKeepAlive) {
+      const logger = new Logger(ApiService.name);
+
+      this.axiosInstance.interceptors.request.use(request => {
+        logger.log(`URL: ${request.url}, Request Headers: ${request.headers['connection'] ?? 'Not set'}`);
+        return request;
+      });
+
+      this.axiosInstance.interceptors.response.use(response => {
+        logger.log(`URL: ${response.config?.url}, Response Headers: ${response.headers['connection'] ?? 'Not set'}`);
+        return response;
+      });
+    }
+  }
 
   private getKeepAliveAgent(): Agent | undefined {
     if (this.keepaliveAgent === null) {
@@ -23,9 +53,9 @@ export class ApiService {
         this.keepaliveAgent = new Agent({
           keepAlive: true,
           maxSockets: Infinity,
-          maxFreeSockets: 10,
+          maxFreeSockets: this.options.keepAliveMaxFreeSockets ?? 10,
           timeout: this.options.axiosTimeout, // active socket keepalive
-          freeSocketTimeout: 30000, // free socket keepalive for 30 seconds
+          freeSocketTimeout: this.options.keepAliveFreeSocketTimeout ?? 30000, // free socket keepalive for 30 seconds
         });
       } else {
         this.keepaliveAgent = undefined;
@@ -40,6 +70,10 @@ export class ApiService {
     const maxRedirects = settings.skipRedirects === true ? 0 : undefined;
 
     const headers = settings.headers ?? {};
+
+    if (this.options.useKeepAliveHeader) {
+      headers['connection'] = 'keep-alive';
+    }
 
     const rateLimiterSecret = this.options.rateLimiterSecret;
     if (rateLimiterSecret) {
@@ -59,33 +93,33 @@ export class ApiService {
     return {
       timeout,
       maxRedirects,
-      httpAgent: this.getKeepAliveAgent(),
       httpsAgent: settings.httpsAgent,
       responseType: settings.responseType,
       auth: settings.auth,
       params: settings.params,
       headers,
-      transformResponse: [
-        (data) => {
-          try {
-            return JSON.parse(data);
-          } catch (error) {
-            return data;
-          }
-        },
-      ],
     };
   }
 
   private requestsExecuter = new PendingExecuter();
 
+  private incrementConcurrentRequests(url: string) {
+    ApiService.concurrentRequests++;
+    this.metricsService.setApiConcurrentRequests(url, ApiService.concurrentRequests);
+  }
+
+  private decrementConcurrentRequests(url: string) {
+    ApiService.concurrentRequests--;
+    this.metricsService.setApiConcurrentRequests(url, ApiService.concurrentRequests);
+  }
+
   async get(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
-
     const config = await this.getConfig(settings);
+    this.incrementConcurrentRequests(this.getHostname(url));
 
     try {
-      return await this.requestsExecuter.execute(url, async () => await axios.get(url, config));
+      return await this.requestsExecuter.execute(url, async () => await this.axiosInstance.get(url, config));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -103,16 +137,17 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+      this.decrementConcurrentRequests(this.getHostname(url));
     }
   }
 
   async put(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
+    const config = await this.getConfig(settings);
+    this.incrementConcurrentRequests(this.getHostname(url));
 
     try {
-      const config = await this.getConfig(settings);
-
-      return await axios.put(url, data, config);
+      return await this.axiosInstance.put(url, data, config);
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -137,16 +172,17 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+      this.decrementConcurrentRequests(this.getHostname(url));
     }
   }
 
   async patch(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
+    const config = await this.getConfig(settings);
+    this.incrementConcurrentRequests(this.getHostname(url));
 
     try {
-      const config = await this.getConfig(settings);
-
-      return await axios.patch(url, data, config);
+      return await this.axiosInstance.patch(url, data, config);
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -171,15 +207,17 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+      this.decrementConcurrentRequests(this.getHostname(url));
     }
   }
 
   async post(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
-    try {
-      const config = await this.getConfig(settings);
+    const config = await this.getConfig(settings);
+    this.incrementConcurrentRequests(this.getHostname(url));
 
-      const response = await axios.post(url, data, config);
+    try {
+      const response = await this.axiosInstance.post(url, data, config);
       return response;
     } catch (error: any) {
       let handled = false;
@@ -198,15 +236,17 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+      this.decrementConcurrentRequests(this.getHostname(url));
     }
   }
 
   async delete(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
-    try {
-      const config = await this.getConfig(settings);
+    const config = await this.getConfig(settings);
+    this.incrementConcurrentRequests(this.getHostname(url));
 
-      const response = await axios.delete(url, {
+    try {
+      const response = await this.axiosInstance.delete(url, {
         data,
         ...config,
       });
@@ -228,16 +268,17 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+      this.decrementConcurrentRequests(this.getHostname(url));
     }
   }
 
   async head(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
+    const config = await this.getConfig(settings);
+    this.incrementConcurrentRequests(this.getHostname(url));
 
     try {
-      const config = await this.getConfig(settings);
-
-      const response = await axios.head(url, config);
+      const response = await this.axiosInstance.head(url, config);
       return response;
     } catch (error: any) {
       let handled = false;
@@ -256,6 +297,7 @@ export class ApiService {
     } finally {
       profiler.stop();
       this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
+      this.decrementConcurrentRequests(this.getHostname(url));
     }
   }
 

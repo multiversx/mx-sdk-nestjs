@@ -10,4 +10,12 @@ export class ApiModuleOptions {
   serverTimeout: number = 60000;
 
   rateLimiterSecret?: string;
+
+  logConnectionKeepAlive: boolean = false;
+
+  useKeepAliveHeader: boolean = false;
+
+  keepAliveMaxFreeSockets?: number;
+
+  keepAliveFreeSocketTimeout?: number;
 }

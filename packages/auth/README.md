@@ -39,17 +39,17 @@ It also provides some [NestJS Decorators](https://docs.nestjs.com/custom-decorat
 ## Configuration
 
 The authentication guards need 2 parameters on instantiation.  
-The fist parameter needs to be an instance of a class implementing the `ErdnestConfigService` interface.  
+The fist parameter needs to be an instance of a class implementing the `MxnestConfigService` interface.  
 The second one, needs to be an instance of a [Caching service](https://www.npmjs.com/package/@multiversx/sdk-nestjs-cache)
 
 
 ```typescript
 import { Injectable } from "@nestjs/common";
 import { ApiConfigService } from "./api.config.service";
-import { ErdnestConfigService } from "@multiversx/sdk-nestjs-common";
+import { MxnestConfigService } from "@multiversx/sdk-nestjs-common";
 
 @Injectable()
-export class SdkNestjsConfigServiceImpl implements ErdnestConfigService {
+export class SdkNestjsConfigServiceImpl implements MxnestConfigService {
   constructor(
     private readonly apiConfigService: ApiConfigService,
   ) { }
@@ -80,12 +80,12 @@ You can register it as a provider, and the DI mechanism of NestJS will handle in
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { ERDNEST_CONFIG_SERVICE } from "@multiversx/sdk-nestjs-common";
+import { MXNEST_CONFIG_SERVICE } from "@multiversx/sdk-nestjs-common";
 
 @Module({
   providers: [
     {
-      provide: ERDNEST_CONFIG_SERVICE,
+      provide: MXNEST_CONFIG_SERVICE,
       useClass: SdkNestjsConfigServiceImpl,
     },
   ],
@@ -136,7 +136,7 @@ In this case, the guard is method-scoped. Only `createProject` benefits from the
 
 ### Native Auth Admin Guard
 
-`NativeAuthAdminGuard` allows only specific addresses to be authenticated. The addresses are defined in the [config](#configuration) file and are passed to the guard via the ErdnestConfigService.
+`NativeAuthAdminGuard` allows only specific addresses to be authenticated. The addresses are defined in the [config](#configuration) file and are passed to the guard via the MxnestConfigService.
 
 *This guard cannot be used by itself. It always has to be paired with a `NativeAuthGuard`*
 
@@ -166,7 +166,7 @@ export class UsersController {
 
 ### JWT Admin Guard
 
-`JwtAdminGuard` relies on the same mechanism, only specific addresses can be authenticated. The addresses are defined in the [config](#configuration) file and are passed to the guard via the ErdnestConfigService.
+`JwtAdminGuard` relies on the same mechanism, only specific addresses can be authenticated. The addresses are defined in the [config](#configuration) file and are passed to the guard via the MxnestConfigService.
 
 *There is one caveat: when creating the JWT, the client must include an `address` field in the payload, before signing it.*
 

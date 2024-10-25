@@ -15,6 +15,7 @@ export class CachingInterceptor implements NestInterceptor {
     private readonly cachingService: CacheService,
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly metricsService: MetricsService,
+    private readonly cacheDuration: number = 3,
   ) { }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
@@ -84,7 +85,7 @@ export class CachingInterceptor implements NestInterceptor {
             pendingRequestResolver(result);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
-            await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * 3);
+            await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * this.cacheDuration);
           }),
           catchError((err) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];

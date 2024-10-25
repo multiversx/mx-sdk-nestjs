@@ -6,6 +6,7 @@ import { ElasticMetricType } from "./entities/elastic.metric.type";
 export class MetricsService {
   private static apiCpuTimeHistogram: Histogram<string>;
   private static apiCallsHistogram: Histogram<string>;
+  private static apiConcurrentRequestsHistogram: Histogram<string>;
   private static pendingRequestsHistogram: Gauge<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static rabbitConsumerDurationHistogram: Histogram<string>;
@@ -44,6 +45,15 @@ export class MetricsService {
         name: 'api',
         help: 'API Calls',
         labelNames: ['endpoint', 'origin', 'code'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsService.apiConcurrentRequestsHistogram) {
+      MetricsService.apiConcurrentRequestsHistogram = new Histogram({
+        name: 'api_concurrent_requests',
+        help: 'API Concurrent Requests',
+        labelNames: ['endpoint'],
         buckets: [],
       });
     }
@@ -238,6 +248,10 @@ export class MetricsService {
 
   setApiCall(endpoint: string, origin: string, status: number, duration: number) {
     MetricsService.apiCallsHistogram.labels(endpoint, origin, status.toString()).observe(duration);
+  }
+
+  setApiConcurrentRequests(endpoint: string, count: number) {
+    MetricsService.apiConcurrentRequestsHistogram.labels(endpoint).observe(count);
   }
 
   setPendingRequestsCount(count: number) {
