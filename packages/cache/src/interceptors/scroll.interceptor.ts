@@ -1,8 +1,7 @@
-import { Constants, ContextTracker, DecoratorUtils } from "@multiversx/sdk-nestjs-common";
+import { Constants, ContextTracker, DecoratorUtils, ScrollableOptions, ScrollableCreateOptions, ScrollableAfterOptions } from "@multiversx/sdk-nestjs-common";
 import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, catchError, tap, throwError } from "rxjs";
 import { randomUUID } from "crypto";
-import { ScrollableOptions } from "../decorators";
 import { CacheService } from "../cache";
 
 @Injectable()
@@ -45,19 +44,19 @@ export class ScrollInterceptor implements NestInterceptor {
 
         // create uuid and store
         ContextTracker.assign({
-          scrollSettings: {
-            scrollCollection: scrollCollection,
-            scrollCreate: true,
-          },
+          scrollSettings: new ScrollableCreateOptions({
+            collection: scrollCollection,
+            create: true,
+          }),
         });
       } else if (guidRegex.test(scrollCreate)) {
         scrollId = scrollCreate;
 
         ContextTracker.assign({
-          scrollSettings: {
-            scrollCollection: scrollCollection,
-            scrollCreate: true,
-          },
+          scrollSettings: new ScrollableCreateOptions({
+            collection: scrollCollection,
+            create: true,
+          }),
         });
       } else {
         throw new Error('Invalid scrollCreate value');
@@ -78,13 +77,13 @@ export class ScrollInterceptor implements NestInterceptor {
         }
 
         if (scrollInfo) {
-          ContextTracker.assign({
-            scrollSettings: {
-              scrollCollection: scrollCollection,
-              scrollAfter: scrollInfo.lastSort,
+          ContextTracker.assign(
+            new ScrollableAfterOptions({
+              collection: scrollCollection,
+              after: scrollInfo.lastSort,
               ids: scrollInfo.lastIds,
-            },
-          });
+            })
+          );
         }
       } else {
         throw new Error('Invalid scrollAfter value');
@@ -105,12 +104,12 @@ export class ScrollInterceptor implements NestInterceptor {
         }
 
         if (scrollInfo) {
-          ContextTracker.assign({
-            scrollSettings: {
-              scrollCollection: scrollCollection,
-              scrollAt: scrollInfo.firstSort,
-            },
-          });
+          ContextTracker.assign(
+            new ScrollableAfterOptions({
+              collection: scrollCollection,
+              after: scrollInfo.firstSort,
+            })
+          );
         }
       } else {
         throw new Error('Invalid scrollAt value');

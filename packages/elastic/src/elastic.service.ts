@@ -3,7 +3,7 @@ import { ApiService } from "@multiversx/sdk-nestjs-http";
 import { MetricsService, ElasticMetricType, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticModuleOptions } from "./entities/elastic.module.options";
-import { ContextTracker } from "@multiversx/sdk-nestjs-common";
+import { ContextTracker, ScrollableAfterOptions } from "@multiversx/sdk-nestjs-common";
 
 @Injectable()
 export class ElasticService {
@@ -62,15 +62,12 @@ export class ElasticService {
   private async getListResult(url: string, collection: string, elasticQuery: ElasticQuery) {
     const scrollSettings = ContextTracker.get()?.scrollSettings;
 
-    const elasticQueryJson: any = elasticQuery.toJson();
-    if (scrollSettings && scrollSettings.scrollCollection === collection) {
+    if (scrollSettings && scrollSettings.collection === collection) {
       let documents: any[] = [];
 
-      if (scrollSettings.scrollAfter) {
-        documents = await this.getScrollAfterResult(url, elasticQuery, scrollSettings.scrollAfter, scrollSettings.ids, elasticQuery.pagination?.size ?? 25);
-      } else if (scrollSettings.scrollAt) {
-        documents = await this.getScrollAtResult(url, elasticQuery, scrollSettings.scrollAt);
-      } else if (scrollSettings.scrollCreate) {
+      if (scrollSettings.after) {
+        documents = await this.getScrollAfterResult(url, elasticQuery, scrollSettings);
+      } else if (scrollSettings.create) {
         documents = await this.getScrollCreateResult(url, elasticQuery);
       } else {
         throw new Error('Invalid scroll settings');
@@ -81,6 +78,7 @@ export class ElasticService {
       return documents;
     }
 
+    const elasticQueryJson: any = elasticQuery.toJson();
     const result = await this.post(url, elasticQueryJson);
     return result.data.hits.hits;
   }
@@ -111,51 +109,34 @@ export class ElasticService {
     });
   }
 
-  private async getScrollAtResult(url: string, elasticQuery: ElasticQuery, scrollAt: any) {
-    const elasticQueryJson: any = elasticQuery.toJson();
-    elasticQueryJson.search_after = scrollAt;
-
-    const result = await this.post(url, elasticQueryJson);
-    return result.data.hits.hits;
-  }
-
-  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, scrollAfter: any, ids: string[], size: number) {
-    const MAX_SIZE = 10000;
-
+  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, scrollSettings: ScrollableAfterOptions) {
     const elasticQueryJson: any = elasticQuery.toJson();
 
-    elasticQueryJson.search_after = scrollAfter;
-    elasticQueryJson.size += ids.length;
-
-    let remainingSize = 0;
-    if (elasticQueryJson.size > MAX_SIZE) {
-      remainingSize = elasticQueryJson.size - MAX_SIZE;
-      elasticQueryJson.size = MAX_SIZE;
-    }
+    elasticQueryJson.search_after = scrollSettings.after;
+    this.excludeIds(elasticQueryJson, scrollSettings.ids);
 
     const queryResult = await this.post(url, elasticQueryJson);
-    const allDocuments = this.excludeIds(queryResult.data.hits.hits, ids, elasticQuery.pagination?.size);
-
-    let result = allDocuments;
-
-    if (remainingSize && allDocuments.length > 0) {
-      ids = this.getLastIds(allDocuments);
-      const lastDocumentSort = allDocuments[allDocuments.length - 1].sort;
-
-      elasticQueryJson.size = remainingSize + ids.length;
-      elasticQueryJson.search_after = lastDocumentSort;
-
-      const remainingResult = await this.post(url, elasticQueryJson);
-      const remainingDocuments = this.excludeIds(remainingResult.data.hits.hits, ids, remainingSize);
-
-      result = allDocuments.concat(remainingDocuments);
-    }
-
-    return result.slice(0, size);
+    return queryResult.data.hits.hits;
   }
 
-  private excludeIds(documents: any[], ids: string[], maxSize: number | undefined) {
-    return documents.filter((document: any) => !ids.includes(document._id)).slice(0, maxSize ?? 25);
+  private excludeIds(elasticQueryJson: any, ids: any[]) {
+    if (!elasticQueryJson.query) {
+      elasticQueryJson.query = {};
+    }
+
+    if (!elasticQueryJson.query.bool) {
+      elasticQueryJson.query.bool = {};
+    }
+
+    if (!elasticQueryJson.query.bool.must_not) {
+      elasticQueryJson.query.bool.must_not = [];
+    }
+
+    elasticQueryJson.query.bool.must_not.push({
+      terms: {
+        _id: ids,
+      },
+    });
   }
 
   async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {

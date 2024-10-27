@@ -15,6 +15,7 @@ export * from './utils/url.utils';
 export * from './utils/origin.logger';
 export * from './utils/record.utils';
 export * from './utils/round.utils';
+export * from './utils/scrollable.utils';
 export * from './utils/string.utils';
 export * from './utils/swagger.utils';
 export * from './utils/token.utils';
