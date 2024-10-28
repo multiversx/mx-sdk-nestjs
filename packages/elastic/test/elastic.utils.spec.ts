@@ -102,7 +102,7 @@ describe('Elastic Query', () => {
     expect(elasticQuery.toJson().query.terms).toBeDefined();
   });
 
-  describe.only('Nested Should query', () => {
+  describe('Nested Should query', () => {
     let elasticQuery: ElasticQuery = ElasticQuery.create();
 
     const textToSearch = "Day One";
