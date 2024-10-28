@@ -5,6 +5,7 @@ import { RangeGreaterThanOrEqual } from "../src/entities/range.greater.than.or.e
 import { RangeLowerThanOrEqual } from "../src/entities/range.lower.than.or.equal";
 import { TermsQuery } from "../src/entities/terms.query";
 import { ElasticQuery } from "../src/entities/elastic.query";
+import { AbstractQuery } from "../lib/entities/abstract.query";
 
 describe('Elastic Query', () => {
   describe('Create Elastic Query', () => {
@@ -100,5 +101,23 @@ describe('Elastic Query', () => {
 
     expect(elasticQuery.toJson().query.terms).toBeDefined();
   });
-});
 
+  describe.only('Nested Should query', () => {
+    let elasticQuery: ElasticQuery = ElasticQuery.create();
+
+    const textToSearch = "Day One";
+    elasticQuery = elasticQuery.withCondition(QueryConditionOptions.must, QueryType.Exists('identifier'));
+    elasticQuery = elasticQuery.withMustCondition(QueryType.Match('address', 'erd1wh9c0sjr2xn8hzf02lwwcr4jk2s84tat9ud2kaq6zr7xzpvl9l5q8awmex'));
+    const conditions: AbstractQuery[] = [];
+    conditions.push(QueryType.Wildcard('data.name', `*${textToSearch.toLowerCase()}*`));
+    conditions.push(QueryType.Wildcard('data.token', `*${textToSearch.toLowerCase()}*`));
+
+    elasticQuery = elasticQuery.withMustCondition(QueryType.NestedShould('data', conditions));
+    expect(elasticQuery).toBeDefined();
+    expect(elasticQuery.toJson().query.bool.must[2].nested).toBeDefined();
+    expect(elasticQuery.toJson().query.bool.must[2].nested.path).toBe('data');
+    expect(elasticQuery.toJson().query.bool.must[2].nested.query.bool.should[0].wildcard).toBeDefined();
+    expect(elasticQuery.toJson().query.bool.must[2].nested.query.bool.should[0].wildcard["data.name"].value).toBe('*day one*');
+    expect(elasticQuery.toJson().query.bool.must[2].nested.query.bool.should[1].wildcard["data.token"].value).toBe('*day one*');
+  });
+});
