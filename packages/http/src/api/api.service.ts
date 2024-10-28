@@ -119,7 +119,12 @@ export class ApiService {
     this.incrementConcurrentRequests(this.getHostname(url));
 
     try {
-      return await this.requestsExecuter.execute(url, async () => await this.axiosInstance.get(url, config));
+      if (config.auth || config.headers?.Authorization || config.headers?.authorization) {
+        return await this.axiosInstance.get(url, config);
+      }
+      const urlKey = config.params ? `${url}?${JSON.stringify(config.params)}` : url;
+
+      return await this.requestsExecuter.execute(urlKey, async () => await this.axiosInstance.get(url, config));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
