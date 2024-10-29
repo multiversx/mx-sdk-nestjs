@@ -12,6 +12,7 @@ export * from './entities/exists.query';
 export * from './entities/match.query';
 export * from './entities/must.query';
 export * from './entities/nested.query';
+export * from './entities/nested.should.query';
 export * from './entities/query.condition.options';
 export * from './entities/query.condition';
 export * from './entities/query.operator';
