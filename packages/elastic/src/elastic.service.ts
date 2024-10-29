@@ -3,7 +3,7 @@ import { ApiService } from "@multiversx/sdk-nestjs-http";
 import { MetricsService, ElasticMetricType, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticModuleOptions } from "./entities/elastic.module.options";
-import { ContextTracker, ScrollableAfterOptions } from "@multiversx/sdk-nestjs-common";
+import { ContextTracker, ScrollableAfterSettings } from "@multiversx/sdk-nestjs-common";
 
 @Injectable()
 export class ElasticService {
@@ -109,7 +109,7 @@ export class ElasticService {
     });
   }
 
-  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, scrollSettings: ScrollableAfterOptions) {
+  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, scrollSettings: ScrollableAfterSettings) {
     const elasticQueryJson: any = elasticQuery.toJson();
 
     elasticQueryJson.search_after = scrollSettings.after;

@@ -1,11 +1,13 @@
-import { Constants, ContextTracker, DecoratorUtils, ScrollableOptions, ScrollableCreateOptions, ScrollableAfterOptions } from "@multiversx/sdk-nestjs-common";
+import { Constants, ContextTracker, DecoratorUtils, ScrollableAfterSettings, ScrollableCreateSettings } from "@multiversx/sdk-nestjs-common";
 import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { Observable, catchError, tap, throwError } from "rxjs";
 import { randomUUID } from "crypto";
 import { CacheService } from "../cache";
+import { ScrollableOptions } from "src/decorators";
 
 @Injectable()
 export class ScrollInterceptor implements NestInterceptor {
+  guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   constructor(
     private readonly cacheService: CacheService,
   ) { }
@@ -25,96 +27,14 @@ export class ScrollInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const scrollCreate = request.query.scrollCreate;
-    const scrollAfter = request.query.scrollAfter;
-    const scrollAt = request.query.scrollAt;
-
     const queryParams = JSON.parse(JSON.stringify(request.query));
     delete queryParams.scrollCreate;
     delete queryParams.scrollAfter;
     delete queryParams.scrollAt;
 
-    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-    let scrollId: string | undefined = undefined;
-
-    if (scrollCreate) {
-      if (scrollCreate === 'true') {
-        scrollId = randomUUID();
-
-        // create uuid and store
-        ContextTracker.assign({
-          scrollSettings: new ScrollableCreateOptions({
-            collection: scrollCollection,
-            create: true,
-          }),
-        });
-      } else if (guidRegex.test(scrollCreate)) {
-        scrollId = scrollCreate;
-
-        ContextTracker.assign({
-          scrollSettings: new ScrollableCreateOptions({
-            collection: scrollCollection,
-            create: true,
-          }),
-        });
-      } else {
-        throw new Error('Invalid scrollCreate value');
-      }
-    }
-
-    if (scrollAfter) {
-      if (guidRegex.test(scrollAfter)) {
-        scrollId = scrollAfter;
-
-        const scrollInfo: any = await this.cacheService.get(`scrollInfo:${scrollId}`);
-        if (!scrollInfo) {
-          throw new BadRequestException(`Could not find scroll info for '${scrollId}'`);
-        }
-
-        if (JSON.stringify(scrollInfo.queryParams) !== JSON.stringify(queryParams)) {
-          throw new BadRequestException('Invalid query params');
-        }
-
-        if (scrollInfo) {
-          ContextTracker.assign(
-            new ScrollableAfterOptions({
-              collection: scrollCollection,
-              after: scrollInfo.lastSort,
-              ids: scrollInfo.lastIds,
-            })
-          );
-        }
-      } else {
-        throw new Error('Invalid scrollAfter value');
-      }
-    }
-
-    if (scrollAt) {
-      if (guidRegex.test(scrollAt)) {
-        scrollId = scrollAt;
-
-        const scrollInfo: any = await this.cacheService.get(`scrollInfo:${scrollId}`);
-        if (!scrollInfo) {
-          throw new BadRequestException(`Could not find scroll info for '${scrollId}'`);
-        }
-
-        if (scrollInfo.queryParams.sort !== queryParams.sort) {
-          throw new BadRequestException('Invalid query params');
-        }
-
-        if (scrollInfo) {
-          ContextTracker.assign(
-            new ScrollableAfterOptions({
-              collection: scrollCollection,
-              after: scrollInfo.firstSort,
-            })
-          );
-        }
-      } else {
-        throw new Error('Invalid scrollAt value');
-      }
-    }
+    let scrollId = this.handleScrollCreate(request, scrollCollection);
+    scrollId = await this.handleScrollAt(request, scrollCollection, queryParams);
+    scrollId = await this.handleScrollAfter(request, scrollCollection, queryParams);
 
     return next
       .handle()
@@ -139,5 +59,93 @@ export class ScrollInterceptor implements NestInterceptor {
           return throwError(() => err);
         })
       );
+  }
+
+  private handleScrollCreate(request: any, scrollCollection: string): string | undefined {
+    const scrollCreate = request.query.scrollCreate;
+    if (!scrollCreate) {
+      return;
+    }
+
+    let scrollId = undefined;
+
+    if (scrollCreate === 'true') {
+      scrollId = randomUUID();
+    } else if (this.guidRegex.test(scrollCreate)) {
+      scrollId = scrollCreate;
+    }
+
+    if (!scrollId) {
+      throw new Error('Invalid scrollCreate value');
+    }
+
+    ContextTracker.assign({
+      scrollSettings: new ScrollableCreateSettings({
+        collection: scrollCollection,
+        create: true,
+      }),
+    });
+
+    return scrollId;
+  }
+
+  private async handleScrollAfter(request: any, scrollCollection: string, queryParams: any): Promise<string | undefined> {
+    let scrollId = undefined;
+
+    const scrollAfter = request.query.scrollAfter;
+    if (scrollAfter && this.guidRegex.test(scrollAfter)) {
+      scrollId = scrollAfter;
+    } else {
+      throw new Error('Invalid scrollAfter value');
+    }
+
+    const scrollInfo: any = await this.cacheService.get(`scrollInfo:${scrollId}`);
+    if (!scrollInfo) {
+      throw new BadRequestException(`Could not find scroll info for '${scrollId}'`);
+    }
+
+    if (JSON.stringify(scrollInfo.queryParams) !== JSON.stringify(queryParams)) {
+      throw new BadRequestException('Invalid query params');
+    }
+
+    ContextTracker.assign({
+      scrollSettings: new ScrollableAfterSettings({
+        collection: scrollCollection,
+        after: scrollInfo.lastSort,
+        ids: scrollInfo.lastIds,
+      }),
+    });
+
+    return scrollId;
+  }
+
+  private async handleScrollAt(request: any, scrollCollection: string, queryParams: any): Promise<string | undefined> {
+    let scrollId = undefined;
+
+    const scrollAt = request.query.scrollAt;
+    if (scrollAt && this.guidRegex.test(scrollAt)) {
+      scrollId = scrollAt;
+    } else {
+      throw new Error('Invalid scrollAt value');
+    }
+
+    const scrollInfo: any = await this.cacheService.get(`scrollInfo:${scrollId}`);
+    if (!scrollInfo) {
+      throw new BadRequestException(`Could not find scroll info for '${scrollId}'`);
+    }
+
+    if (scrollInfo.queryParams.sort !== queryParams.sort) {
+      throw new BadRequestException('Invalid query params');
+    }
+
+    ContextTracker.assign({
+      scrollSettings: new ScrollableAfterSettings({
+        collection: scrollCollection,
+        after: scrollInfo.firstSort,
+        ids: scrollInfo.lastIds,
+      }),
+    });
+
+    return scrollId;
   }
 }
