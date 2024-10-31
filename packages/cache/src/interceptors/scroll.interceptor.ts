@@ -3,7 +3,7 @@ import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInt
 import { Observable, catchError, tap, throwError } from "rxjs";
 import { randomUUID } from "crypto";
 import { CacheService } from "../cache";
-import { ScrollableOptions } from "src/decorators";
+import { ScrollableOptions } from "../decorators";
 
 @Injectable()
 export class ScrollInterceptor implements NestInterceptor {
