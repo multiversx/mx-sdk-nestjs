@@ -5,5 +5,6 @@ export * from './cache';
 export * from './jitter';
 export * from './interceptors/caching.interceptor';
 export * from './interceptors/guest.cache.interceptor';
+export * from './interceptors/scroll.interceptor';
 export * from './guest-cache';
 export * from './decorators';

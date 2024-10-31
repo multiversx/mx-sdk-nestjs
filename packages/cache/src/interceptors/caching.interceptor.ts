@@ -43,6 +43,12 @@ export class CachingInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    for (const paramName of Object.keys(request.query)) {
+      if (['scrollCreate', 'scrollAt', 'scrollAfter'].includes(paramName)) {
+        return next.handle();
+      }
+    }
+
     this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
     const cacheKey = this.getCacheKey(context);
