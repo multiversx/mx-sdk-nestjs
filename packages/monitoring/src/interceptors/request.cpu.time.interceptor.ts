@@ -8,7 +8,7 @@ import { CpuProfiler } from "../profilers/cpu.profiler";
 export class RequestCpuTimeInterceptor implements NestInterceptor {
   constructor(
     private readonly metricsService: MetricsService,
-    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void
+    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void,
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {

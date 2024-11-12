@@ -8,7 +8,7 @@ import { PerformanceProfiler } from "../profilers/performance.profiler";
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
     private readonly metricsService: MetricsService,
-    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void
+    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void,
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
