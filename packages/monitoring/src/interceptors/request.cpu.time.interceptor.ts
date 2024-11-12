@@ -3,12 +3,13 @@ import { Observable, throwError } from "rxjs";
 import { catchError, tap } from 'rxjs/operators';
 import { MetricsService } from '../metrics';
 import { CpuProfiler } from "../profilers/cpu.profiler";
+import { RequestCpuTimeInterceptorContext } from "./entities";
 
 @Injectable()
 export class RequestCpuTimeInterceptor implements NestInterceptor {
   constructor(
     private readonly metricsService: MetricsService,
-    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void,
+    private readonly onRequest?: (context: RequestCpuTimeInterceptorContext) => void,
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -31,7 +32,11 @@ export class RequestCpuTimeInterceptor implements NestInterceptor {
           this.metricsService.setApiCpuTime(apiFunction, duration);
 
           if (this.onRequest) {
-            this.onRequest(apiFunction, duration, context);
+            this.onRequest(new RequestCpuTimeInterceptorContext({
+              apiFunction,
+              durationMs: duration,
+              context,
+            }));
           }
 
           if (!request.res.headersSent) {
@@ -43,7 +48,11 @@ export class RequestCpuTimeInterceptor implements NestInterceptor {
           this.metricsService.setApiCpuTime(apiFunction, duration);
 
           if (this.onRequest) {
-            this.onRequest(apiFunction, duration, context);
+            this.onRequest(new RequestCpuTimeInterceptorContext({
+              apiFunction,
+              durationMs: duration,
+              context,
+            }));
           }
 
           if (!request.res.headersSent) {

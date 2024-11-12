@@ -3,12 +3,13 @@ import { Observable, throwError } from "rxjs";
 import { catchError, tap } from "rxjs/operators";
 import { MetricsService } from "../metrics";
 import { PerformanceProfiler } from "../profilers/performance.profiler";
+import { LoggingInterceptorContext } from "./entities/logging.interceptor.context";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
     private readonly metricsService: MetricsService,
-    private readonly onRequest?: (apiFunction: string, durationMs: number, context: ExecutionContext) => void,
+    private readonly onRequest?: (context: LoggingInterceptorContext) => void,
   ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -41,7 +42,13 @@ export class LoggingInterceptor implements NestInterceptor {
           this.metricsService.setApiCall(apiFunction, origin, res.statusCode, profiler.duration);
 
           if (this.onRequest) {
-            this.onRequest(apiFunction, profiler.duration, context);
+            this.onRequest(new LoggingInterceptorContext({
+              apiFunction,
+              durationMs: profiler.duration,
+              origin,
+              statusCode: res.statusCode,
+              context,
+            }));
           }
         }),
         catchError(err => {
@@ -51,7 +58,13 @@ export class LoggingInterceptor implements NestInterceptor {
           this.metricsService.setApiCall(apiFunction, origin, statusCode, profiler.duration);
 
           if (this.onRequest) {
-            this.onRequest(apiFunction, profiler.duration, context);
+            this.onRequest(new LoggingInterceptorContext({
+              apiFunction,
+              durationMs: profiler.duration,
+              origin,
+              statusCode,
+              context,
+            }));
           }
 
           return throwError(() => err);
