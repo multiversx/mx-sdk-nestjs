@@ -24,3 +24,11 @@ describe('isToken', () => {
       expect(TokenUtils.isNft('SOV-MOS-b9b4b2')).toBeFalsy();
     });
   });
+
+  describe('isSovereignIdentifier', () => {
+    it('Check isSovereignIdentifier function', () => {
+      expect(TokenUtils.isSovereignIdentifier('SOV-MOS-b9b4b2-947a3912')).toBeTruthy();
+      expect(TokenUtils.isSovereignIdentifier('SOV-MOS-b9b4b2')).toBeTruthy();
+      expect(TokenUtils.isSovereignIdentifier('MOS-b9b4b2-947a3912')).toBeFalsy();
+    });
+  });

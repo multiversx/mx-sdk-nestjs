@@ -13,4 +13,17 @@ export class TokenUtils {
   static isNft(identifier: string): boolean {
     return this.nftValidateRegex.test(identifier);
   }
+
+  static isSovereignIdentifier(identifier: string): boolean {
+    const numDashes = identifier.split("-").length;
+    if (this.isCollection(identifier)) {
+      return numDashes === 2;
+    }
+
+    if (this.isNft(identifier)) {
+      return numDashes === 3;
+    }
+
+    return false;
+  }
 }
