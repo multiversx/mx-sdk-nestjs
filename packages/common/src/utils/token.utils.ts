@@ -15,13 +15,13 @@ export class TokenUtils {
   }
 
   static isSovereignIdentifier(identifier: string): boolean {
-    const numDashes = identifier.split("-").length;
+    const numParts = identifier.split("-").length;
     if (this.isCollection(identifier)) {
-      return numDashes === 2;
+      return numParts === 3;
     }
 
     if (this.isNft(identifier)) {
-      return numDashes === 3;
+      return numParts === 4;
     }
 
     return false;
