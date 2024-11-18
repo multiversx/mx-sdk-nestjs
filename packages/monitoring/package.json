@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-monitoring",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Multiversx SDK Nestjs monitoring package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
