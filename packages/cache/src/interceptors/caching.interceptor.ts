@@ -52,6 +52,7 @@ export class CachingInterceptor implements NestInterceptor {
         const result = await pendingRequest;
         this.metricsService.incrementPendingApiHit(apiFunction);
 
+        console.log(`result : ${result}. str: ${JSON.stringify(result, null, 2)}. typeof: ${typeof result}`);
         if (result instanceof Error) {
           return throwError(() => result);
         } else {
