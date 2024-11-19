@@ -49,12 +49,12 @@ export class CachingInterceptor implements NestInterceptor {
     if (cacheKey) {
       const pendingRequest = this.pendingRequestsDictionary[cacheKey];
       if (pendingRequest) {
-        const result = await pendingRequest;
+        const [result, error] = await pendingRequest;
         this.metricsService.incrementPendingApiHit(apiFunction);
 
         console.log(`result : ${result}. str: ${JSON.stringify(result, null, 2)}. typeof: ${typeof result}`);
-        if (result instanceof Error) {
-          return throwError(() => result);
+        if (result instanceof Error || error != null) {
+          return throwError(() => error);
         } else {
           return of(result);
         }
@@ -77,14 +77,14 @@ export class CachingInterceptor implements NestInterceptor {
         .pipe(
           tap(async (result: any) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];
-            pendingRequestResolver(result);
+            pendingRequestResolver([result, null]);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
             await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * this.cacheDuration);
           }),
           catchError((err) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];
-            pendingRequestResolver(err);
+            pendingRequestResolver([null, err]);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
             return throwError(() => err);
