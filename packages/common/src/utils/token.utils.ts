@@ -1,6 +1,6 @@
 export class TokenUtils {
-  static tokenValidateRegex: RegExp = /^[A-Za-z0-9]{3,10}-[a-fA-F0-9]{6}$/;
-  static nftValidateRegex: RegExp = /^[A-Za-z0-9]{3,10}-[a-fA-F0-9]{6}-[a-fA-F0-9]{2,}$/;
+  static tokenValidateRegex: RegExp = /^([a-z0-9]{1,4}-)?[A-Za-z0-9]{3,10}-[a-fA-F0-9]{6}$/;
+  static nftValidateRegex: RegExp = /^([a-z0-9]{1,4}-)?[A-Za-z0-9]{3,10}-[a-fA-F0-9]{6}-[a-fA-F0-9]{2,}$/;
 
   static isToken(identifier: string): boolean {
     return this.tokenValidateRegex.test(identifier);
@@ -12,5 +12,18 @@ export class TokenUtils {
 
   static isNft(identifier: string): boolean {
     return this.nftValidateRegex.test(identifier);
+  }
+
+  static isSovereignIdentifier(identifier: string): boolean {
+    const numParts = identifier.split("-").length;
+    if (this.isCollection(identifier)) {
+      return numParts === 3;
+    }
+
+    if (this.isNft(identifier)) {
+      return numParts === 4;
+    }
+
+    return false;
   }
 }
