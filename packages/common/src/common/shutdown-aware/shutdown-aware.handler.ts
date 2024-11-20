@@ -9,6 +9,7 @@ export class ShutdownAwareHandler {
   private static isShuttingDown = false;
   private static defaultTimeout = 30_000;  // Default timeout of 30 seconds
   private static logger = new OriginLogger(ShutdownAwareHandler.name);
+  private static apps: Set<(INestApplication | INestMicroservice)> = new Set();
 
   static setDefaultTimeout(timeoutMs: number) {
     this.defaultTimeout = timeoutMs;
@@ -49,25 +50,31 @@ export class ShutdownAwareHandler {
   }
 
   static addShutdownHooks(...apps: (INestApplication | INestMicroservice)[]) {
-    async function handleShutdown(signal: string) {
-      ShutdownAwareHandler.logger.log(`Received ${signal}. Cleaning up...`);
-      try {
-        await ShutdownAwareHandler.signalShutdownAndWait();
-        ShutdownAwareHandler.logger.log('Shutdown process completed.');
-      } finally {
-        for (const app of apps) {
-          await app.close();
-        }
-        process.exit(0);  // Ensure the process exits after cleanup
-      }
+    apps.forEach(app => this.apps.add(app));
+
+    if (this.isInitialized) {
+      return;
     }
 
     readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-    }).on('SIGINT', async () => await handleShutdown('SIGINT'));
-    process.on('SIGTERM', async () => await handleShutdown('SIGTERM'));
+    }).on('SIGINT', async () => await this.handleShutdown('SIGINT'));
+    process.on('SIGTERM', async () => await this.handleShutdown('SIGTERM'));
 
     this.isInitialized = true;
+  }
+
+  private static async handleShutdown(signal: string) {
+    ShutdownAwareHandler.logger.log(`Received ${signal}. Cleaning up...`);
+    try {
+      await ShutdownAwareHandler.signalShutdownAndWait();
+      ShutdownAwareHandler.logger.log('Shutdown process completed.');
+    } finally {
+      for (const app of this.apps) {
+        await app.close();
+      }
+      process.exit(0);  // Ensure the process exits after cleanup
+    }
   }
 }
