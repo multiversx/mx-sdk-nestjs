@@ -1,15 +1,14 @@
 
-import { ContractQueryResponse } from "@multiversx/sdk-network-providers";
-import { INetworkProvider } from "@multiversx/sdk-network-providers/out/interface";
+import { ContractQueryResponse, ApiNetworkProvider } from "@multiversx/sdk-core";
 import { ResultsParser, SmartContract, Interaction, TypedOutcomeBundle } from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractQueryRunner {
   private readonly logger = new OriginLogger(ContractQueryRunner.name);
-  private readonly proxy: INetworkProvider;
+  private readonly proxy: ApiNetworkProvider;
   private readonly parser: ResultsParser = new ResultsParser();
 
-  constructor(proxy: INetworkProvider) {
+  constructor(proxy: ApiNetworkProvider) {
     this.proxy = proxy;
   }
 

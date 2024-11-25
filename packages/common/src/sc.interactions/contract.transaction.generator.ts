@@ -1,15 +1,19 @@
 
-import { NetworkConfig } from "@multiversx/sdk-network-providers";
-import { INetworkProvider } from "@multiversx/sdk-network-providers/out/interface";
-import { Interaction, IAddress, Transaction } from "@multiversx/sdk-core";
+import {
+  NetworkConfig,
+  ApiNetworkProvider,
+  Interaction,
+  IAddress,
+  Transaction,
+} from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
 
 export class ContractTransactionGenerator {
   private readonly logger = new OriginLogger(ContractTransactionGenerator.name);
-  private readonly proxy: INetworkProvider;
+  private readonly proxy: ApiNetworkProvider;
   private networkConfig: NetworkConfig | undefined = undefined;
 
-  constructor(proxy: INetworkProvider) {
+  constructor(proxy: ApiNetworkProvider) {
     this.proxy = proxy;
   }
 
