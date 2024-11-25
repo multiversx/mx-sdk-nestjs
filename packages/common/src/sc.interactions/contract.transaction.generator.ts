@@ -1,19 +1,19 @@
 
 import {
   NetworkConfig,
-  ApiNetworkProvider,
   Interaction,
   IAddress,
   Transaction,
 } from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
+import { INetworkProvider } from "./interfaces";
 
 export class ContractTransactionGenerator {
   private readonly logger = new OriginLogger(ContractTransactionGenerator.name);
-  private readonly proxy: ApiNetworkProvider;
+  private readonly proxy: INetworkProvider;
   private networkConfig: NetworkConfig | undefined = undefined;
 
-  constructor(proxy: ApiNetworkProvider) {
+  constructor(proxy: INetworkProvider) {
     this.proxy = proxy;
   }
 
