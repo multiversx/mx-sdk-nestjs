@@ -7,7 +7,6 @@ This package contains a set of utilities commonly used in the MultiversX Microse
 It relies on the following peer dependencies which must be installed in the parent package:
 
 - @multiversx/sdk-core
-- @multiversx/sdk-wallet
 - @nestjs/common v9
 - @nestjs/swagger v9
 

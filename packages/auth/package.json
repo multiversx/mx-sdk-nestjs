@@ -32,9 +32,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^13.5.0",
+    "@multiversx/sdk-core": "^13.15.0",
     "@multiversx/sdk-native-auth-server": "^1.0.19",
-    "@multiversx/sdk-wallet": "^4.5.0",
     "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
