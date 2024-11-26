@@ -1,8 +1,7 @@
 
-import { ContractQueryResponse } from "@multiversx/sdk-network-providers";
-import { INetworkProvider } from "@multiversx/sdk-network-providers/out/interface";
-import { ResultsParser, SmartContract, Interaction, TypedOutcomeBundle } from "@multiversx/sdk-core";
+import { ContractQueryResponse, ResultsParser, SmartContract, Interaction, TypedOutcomeBundle } from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
+import { INetworkProvider } from "./interfaces";
 
 export class ContractQueryRunner {
   private readonly logger = new OriginLogger(ContractQueryRunner.name);

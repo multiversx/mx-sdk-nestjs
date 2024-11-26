@@ -1,7 +1,6 @@
 import { NativeAuthClient } from '@multiversx/sdk-native-auth-client';
 import { NativeAuthClientConfig } from '@multiversx/sdk-native-auth-client/lib/src/entities/native.auth.client.config';
-import { UserSigner } from '@multiversx/sdk-wallet';
-import { SignableMessage } from '@multiversx/sdk-core';
+import { SignableMessage, UserSigner } from '@multiversx/sdk-core';
 import { FileUtils } from '@multiversx/sdk-nestjs-common/lib/utils/file.utils';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/date.extensions';
 
