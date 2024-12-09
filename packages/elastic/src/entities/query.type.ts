@@ -47,4 +47,8 @@ export class QueryType {
   static String = (key: string | string[], value: any | undefined): StringQuery => {
     return new StringQuery(key, value);
   };
+
+  static Script = (key: string | string[], value: any | undefined): StringQuery => {
+    return new StringQuery(key, value);
+  };
 }
