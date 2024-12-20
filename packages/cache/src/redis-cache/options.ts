@@ -14,6 +14,8 @@ export class RedisCacheModuleOptions {
     name?: string | undefined;
     tls?: ConnectionOptions | undefined;
     db?: number | undefined;
+    enableAutoPipelining?: boolean | undefined;
+    autoPipeliningIgnoredCommands?: string[] | undefined;
   };
 
   additionalOptions?: {
