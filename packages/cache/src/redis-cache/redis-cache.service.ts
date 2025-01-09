@@ -389,9 +389,9 @@ export class RedisCacheService {
     return null;
   }
 
-  async hgetall<T>(
+  async hgetall(
     hash: string,
-  ): Promise<Record<string, T> | null> {
+  ): Promise<Record<string, any> | null> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.hgetall(hash);
@@ -399,7 +399,7 @@ export class RedisCacheService {
         return null;
       }
 
-      const response: Record<string, T> = {};
+      const response: Record<string, any> = {};
       for (const key of Object.keys(data)) {
         response[key] = JSON.parse(data[key]);
       }
