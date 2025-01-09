@@ -445,6 +445,38 @@ export class RedisCacheService {
     }
   }
 
+  async hsetMany(
+    hash: string,
+    fieldsValues: [string, any][],
+    cacheNullable: boolean = true,
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const hashMap = new Map<string, string>();
+      for (const [field, value] of fieldsValues) {
+        if (!cacheNullable && value == null) {
+          continue;
+        }
+        hashMap.set(field, JSON.stringify(value));
+      }
+      if (hashMap.size === 0) {
+        return 0;
+      }
+      return await this.redis.hset(hash, hashMap);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hset many in redis.', {
+          hash, fieldsValues,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HMSET', performanceProfiler.duration);
+    }
+  }
+
   async hincrby(
     hash: string,
     field: string,
