@@ -3,17 +3,17 @@ import { Logger } from "@nestjs/common";
 import { BinaryUtils } from "./binary.utils";
 
 export class AddressUtils {
-  static bech32Encode(publicKey: string) {
-    return Address.fromHex(publicKey).bech32();
+  static bech32Encode(publicKey: string, hrp?: string) {
+    return Address.fromHex(publicKey, hrp).bech32();
   }
 
   static bech32Decode(address: string) {
-    return Address.fromBech32(address).hex();
+    return Address.newFromBech32(address).hex();
   }
 
   static isAddressValid(address: string): boolean {
     try {
-      Address.fromBech32(address);
+      Address.newFromBech32(address);
       return true;
     } catch (error) {
       return false;
@@ -55,7 +55,7 @@ export class AddressUtils {
     return shard;
   }
 
-  static isSmartContractAddress(address: string): boolean {
+  static isSmartContractAddress(address: string, hrp?: string): boolean {
     if (address.toLowerCase() === 'metachain') {
       return true;
     }
@@ -65,7 +65,7 @@ export class AddressUtils {
     }
 
     try {
-      return new Address(address).isContractAddress();
+      return new Address(address, hrp).isContractAddress();
     } catch (error) {
       const logger = new Logger(AddressUtils.name);
       logger.error(`Error when determining whether address '${address}' is a smart contract address`);

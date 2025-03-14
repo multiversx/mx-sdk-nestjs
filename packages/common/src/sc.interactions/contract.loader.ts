@@ -27,13 +27,13 @@ export class ContractLoader {
     }
   }
 
-  async getContract(contractAddress: string): Promise<SmartContract> {
+  async getContract(contractAddress: string, hrp?: string): Promise<SmartContract> {
     if (!this.abi) {
       this.abi = await this.load();
     }
 
     return new SmartContract({
-      address: new Address(contractAddress),
+      address: new Address(contractAddress, hrp),
       abi: this.abi,
     });
   }
