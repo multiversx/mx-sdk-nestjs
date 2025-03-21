@@ -1,0 +1,59 @@
+name: Publish (alpha / beta) with specific package
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        type: choice
+        description: NPM channel
+        options:
+          - alpha
+          - beta
+      package_name:
+        type: string
+        description: Optional: Specify the package to publish (leave empty to publish all changed packages)
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+          cache-dependency-path: ./package-lock.json
+
+      - run: npx lerna@6 bootstrap
+      - run: npx lerna@6 run build
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "${{ github.event.inputs.package_name }}" ]; then
+            echo "Creating a release for all packages..."
+            RELEASE_TAG=v$(node -p "require('./lerna.json').version")
+            gh release create --prerelease $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes
+          else
+            echo "Skipping release creation because we're publishing a single package."
+          fi
+
+      - name: Publish to npmjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "${{ github.event.inputs.package_name }}" ]; then
+            echo "Publishing all packages..."
+            npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}
+          else
+            echo "Publishing a single package: ${{ github.event.inputs.package_name }}"
+            npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }} --scope ${{ github.event.inputs.package_name }}
+          fi
