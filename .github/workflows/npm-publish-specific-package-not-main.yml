@@ -55,9 +55,6 @@ jobs:
             npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}
           else
             echo "Publishing only: ${{ github.event.inputs.package_name }}"
-            
-            # Bump version of the specific package
-            npx lerna version patch --yes --no-push --scope ${{ github.event.inputs.package_name }}
 
             # Publish the specific package
             npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}
