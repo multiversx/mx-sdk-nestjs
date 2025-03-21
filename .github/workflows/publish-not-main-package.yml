@@ -1,4 +1,4 @@
-name: Publish (alpha / beta)
+name: Publish (alpha / beta) with specific package
 
 on:
   workflow_dispatch:
