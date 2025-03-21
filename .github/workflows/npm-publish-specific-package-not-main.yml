@@ -34,7 +34,7 @@ jobs:
       - run: npx lerna@6 bootstrap
       - run: npx lerna@6 run build
 
-      - name: Create release
+      - name: Create release (only for all packages)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -51,9 +51,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -z "${{ github.event.inputs.package_name }}" ]; then
-            echo "Publishing all packages..."
+            echo "Publishing all changed packages..."
             npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}
           else
-            echo "Publishing a single package: ${{ github.event.inputs.package_name }}"
-            npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }} --scope ${{ github.event.inputs.package_name }}
+            echo "Publishing only: ${{ github.event.inputs.package_name }}"
+            npx lerna version patch --yes --no-push --scope ${{ github.event.inputs.package_name }}
+            npx lerna publish --scope ${{ github.event.inputs.package_name }} --dist-tag ${{ github.event.inputs.channel }} --yes
           fi
