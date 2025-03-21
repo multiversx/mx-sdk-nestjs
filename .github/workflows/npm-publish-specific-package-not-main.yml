@@ -11,7 +11,7 @@ on:
           - beta
       package_name:
         type: string
-        description: Optional: Specify the package to publish (leave empty to publish all changed packages)
+        description: "Optional: Specify the package to publish (leave empty to publish all changed packages)"
         required: false
 
 permissions:
