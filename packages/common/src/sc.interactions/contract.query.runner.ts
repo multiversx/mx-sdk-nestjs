@@ -1,24 +1,40 @@
-
-import { ContractQueryResponse, ResultsParser, SmartContract, Interaction, TypedOutcomeBundle } from "@multiversx/sdk-core";
+import {
+  Abi,
+  INetworkProvider,
+  SmartContractController,
+  SmartContractQuery,
+  SmartContractQueryResponse,
+} from "@multiversx/sdk-core";
 import { OriginLogger } from "../utils/origin.logger";
-import { INetworkProvider } from "./interfaces";
 
 export class ContractQueryRunner {
   private readonly logger = new OriginLogger(ContractQueryRunner.name);
   private readonly proxy: INetworkProvider;
-  private readonly parser: ResultsParser = new ResultsParser();
 
   constructor(proxy: INetworkProvider) {
     this.proxy = proxy;
   }
 
-  async runQuery(contract: SmartContract, interaction: Interaction): Promise<TypedOutcomeBundle> {
+  async runQuery(
+    query: SmartContractQuery,
+    chainID: string,
+    abi?: Abi
+  ): Promise<SmartContractQueryResponse> {
     try {
-      const queryResponse: ContractQueryResponse = await this.proxy.queryContract(interaction.buildQuery());
+      const controller = new SmartContractController({
+        chainID: chainID,
+        networkProvider: this.proxy,
+        abi: abi,
+      });
+      const response = await controller.runQuery(query);
 
-      return this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
+      return response;
     } catch (error) {
-      this.logger.log(`Unexpected error when running query '${interaction.buildQuery().func}' to sc '${contract.getAddress().bech32()}' `);
+      this.logger.log(
+        `Unexpected error when running query '${
+          query.function
+        }' to sc '${query.contract.toBech32()}' `
+      );
       this.logger.error(error);
 
       throw error;

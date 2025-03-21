@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-cache",
-  "version": "4.2.0",
+  "version": "5.0.0-alpha.0",
   "description": "Multiversx SDK Nestjs cache package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -23,7 +23,7 @@
     "cache"
   ],
   "author": "MultiversX",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^16.11.10",
     "@types/tiny-async-pool": "^1.0.0",

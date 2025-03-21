@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-auth",
-  "version": "4.2.0",
+  "version": "5.0.0-alpha.0",
   "description": "Multiversx SDK Nestjs auth package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -23,7 +23,7 @@
     "auth"
   ],
   "author": "MultiversX",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
@@ -32,8 +32,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^13.15.0",
-    "@multiversx/sdk-native-auth-server": "^1.0.19",
+    "@multiversx/sdk-core": "^14.0.0",
+    "@multiversx/sdk-native-auth-server": "2.0.0",
     "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
