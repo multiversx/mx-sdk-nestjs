@@ -39,15 +39,15 @@ export class NativeAuthSigner {
 
     const message = this.getMessage(signerAddress, signableToken);
 
-    const messageC = new MessageComputer();
+    const messageComputer = new MessageComputer();
     const signature = await userSigner.sign(
-      messageC.computeBytesForSigning(message)
+      messageComputer.computeBytesForSigning(message)
     );
 
     const token = this.nativeAuthClient.getToken(
       signerAddress,
       signableToken,
-      signature.toString()
+      Buffer.from(signature).toString("hex")
     );
     const expiryDate = new Date().addSeconds(this.config.expirySeconds);
 

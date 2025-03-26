@@ -30,7 +30,7 @@ describe("NativeAuthSigner", () => {
 
     const mockToken = "newDummyToken";
     const mockSignerAddress = "dummySignerAddress";
-    const mockSignature = "dummySignature";
+    const mockSignature = Buffer.from("dummySignature");
     const mockSignableToken = "dummySignableToken";
 
     nativeAuthSigner = new NativeAuthSigner({});
@@ -41,7 +41,7 @@ describe("NativeAuthSigner", () => {
 
     jest.spyOn(nativeAuthSigner as any, "getUserSigner").mockResolvedValue({
       getAddress: () => ({ toBech32: () => mockSignerAddress }),
-      sign: jest.fn().mockResolvedValue({ toString: () => mockSignature }),
+      sign: jest.fn().mockResolvedValue(mockSignature),
     } as unknown as UserSigner);
     jest
       .spyOn(nativeAuthSigner as any, "getSignableToken")
