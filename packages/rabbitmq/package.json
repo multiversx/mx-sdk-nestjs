@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-rabbitmq",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "description": "Multiversx SDK Nestjs rabbitmq client package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -23,7 +23,7 @@
     "rabbitmq"
   ],
   "author": "MultiversX",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "devDependencies": {
     "@types/amqplib": "^0.8.2",
     "@types/uuid": "^8.3.4",
@@ -37,7 +37,7 @@
     "uuid": "^8.3.2"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-common": "^4.0.0",
+    "@multiversx/sdk-nestjs-common": "^5.0.0",
     "@nestjs/common": "^10.x"
   },
   "publishConfig": {
