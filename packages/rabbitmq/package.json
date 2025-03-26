@@ -23,7 +23,7 @@
     "rabbitmq"
   ],
   "author": "MultiversX",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "devDependencies": {
     "@types/amqplib": "^0.8.2",
     "@types/uuid": "^8.3.4",
