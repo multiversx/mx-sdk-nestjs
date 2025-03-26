@@ -78,19 +78,6 @@ export class BinaryUtils {
     return value.length % 2 ? "0" + value : value;
   }
 
-  static isHash(value: string): boolean {
-    try {
-      if (!value) {
-        return true;
-      } else if (typeof value === "string") {
-        true;
-      }
-      return false;
-    } catch (error) {
-      return false;
-    }
-  }
-
   static numberToHex(value: number): string {
     return BinaryUtils.padHex(value.toString(16));
   }
