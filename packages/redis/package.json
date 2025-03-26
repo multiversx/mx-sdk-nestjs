@@ -23,7 +23,7 @@
     "redis"
   ],
   "author": "MultiversX",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@types/redis": "^2.8.32",
     "@typescript-eslint/eslint-plugin": "^5.12.0",

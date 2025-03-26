@@ -23,7 +23,7 @@
     "auth"
   ],
   "author": "MultiversX",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.12.0",

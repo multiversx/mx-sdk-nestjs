@@ -23,7 +23,7 @@
     "cache"
   ],
   "author": "MultiversX",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@types/node": "^16.11.10",
     "@types/tiny-async-pool": "^1.0.0",
