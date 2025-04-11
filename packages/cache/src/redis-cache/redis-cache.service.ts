@@ -655,6 +655,29 @@ export class RedisCacheService {
     }
   }
 
+  async srem(
+    key: string,
+    ...values: string[]
+  ): Promise<number | null> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      return await this.redis.srem(key, ...values);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to srem in redis.', {
+          exception: error?.toString(),
+          key,
+          ...values,
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('SREM', performanceProfiler.duration);
+    }
+  }
+
+
   async sunionstore(
     destination: string,
     keys: string[],
