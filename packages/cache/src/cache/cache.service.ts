@@ -478,6 +478,43 @@ export class CacheService {
     return await this.redisCacheService.scard(key);
   }
 
+  async hashGetRemote<T>(hash: string, field: string): Promise<T | null> {
+    return await this.redisCacheService.hget<T>(hash, field);
+  }
+
+  async hashGetAllRemote(hash: string): Promise<Record<string, any> | null> {
+    return await this.redisCacheService.hgetall(hash);
+  }
+
+  async hashSetRemote<T>(
+    hash: string,
+    field: string,
+    value: T,
+    cacheNullable: boolean = true,
+  ): Promise<number> {
+    return await this.redisCacheService.hset<T>(hash, field, value, cacheNullable);
+  }
+
+  async hashSetManyRemote(
+    hash: string,
+    fieldsValues: [string, any][],
+    cacheNullable: boolean = true,
+  ): Promise<number> {
+    return await this.redisCacheService.hsetMany(hash, fieldsValues, cacheNullable);
+  }
+
+  async hashIncrementRemote(
+    hash: string,
+    field: string,
+    increment: number | string,
+  ): Promise<number> {
+    return await this.redisCacheService.hincrby(hash, field, increment);
+  }
+
+  async hashKeysRemote(hash: string): Promise<string[]> {
+    return await this.redisCacheService.hkeys(hash);
+  }
+
   async batchSet(keys: string[], values: any[], ttls: number[], setLocalCache: boolean = true, spreadTtl: boolean = true) {
     if (!ttls) {
       ttls = new Array(keys.length).fill(this.getCacheTtl());

@@ -1,7 +1,16 @@
-import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
-import { BinaryUtils } from "../utils/binary.utils";
+import {
+  ArgumentMetadata,
+  BadRequestException,
+  PipeTransform,
+} from "@nestjs/common";
 
-export class ParseHashArrayPipe implements PipeTransform<string | string[] | undefined, Promise<string | string[] | undefined>> {
+export class ParseHashArrayPipe
+  implements
+    PipeTransform<
+      string | string[] | undefined,
+      Promise<string | string[] | undefined>
+    >
+{
   private entity: string;
   private length: number;
 
@@ -10,21 +19,22 @@ export class ParseHashArrayPipe implements PipeTransform<string | string[] | und
     this.length = length;
   }
 
-  transform(value: string | string[] | undefined, metadata: ArgumentMetadata): Promise<string | string[] | undefined> {
-    return new Promise(resolve => {
-      if (value === undefined || value === '') {
+  transform(
+    value: string | string[] | undefined,
+    metadata: ArgumentMetadata
+  ): Promise<string | string[] | undefined> {
+    return new Promise((resolve) => {
+      if (value === undefined || value === "") {
         return resolve(undefined);
       }
 
-      const hashes = Array.isArray(value) ? value : value.split(',');
+      const hashes = Array.isArray(value) ? value : value.split(",");
 
       for (const hash of hashes) {
-        if (!BinaryUtils.isHash(hash)) {
-          throw new BadRequestException(`Validation failed for ${this.entity} hash '${metadata.data}'. Value does not represent a hash`);
-        }
-
         if (hash.length !== this.length) {
-          throw new BadRequestException(`Validation failed for ${this.entity} hash '${metadata.data}'. Length should be ${this.length}.`);
+          throw new BadRequestException(
+            `Validation failed for ${this.entity} hash '${metadata.data}'. Length should be ${this.length}.`
+          );
         }
       }
 

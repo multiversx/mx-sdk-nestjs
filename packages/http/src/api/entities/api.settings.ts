@@ -14,4 +14,5 @@ export class ApiSettings {
   httpsAgent?: any;
   auth?: ApiSettingsBasicCredentials;
   nativeAuthSigner?: NativeAuthSigner;
+  validateStatus?: (status: number) => boolean;
 }

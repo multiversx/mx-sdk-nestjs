@@ -90,7 +90,7 @@ export class ApiService {
       headers['x-request-id'] = context.requestId;
     }
 
-    return {
+    const config: AxiosRequestConfig = {
       timeout,
       maxRedirects,
       httpsAgent: settings.httpsAgent,
@@ -99,6 +99,12 @@ export class ApiService {
       params: settings.params,
       headers,
     };
+
+    if (settings.validateStatus) {
+      config.validateStatus = settings.validateStatus;
+    }
+
+    return config;
   }
 
   private requestsExecuter = new PendingExecuter();
