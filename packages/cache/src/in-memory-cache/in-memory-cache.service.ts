@@ -21,7 +21,7 @@ export class InMemoryCacheService {
 
   get<T>(
     key: string,
-  ): Promise<T | undefined> {
+  ): T | undefined {
     const data = InMemoryCacheService.localCache.get(key);
 
     if (this.inMemoryCacheOptions?.skipItemsSerialization) {
@@ -37,10 +37,8 @@ export class InMemoryCacheService {
 
   getMany<T>(
     keys: string[],
-  ): Promise<(T | undefined)[]> {
-    return Promise.all(
-      keys.map(key => this.get<T>(key)),
-    );
+  ): (T | undefined)[] {
+    return keys.map(key => this.get<T>(key));
   }
 
   set<T>(
@@ -79,21 +77,21 @@ export class InMemoryCacheService {
     }
   }
 
-  async setMany<T>(
+  setMany<T>(
     keys: string[],
     values: T[],
     ttl: number,
     cacheNullable: boolean = true,
-  ): Promise<void> {
+  ): void {
     for (const [index, key] of keys.entries()) {
-      await this.set(key, values[index], ttl, cacheNullable);
+      this.set(key, values[index], ttl, cacheNullable);
     }
   }
 
-  async delete(
+  delete(
     key: string,
-  ): Promise<void> {
-    await InMemoryCacheService.localCache.delete(key);
+  ): void {
+    InMemoryCacheService.localCache.delete(key);
   }
 
   async getOrSet<T>(
@@ -109,7 +107,7 @@ export class InMemoryCacheService {
 
     const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl, cacheNullable);
+    this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
@@ -121,7 +119,7 @@ export class InMemoryCacheService {
   ): Promise<T> {
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(createValueFunc);
     const value = await internalCreateValueFunc();
-    await this.set<T>(key, value, ttl, cacheNullable);
+    this.set<T>(key, value, ttl, cacheNullable);
     return value;
   }
 
