@@ -421,6 +421,7 @@ export class CacheService {
       cacheKeyFunc,
       [
         {
+          // eslint-disable-next-line require-await
           getter: async elements => {
             const result: { [key: string]: TOUT; } = {};
 
@@ -434,6 +435,7 @@ export class CacheService {
 
             return result;
           },
+          // eslint-disable-next-line require-await
           setter: async elements => {
             for (const key of Object.keys(elements)) {
               this.setLocal(key, elements[key], ttl);
