@@ -56,12 +56,10 @@ export class CacheService {
     return this.inMemoryCacheService.delete(key);
   }
 
-  async deleteManyLocal(
+  deleteManyLocal(
     keys: string[],
-  ): Promise<void> {
-    await Promise.all(
-      keys.map(key => this.inMemoryCacheService.delete(key)),
-    );
+  ): void {
+    keys.map(key => this.inMemoryCacheService.delete(key));
   }
 
   getOrSetLocal<T>(
@@ -283,8 +281,9 @@ export class CacheService {
   async deleteMany(
     keys: string[],
   ): Promise<void> {
-    await this.deleteManyRemote(keys);
-    await this.deleteManyLocal(keys);
+    const deleteManyRemotePromise = this.deleteManyRemote(keys);
+    this.deleteManyLocal(keys);
+    await deleteManyRemotePromise;
   }
 
   async getOrSet<T>(
