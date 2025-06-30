@@ -252,10 +252,9 @@ export class CacheService {
     inMemoryTtl: number = ttl,
     cacheNullable: boolean = true,
   ): Promise<void> {
-    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
     const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
-
-    await Promise.all([setInMemoryCachePromise, setRedisCachePromise]);
+    this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
+    await setRedisCachePromise;
   }
 
   async setMany<T>(
@@ -264,10 +263,9 @@ export class CacheService {
     ttl: number,
     cacheNullable: boolean = true,
   ): Promise<void> {
-    await Promise.all([
-      this.setManyRemote(keys, values, ttl, cacheNullable),
-      this.setManyLocal(keys, values, ttl, cacheNullable),
-    ]);
+    const setManyRemotePromise = this.setManyRemote(keys, values, ttl, cacheNullable);
+    this.setManyLocal(keys, values, ttl, cacheNullable);
+    await setManyRemotePromise;
   }
 
   async delete(
