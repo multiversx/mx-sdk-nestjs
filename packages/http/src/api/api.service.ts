@@ -122,7 +122,8 @@ export class ApiService {
   async get(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     const config = await this.getConfig(settings);
-    this.incrementConcurrentRequests(this.getHostname(url));
+    const hostName = this.getHostname(url);
+    this.incrementConcurrentRequests(hostName);
 
     try {
       if (config.auth || config.headers?.Authorization || config.headers?.authorization) {
@@ -147,15 +148,16 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-      this.decrementConcurrentRequests(this.getHostname(url));
+      this.metricsService.setExternalCall(hostName, profiler.duration);
+      this.decrementConcurrentRequests(hostName);
     }
   }
 
   async put(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     const config = await this.getConfig(settings);
-    this.incrementConcurrentRequests(this.getHostname(url));
+    const hostName = this.getHostname(url);
+    this.incrementConcurrentRequests(hostName);
 
     try {
       return await this.axiosInstance.put(url, data, config);
@@ -182,15 +184,16 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-      this.decrementConcurrentRequests(this.getHostname(url));
+      this.metricsService.setExternalCall(hostName, profiler.duration);
+      this.decrementConcurrentRequests(hostName);
     }
   }
 
   async patch(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     const config = await this.getConfig(settings);
-    this.incrementConcurrentRequests(this.getHostname(url));
+    const hostName = this.getHostname(url);
+    this.incrementConcurrentRequests(hostName);
 
     try {
       return await this.axiosInstance.patch(url, data, config);
@@ -217,15 +220,16 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-      this.decrementConcurrentRequests(this.getHostname(url));
+      this.metricsService.setExternalCall(hostName, profiler.duration);
+      this.decrementConcurrentRequests(hostName);
     }
   }
 
   async post(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     const config = await this.getConfig(settings);
-    this.incrementConcurrentRequests(this.getHostname(url));
+    const hostName = this.getHostname(url);
+    this.incrementConcurrentRequests(hostName);
 
     try {
       const response = await this.axiosInstance.post(url, data, config);
@@ -246,15 +250,16 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-      this.decrementConcurrentRequests(this.getHostname(url));
+      this.metricsService.setExternalCall(hostName, profiler.duration);
+      this.decrementConcurrentRequests(hostName);
     }
   }
 
   async delete(url: string, data: any, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     const config = await this.getConfig(settings);
-    this.incrementConcurrentRequests(this.getHostname(url));
+    const hostName = this.getHostname(url);
+    this.incrementConcurrentRequests(hostName);
 
     try {
       const response = await this.axiosInstance.delete(url, {
@@ -278,15 +283,16 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-      this.decrementConcurrentRequests(this.getHostname(url));
+      this.metricsService.setExternalCall(hostName, profiler.duration);
+      this.decrementConcurrentRequests(hostName);
     }
   }
 
   async head(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     const profiler = new PerformanceProfiler();
     const config = await this.getConfig(settings);
-    this.incrementConcurrentRequests(this.getHostname(url));
+    const hostName = this.getHostname(url);
+    this.incrementConcurrentRequests(hostName);
 
     try {
       const response = await this.axiosInstance.head(url, config);
@@ -307,8 +313,8 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      this.metricsService.setExternalCall(this.getHostname(url), profiler.duration);
-      this.decrementConcurrentRequests(this.getHostname(url));
+      this.metricsService.setExternalCall(hostName, profiler.duration);
+      this.decrementConcurrentRequests(hostName);
     }
   }
 
