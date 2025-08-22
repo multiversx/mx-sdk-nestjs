@@ -39,7 +39,7 @@
     "winston": "^3.7.2"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-monitoring": "^6.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "6.0.1-beta.0",
     "@nestjs/common": "^10.x",
     "@nestjs/config": "^3.x",
     "@nestjs/core": "^10.x",

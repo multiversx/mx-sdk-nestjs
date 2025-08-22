@@ -37,9 +37,9 @@
     "jsonwebtoken": "^9.0.0"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-cache": "^6.0.0",
-    "@multiversx/sdk-nestjs-common": "^6.0.0",
-    "@multiversx/sdk-nestjs-monitoring": "^6.0.0",
+    "@multiversx/sdk-nestjs-cache": "6.0.1-beta.0",
+    "@multiversx/sdk-nestjs-common": "6.0.1-beta.0",
+    "@multiversx/sdk-nestjs-monitoring": "6.0.1-beta.0",
     "@nestjs/common": "^10.x"
   },
   "publishConfig": {
