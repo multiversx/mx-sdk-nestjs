@@ -22,13 +22,13 @@ export class CacheService {
 
   getLocal<T>(
     key: string,
-  ): Promise<T | undefined> {
+  ): T | undefined {
     return this.inMemoryCacheService.get<T>(key);
   }
 
   getManyLocal<T>(
     keys: string[],
-  ): Promise<(T | undefined)[]> {
+  ): (T | undefined)[] {
     return this.inMemoryCacheService.getMany<T>(keys);
   }
 
@@ -46,22 +46,20 @@ export class CacheService {
     values: T[],
     ttl: number,
     cacheNullable: boolean = true,
-  ): Promise<void> {
+  ): void {
     return this.inMemoryCacheService.setMany(keys, values, ttl, cacheNullable);
   }
 
   deleteLocal(
     key: string,
-  ): Promise<void> {
+  ): void {
     return this.inMemoryCacheService.delete(key);
   }
 
-  async deleteManyLocal(
+  deleteManyLocal(
     keys: string[],
-  ): Promise<void> {
-    await Promise.all(
-      keys.map(key => this.inMemoryCacheService.delete(key)),
-    );
+  ): void {
+    keys.map(key => this.inMemoryCacheService.delete(key));
   }
 
   getOrSetLocal<T>(
@@ -212,7 +210,7 @@ export class CacheService {
   async get<T>(
     key: string,
   ): Promise<T | undefined> {
-    const inMemoryCacheValue = await this.inMemoryCacheService.get<T>(key);
+    const inMemoryCacheValue = this.inMemoryCacheService.get<T>(key);
     if (inMemoryCacheValue) {
       return inMemoryCacheValue;
     }
@@ -223,7 +221,7 @@ export class CacheService {
   async getMany<T>(
     keys: string[],
   ): Promise<(T | undefined)[]> {
-    const values = await this.getManyLocal<T>(keys);
+    const values = this.getManyLocal<T>(keys);
 
     const missingIndexes: number[] = [];
     values.forEach((value, index) => {
@@ -254,10 +252,9 @@ export class CacheService {
     inMemoryTtl: number = ttl,
     cacheNullable: boolean = true,
   ): Promise<void> {
-    const setInMemoryCachePromise = this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
     const setRedisCachePromise = this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
-
-    await Promise.all([setInMemoryCachePromise, setRedisCachePromise]);
+    this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
+    await setRedisCachePromise;
   }
 
   async setMany<T>(
@@ -266,24 +263,25 @@ export class CacheService {
     ttl: number,
     cacheNullable: boolean = true,
   ): Promise<void> {
-    await Promise.all([
-      this.setManyRemote(keys, values, ttl, cacheNullable),
-      this.setManyLocal(keys, values, ttl, cacheNullable),
-    ]);
+    const setManyRemotePromise = this.setManyRemote(keys, values, ttl, cacheNullable);
+    this.setManyLocal(keys, values, ttl, cacheNullable);
+    await setManyRemotePromise;
   }
 
   async delete(
     key: string,
   ): Promise<void> {
-    await this.redisCacheService.delete(key);
-    await this.inMemoryCacheService.delete(key);
+    const deleteRemotePromise = this.redisCacheService.delete(key);
+    this.inMemoryCacheService.delete(key);
+    await deleteRemotePromise;
   }
 
   async deleteMany(
     keys: string[],
   ): Promise<void> {
-    await this.deleteManyRemote(keys);
-    await this.deleteManyLocal(keys);
+    const deleteManyRemotePromise = this.deleteManyRemote(keys);
+    this.deleteManyLocal(keys);
+    await deleteManyRemotePromise;
   }
 
   async getOrSet<T>(
@@ -319,10 +317,10 @@ export class CacheService {
   async refreshLocal<T>(key: string, ttl: number = this.getCacheTtl()): Promise<T | undefined> {
     const value = await this.getRemote<T>(key);
     if (value) {
-      await this.setLocal<T>(key, value, ttl);
+      this.setLocal<T>(key, value, ttl);
     } else {
       this.logger.log(`Deleting local cache key '${key}'`);
-      await this.deleteLocal(key);
+      this.deleteLocal(key);
     }
 
     return value;
@@ -420,12 +418,13 @@ export class CacheService {
       cacheKeyFunc,
       [
         {
+          // eslint-disable-next-line require-await
           getter: async elements => {
             const result: { [key: string]: TOUT; } = {};
 
             for (const element of elements) {
               const key = cacheKeyFunc(element);
-              const value = await this.getLocal<TOUT>(key);
+              const value = this.getLocal<TOUT>(key);
               if (value !== undefined) {
                 result[key] = value;
               }
@@ -433,9 +432,10 @@ export class CacheService {
 
             return result;
           },
+          // eslint-disable-next-line require-await
           setter: async elements => {
             for (const key of Object.keys(elements)) {
-              await this.setLocal(key, elements[key], ttl);
+              this.setLocal(key, elements[key], ttl);
             }
           },
         },
@@ -478,6 +478,43 @@ export class CacheService {
     return await this.redisCacheService.scard(key);
   }
 
+  async hashGetRemote<T>(hash: string, field: string): Promise<T | null> {
+    return await this.redisCacheService.hget<T>(hash, field);
+  }
+
+  async hashGetAllRemote(hash: string): Promise<Record<string, any> | null> {
+    return await this.redisCacheService.hgetall(hash);
+  }
+
+  async hashSetRemote<T>(
+    hash: string,
+    field: string,
+    value: T,
+    cacheNullable: boolean = true,
+  ): Promise<number> {
+    return await this.redisCacheService.hset<T>(hash, field, value, cacheNullable);
+  }
+
+  async hashSetManyRemote(
+    hash: string,
+    fieldsValues: [string, any][],
+    cacheNullable: boolean = true,
+  ): Promise<number> {
+    return await this.redisCacheService.hsetMany(hash, fieldsValues, cacheNullable);
+  }
+
+  async hashIncrementRemote(
+    hash: string,
+    field: string,
+    increment: number | string,
+  ): Promise<number> {
+    return await this.redisCacheService.hincrby(hash, field, increment);
+  }
+
+  async hashKeysRemote(hash: string): Promise<string[]> {
+    return await this.redisCacheService.hkeys(hash);
+  }
+
   async batchSet(keys: string[], values: any[], ttls: number[], setLocalCache: boolean = true, spreadTtl: boolean = true) {
     if (!ttls) {
       ttls = new Array(keys.length).fill(this.getCacheTtl());
@@ -492,7 +529,7 @@ export class CacheService {
         const value = values[index];
         const ttl = ttls[index];
 
-        await this.setLocal(key, value, ttl);
+        this.setLocal(key, value, ttl);
       }
     }
 
@@ -615,7 +652,7 @@ export class CacheService {
 
   async batchDelCache(keys: string[]) {
     for (const key of keys) {
-      await this.deleteLocal(key);
+      this.deleteLocal(key);
     }
 
     const dels = keys.map(key => ['del', key]);
@@ -656,15 +693,18 @@ export class CacheService {
       const allKeys = await this.getKeys(key);
       for (const key of allKeys) {
 
-        await this.deleteLocal(key);
-        await this.redisCacheService.delete(key);
+        const deleteRemotePromise = this.redisCacheService.delete(key);
+        this.deleteLocal(key);
+        await deleteRemotePromise;
 
         invalidatedKeys.push(key);
       }
     } else {
-      await this.deleteLocal(key);
-      await this.redisCacheService.delete(key);
+      const deleteRemotePromise = this.redisCacheService.delete(key);
+      this.deleteLocal(key);
       invalidatedKeys.push(key);
+
+      await deleteRemotePromise;
     }
 
     return invalidatedKeys;

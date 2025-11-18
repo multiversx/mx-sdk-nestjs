@@ -389,9 +389,9 @@ export class RedisCacheService {
     return null;
   }
 
-  async hgetall<T>(
+  async hgetall(
     hash: string,
-  ): Promise<Record<string, T> | null> {
+  ): Promise<Record<string, any> | null> {
     const performanceProfiler = new PerformanceProfiler();
     try {
       const data = await this.redis.hgetall(hash);
@@ -399,7 +399,7 @@ export class RedisCacheService {
         return null;
       }
 
-      const response: Record<string, T> = {};
+      const response: Record<string, any> = {};
       for (const key of Object.keys(data)) {
         response[key] = JSON.parse(data[key]);
       }
@@ -442,6 +442,38 @@ export class RedisCacheService {
     } finally {
       performanceProfiler.stop();
       this.metricsService.setRedisDuration('HSET', performanceProfiler.duration);
+    }
+  }
+
+  async hsetMany(
+    hash: string,
+    fieldsValues: [string, any][],
+    cacheNullable: boolean = true,
+  ): Promise<number> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const hashMap = new Map<string, string>();
+      for (const [field, value] of fieldsValues) {
+        if (!cacheNullable && value == null) {
+          continue;
+        }
+        hashMap.set(field, JSON.stringify(value));
+      }
+      if (hashMap.size === 0) {
+        return 0;
+      }
+      return await this.redis.hset(hash, hashMap);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('An error occurred while trying to hset many in redis.', {
+          hash, fieldsValues,
+          exception: error?.toString(),
+        });
+      }
+      throw error;
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('HMSET', performanceProfiler.duration);
     }
   }
 

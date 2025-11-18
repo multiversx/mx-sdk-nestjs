@@ -80,12 +80,12 @@ export class CachingInterceptor implements NestInterceptor {
       return next
         .handle()
         .pipe(
-          tap(async (result: any) => {
+          tap((result: any) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];
             pendingRequestResolver(result);
             this.metricsService.setPendingRequestsCount(Object.keys(this.pendingRequestsDictionary).length);
 
-            await this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * this.cacheDuration);
+            this.cachingService.setLocal(cacheKey ?? '', result, Constants.oneSecond() * this.cacheDuration);
           }),
           catchError((err) => {
             delete this.pendingRequestsDictionary[cacheKey ?? ''];
