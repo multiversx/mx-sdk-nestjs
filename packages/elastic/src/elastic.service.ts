@@ -1,9 +1,8 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ApiService } from "@multiversx/sdk-nestjs-http";
 import { MetricsService, ElasticMetricType, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ElasticQuery } from "./entities/elastic.query";
 import { ElasticModuleOptions } from "./entities/elastic.module.options";
-import { ContextTracker, ScrollableAfterSettings } from "@multiversx/sdk-nestjs-common";
 
 @Injectable()
 export class ElasticService {
@@ -52,129 +51,98 @@ export class ElasticService {
   }
 
   private formatItem(document: any, key: string) {
-    const { _id, _source } = document;
+    const { _id, _source, sort } = document;
     const item: any = {};
     item[key] = _id;
 
-    return { ...item, ..._source };
+    const result = { ...item, ..._source };
+
+    if (sort !== undefined) {
+      result.searchAfter = this.encodeCursor(sort);
+    }
+
+    return result;
   }
 
-  private async getListResult(url: string, collection: string, elasticQuery: ElasticQuery) {
-    const scrollSettings = ContextTracker.get()?.scrollSettings;
-
-    if (scrollSettings && scrollSettings.collection === collection) {
-      let documents: any[] = [];
-
-      if (scrollSettings.after) {
-        documents = await this.getScrollAfterResult(url, elasticQuery, scrollSettings);
-      } else if (scrollSettings.create) {
-        documents = await this.getScrollCreateResult(url, elasticQuery);
-      } else {
-        throw new Error('Invalid scroll settings');
-      }
-
-      this.storeScrollResult(documents);
-
-      return documents;
+  private async getListResult(url: string, elasticQuery: ElasticQuery, searchAfter?: string | any[]) {
+    if (searchAfter) {
+      return this.getScrollAfterResult(url, elasticQuery, this.decodeCursor(searchAfter));
     }
 
     const elasticQueryJson: any = elasticQuery.toJson();
+    this.ensureUuidTieBreaker(elasticQueryJson);
     const result = await this.post(url, elasticQueryJson);
     return result.data.hits.hits;
   }
 
-  private async getScrollCreateResult(url: string, elasticQuery: ElasticQuery) {
-    const result = await this.post(url, elasticQuery.toJson());
-    const documents = result.data.hits.hits;
-
-    if (documents.length === 0) {
-      return documents;
-    }
-
-    return documents;
-  }
-
-  private storeScrollResult(documents: any[]) {
-    const ids = this.getLastIds(documents);
-    const firstDocumentSort = documents[0].sort;
-    const lastDocumentSort = documents[documents.length - 1].sort;
-
-    // and store this in cache on a specific key
-    ContextTracker.assign({
-      scrollResult: {
-        lastIds: ids,
-        lastSort: lastDocumentSort,
-        firstSort: firstDocumentSort,
-      },
-    });
-  }
-
-  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, scrollSettings: ScrollableAfterSettings) {
+  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, searchAfter: any[]) {
     const elasticQueryJson: any = elasticQuery.toJson();
+    this.ensureUuidTieBreaker(elasticQueryJson);
 
-    elasticQueryJson.search_after = scrollSettings.after;
-    this.excludeIds(elasticQueryJson, scrollSettings.ids);
+    elasticQueryJson.search_after = searchAfter;
 
     const queryResult = await this.post(url, elasticQueryJson);
     return queryResult.data.hits.hits;
   }
 
-  private excludeIds(elasticQueryJson: any, ids: any[]) {
-    if (!elasticQueryJson.query) {
-      elasticQueryJson.query = {};
+  private formatDocuments(documents: any[], key: string): any[] {
+    return documents.map((document: any) => this.formatItem(document, key));
+  }
+
+  private encodeCursor(sort: any[]): string {
+    return Buffer.from(JSON.stringify(sort), 'utf8').toString('base64');
+  }
+
+  private decodeCursor(searchAfter: string | any[]): any[] {
+    if (Array.isArray(searchAfter)) {
+      return searchAfter;
     }
 
-    if (!elasticQueryJson.query.bool) {
-      elasticQueryJson.query.bool = {};
+    try {
+      const decoded = JSON.parse(Buffer.from(searchAfter, 'base64').toString('utf8'));
+      if (!Array.isArray(decoded)) {
+        throw new Error('Invalid cursor payload');
+      }
+
+      return decoded;
+    } catch {
+      throw new BadRequestException('Invalid searchAfter');
+    }
+  }
+
+  private ensureUuidTieBreaker(elasticQueryJson: any): void {
+    const sorts: any[] = elasticQueryJson.sort;
+    if (!Array.isArray(sorts) || sorts.length === 0) {
+      return;
     }
 
-    if (!elasticQueryJson.query.bool.must_not) {
-      elasticQueryJson.query.bool.must_not = [];
+    const hasUuidTieBreaker = sorts.some((sort) => Object.keys(sort)[0] === 'uuid.keyword');
+    if (hasUuidTieBreaker) {
+      return;
     }
 
-    elasticQueryJson.query.bool.must_not.push({
-      terms: {
-        _id: ids,
+    const lastSortKey = Object.keys(sorts[sorts.length - 1])[0];
+    const lastSortOrder = sorts[sorts.length - 1][lastSortKey]?.order ?? 'desc';
+    sorts.push({
+      'uuid.keyword': {
+        order: lastSortOrder,
       },
     });
   }
 
-  async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {
+  async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string, searchAfter?: string | any[]): Promise<any[]> {
     const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
 
     // attempt to get scroll settings
     const profiler = new PerformanceProfiler();
 
-    const documents = await this.getListResult(url, collection, elasticQuery);
+    const documents = await this.getListResult(url, elasticQuery, searchAfter);
 
     profiler.stop();
 
     this.metricsService.setElasticDuration(collection, ElasticMetricType.list, profiler.duration);
 
-    return documents.map((document: any) => this.formatItem(document, key));
-  }
-
-  private getLastIds(documents: any[]) {
-    const lastDocument = documents[documents.length - 1];
-    const lastDocumentSort = lastDocument.sort;
-    const lastDocumentSortJson = JSON.stringify(lastDocumentSort);
-
-    // then take the ids of all elements that have the same sort
-    const ids: string[] = [];
-
-    for (let index = documents.length - 1; index >= 0; index--) {
-      const document = documents[index];
-
-      const documentSortJson = JSON.stringify(document.sort);
-
-      if (documentSortJson === lastDocumentSortJson) {
-        ids.push(document._id);
-      } else {
-        break;
-      }
-    }
-
-    return ids;
+    return this.formatDocuments(documents, key);
   }
 
   async getScrollableList(collection: string, key: string, elasticQuery: ElasticQuery, action: (items: any[]) => Promise<void>, options?: { scrollTimeout?: string, delayBetweenScrolls?: number }): Promise<void> {
