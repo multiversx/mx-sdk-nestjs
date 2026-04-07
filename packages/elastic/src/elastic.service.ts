@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ApiService } from "@multiversx/sdk-nestjs-http";
 import { MetricsService, ElasticMetricType, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ElasticQuery } from "./entities/elastic.query";
@@ -106,7 +106,7 @@ export class ElasticService {
 
       return decoded;
     } catch {
-      throw new Error('Invalid next_cursor');
+      throw new BadRequestException('Invalid searchAfter');
     }
   }
 
