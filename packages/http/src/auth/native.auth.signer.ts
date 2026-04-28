@@ -1,8 +1,18 @@
 import { Message, MessageComputer, UserSigner } from "@multiversx/sdk-core";
 import { NativeAuthClient } from "@multiversx/sdk-native-auth-client";
-import { NativeAuthClientConfig } from "@multiversx/sdk-native-auth-client/lib/src/entities/native.auth.client.config";
 import "@multiversx/sdk-nestjs-common/lib/utils/extensions/date.extensions";
 import { FileUtils } from "@multiversx/sdk-nestjs-common/lib/utils/file.utils";
+
+export class NativeAuthClientConfig {
+  origin: string = "";
+  apiUrl: string = "";
+  expirySeconds: number = 0;
+  blockHashShard?: number;
+  gatewayUrl?: string;
+  extraRequestHeaders?: {
+    [key: string]: string;
+  };
+}
 
 export class NativeAuthSignerConfig extends NativeAuthClientConfig {
   signerPrivateKeyPath?: string | undefined = undefined;

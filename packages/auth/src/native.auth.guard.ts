@@ -27,7 +27,7 @@ export class NativeAuthGuard implements CanActivate {
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+             
             // @ts-ignore
             return new Date().getTime() / 1000;
           }

@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 export class NumberUtils {
-  static denominate(value: BigInt, decimals: number = 18): number {
+  static denominate(value: bigint, decimals: number = 18): number {
     return new BigNumber(value.toString()).dividedBy(new BigNumber(10).pow(decimals)).toNumber();
   }
 
@@ -8,7 +8,7 @@ export class NumberUtils {
     return NumberUtils.denominate(BigInt(value), decimals);
   }
 
-  static toDenominatedString(amount: BigInt, decimals: number = 18): string {
+  static toDenominatedString(amount: bigint, decimals: number = 18): string {
     let denominatedValue = new BigNumber(amount.toString()).shiftedBy(-decimals).toFixed(decimals);
     if (denominatedValue.includes('.')) {
       denominatedValue = denominatedValue.replace(/0+$/g, '').replace(/\.$/g, '');

@@ -6,7 +6,7 @@ export interface LockOptions {
 }
 
 export function Lock(options?: LockOptions) {
-  return (_target: Object, _key: string | symbol, descriptor: PropertyDescriptor) => {
+  return (_target: object, _key: string | symbol, descriptor: PropertyDescriptor) => {
     const childMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

@@ -25,17 +25,17 @@
   "author": "MultiversX",
   "license": "MIT",
   "devDependencies": {
-    "@types/redis": "^2.8.32",
-    "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.16.0",
-    "eslint": "^8.9.0",
-    "typescript": "^4.3.5"
+    "@types/redis": "^4.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "eslint": "^10.2.1",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
-    "ioredis": "^5.2.3"
+    "ioredis": "^5.10.1"
   },
   "peerDependencies": {
-    "@nestjs/common": "^10.x"
+    "@nestjs/common": "^11.x"
   },
   "publishConfig": {
     "access": "public"

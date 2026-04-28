@@ -6,7 +6,7 @@ export class ContextTracker {
   private static readonly contextDict: Record<string, any> = {};
   private static hook?: async_hooks.AsyncHook;
 
-  static assign(value: Object) {
+  static assign(value: object) {
     ContextTracker.ensureIsTracking();
 
     const asyncId = async_hooks.executionAsyncId();
@@ -54,7 +54,7 @@ export class ContextTracker {
 
     return ContextTracker.hook;
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+     
     function onInit(asyncId: number, _: string, triggerAsyncId: number) {
       const previousValue = ContextTracker.asyncHookDict[triggerAsyncId];
       if (previousValue) {

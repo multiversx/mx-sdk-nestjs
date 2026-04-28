@@ -49,7 +49,7 @@ export class ContractTransactionGenerator {
         abi: abi,
       });
 
-      const transaction = factory.createTransactionForExecute(
+      const transaction = await factory.createTransactionForExecute(
         signerAddress,
         input
       );
@@ -62,8 +62,7 @@ export class ContractTransactionGenerator {
       return transaction;
     } catch (error) {
       this.logger.log(
-        `Unexpected error when trying to create transaction '${
-          input.contract
+        `Unexpected error when trying to create transaction '${input.contract
         }' to contract '${input.contract.toBech32()}'`
       );
       this.logger.error(error);

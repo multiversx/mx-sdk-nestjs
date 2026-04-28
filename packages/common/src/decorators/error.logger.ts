@@ -17,7 +17,7 @@ const getErrorText = (methodName: string, options?: IErrorLoggerOptions, ...args
 
 export function ErrorLoggerSync(options?: IErrorLoggerOptions) {
   return (
-    _target: Object,
+    _target: object,
     key: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
@@ -38,7 +38,7 @@ export function ErrorLoggerSync(options?: IErrorLoggerOptions) {
 
 export function ErrorLoggerAsync(options?: IErrorLoggerOptions) {
   return (
-    _target: Object,
+    _target: object,
     key: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
