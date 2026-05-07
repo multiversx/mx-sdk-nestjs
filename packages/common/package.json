@@ -1,6 +1,9 @@
 {
   "name": "@multiversx/sdk-nestjs-common",
-  "version": "6.0.0",
+  "version": "7.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "description": "Multiversx SDK Nestjs common package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -39,7 +42,7 @@
     "winston": "^3.19.0"
   },
   "peerDependencies": {
-    "@multiversx/sdk-nestjs-monitoring": "^6.0.0",
+    "@multiversx/sdk-nestjs-monitoring": "^7.0.0",
     "@nestjs/common": "^11.x",
     "@nestjs/config": "^4.x",
     "@nestjs/core": "^11.x",
