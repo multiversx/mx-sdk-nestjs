@@ -1,5 +1,3 @@
- 
-
 import { BatchUtils } from '../../src/utils/batch.utils';
 
 describe('Batch Utils', () => {

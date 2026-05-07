@@ -383,17 +383,21 @@ export class CacheService {
       .filter((element) => element !== false)
       .map(element => element as number);
 
-    const values: OUT[] = [];
+    const values: OUT[] = new Array(missing.length);
 
     if (missing.length) {
+      const missingEntries = missing.map((index, position) => ({ index, position }));
       const pool = asyncPool(
         this.options?.poolLimit || 100,
-        missing.map((index) => payload[index]),
-        handler
+        missingEntries,
+        async ({ index, position }) => ({
+          position,
+          value: await handler(payload[index]),
+        })
       );
 
-      for await (const value of pool) {
-        values.push(value);
+      for await (const result of pool) {
+        values[result.position] = result.value;
       }
 
       const params = {
@@ -422,7 +426,7 @@ export class CacheService {
       cacheKeyFunc,
       [
         {
-           
+
           getter: async elements => {
             const result: { [key: string]: TOUT; } = {};
 
@@ -436,7 +440,7 @@ export class CacheService {
 
             return result;
           },
-           
+
           setter: async elements => {
             for (const key of Object.keys(elements)) {
               this.setLocal(key, elements[key], ttl);

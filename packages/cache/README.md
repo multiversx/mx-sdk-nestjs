@@ -4,6 +4,8 @@
 
 This package contains a set of utilities commonly used for caching purposes in the MultiversX Microservice ecosystem. 
 
+This release line targets Node 24 and NestJS 11.
+
 ## Installation
 
 `sdk-nestjs-cache` is delivered via **npm** and it can be installed as follows:

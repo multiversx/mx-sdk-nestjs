@@ -7,8 +7,12 @@ This package contains a set of utilities commonly used in the MultiversX Microse
 It relies on the following peer dependencies which must be installed in the parent package:
 
 - @multiversx/sdk-core
-- @nestjs/common v9
-- @nestjs/swagger v9
+- @nestjs/common v11
+- @nestjs/swagger v11
+
+This release line targets Node 24 and NestJS 11.
+
+`ContractLoader` was removed in v7; load contracts in your application code and pass them to the query and transaction helpers directly.
 
 ## Documentation
 
@@ -129,18 +133,9 @@ If you need something else please make sure to check our [CacheService](packages
 
 ### Smart Contract Interactions
 
-This package is for dApps that interacts with smart contracts
+This package is for dApps that interacts with smart contracts.
 
-#### Contract Loader
-
-Uses Singleton pattern and load a [SmartContract](https://github.com/multiversx/mx-sdk-erdjs/blob/main/src/smartcontracts/smartContract.ts) from an abi path.
-You can also load multiple contracts with same abi.
-
-```
-const cLoader = new ContractLoader(ABI_PATH, CONTRACT_INTERFACE);
-
-const sc = await cLoader.getContract(CONTRACT_ADDRESS);
-```
+`ContractLoader` is no longer part of this release line.
 
 #### Contract Query Runner
 
@@ -149,12 +144,12 @@ Execute contract queries using a multiversx proxy provider (api/gateway).
 ```
 const cRunner = new ContractQueryRunner(new ApiNetworkProvider(this.apiConfigService.getApiUrl()));
 
-const contract = await this.contractLoader.getContract(CONTRACT_ADDRESS);
+const query = smartContract.methodsExplicit.getTotalLockedAssetSupply([]);
 
-const interaction: Interaction = contract.methodsExplicit.getTotalLockedAssetSupply([]);
-
-const queryResponse = await cRunner.runQuery(contract, interaction);
+const queryResponse = await cRunner.runQuery(query, chainId, abi);
 ```
+
+`smartContract` is created in your application code from `@multiversx/sdk-core`; the helper only needs the query, chain ID, and optional ABI.
 
 #### Contract Transaction Generator
 

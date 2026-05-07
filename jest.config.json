@@ -20,7 +20,7 @@
     ]
   },
   "transformIgnorePatterns": [
-    "/node_modules/(?!uuid/)"
+    "/node_modules/"
   ],
   "collectCoverageFrom": [
     "**/*.(t|j)s"

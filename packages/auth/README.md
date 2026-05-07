@@ -5,6 +5,8 @@
 This package contains a set of utilities commonly used for authentication purposes in the MultiversX Microservice ecosystem.  
 The package relies on [@multiversx/sdk-native-auth-server](https://www.npmjs.com/package/@multiversx/sdk-native-auth-server) for validating access tokens signed by MultiversX wallets.
 
+This release line targets Node 24 and NestJS 11.
+
 ## Installation
 
 `sdk-nestjs-auth` is delivered via **npm** and it can be installed as follows:

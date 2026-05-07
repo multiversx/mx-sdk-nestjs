@@ -5,6 +5,8 @@
 This package contains a set of utilities commonly used for monitoring purposes in the MultiversX Microservice ecosystem. 
 The package relies on Prometheus to aggregate the metrics and it is using [prom-client](https://www.npmjs.com/package/prom-client) as a client for it.
 
+This release line targets Node 24 and NestJS 11.
+
 ## Installation
 
 `sdk-nestjs-monitoring` is delivered via **npm** and it can be installed as follows:
