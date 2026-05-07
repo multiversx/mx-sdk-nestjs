@@ -10,8 +10,6 @@ It relies on the following peer dependencies which must be installed in the pare
 - @nestjs/common v11
 - @nestjs/swagger v11
 
-This release line targets Node 24 and NestJS 11.
-
 `ContractLoader` was removed in v7; load contracts in your application code and pass them to the query and transaction helpers directly.
 
 ## Documentation
