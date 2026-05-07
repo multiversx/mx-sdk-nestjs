@@ -21,7 +21,7 @@ jobs:
           cache: npm
           cache-dependency-path: ./package-lock.json
 
-      - run: npm ci
+      - run: npm install
       - run: npx lerna run build
 
       - name: Create release
