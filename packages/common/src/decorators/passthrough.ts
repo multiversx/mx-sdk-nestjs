@@ -1,6 +1,6 @@
 export function PassthroughAsync(enabled: boolean, returnedValue?: any) {
   return (
-    _target: object,
+    _target: Object,
     _key: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
@@ -15,7 +15,7 @@ export function PassthroughAsync(enabled: boolean, returnedValue?: any) {
 
 export function PassthroughSync(enabled: boolean, returnedValue: any) {
   return (
-    _target: object,
+    _target: Object,
     _key: string | symbol,
     descriptor: PropertyDescriptor
   ) => {

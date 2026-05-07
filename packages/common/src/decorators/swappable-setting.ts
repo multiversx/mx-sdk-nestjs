@@ -5,7 +5,7 @@ export function SwappableSetting(settingKey: string) {
   const swappableSettingsServiceInjector = Inject(SwappableSettingsService);
 
   return function (
-    target: object,
+    target: Object,
     _key: string | symbol,
     descriptor: PropertyDescriptor,
   ) {

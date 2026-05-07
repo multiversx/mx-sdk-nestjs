@@ -6,7 +6,7 @@ import { CpuProfiler, MetricsService, PerformanceProfiler } from '@multiversx/sd
 
 function QueueMetricsConsumer(queue: string) {
   return (
-    _target: object,
+    _target: Object,
     key: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
