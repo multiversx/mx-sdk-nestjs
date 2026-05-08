@@ -8,11 +8,9 @@ export class JwtAdminGuard implements CanActivate {
     private readonly mxnestConfigService: MxnestConfigService
   ) { }
 
-   
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
-
 
     const admins = this.mxnestConfigService.getSecurityAdmins();
     if (!admins) {
