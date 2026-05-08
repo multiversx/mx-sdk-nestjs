@@ -16,7 +16,6 @@ describe("Contract transaction generator", () => {
 
     const getAccountSpy = jest
       .spyOn(ApiNetworkProvider.prototype, "getAccount")
-       
       .mockImplementation(
         jest.fn(
           async (_: Address) => new AccountOnNetwork({ nonce: BigInt(10) })
@@ -25,7 +24,6 @@ describe("Contract transaction generator", () => {
 
     const getNetworkConfigSpy = jest
       .spyOn(ApiNetworkProvider.prototype, "getNetworkConfig")
-       
       .mockImplementation(jest.fn(async () => new NetworkConfig()));
 
     const tx = await cTxGenerator.createTransaction(

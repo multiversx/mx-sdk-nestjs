@@ -54,7 +54,6 @@ export class ContextTracker {
 
     return ContextTracker.hook;
 
-
     function onInit(asyncId: number, _: string, triggerAsyncId: number) {
       const previousValue = ContextTracker.asyncHookDict[triggerAsyncId];
       if (previousValue) {

@@ -27,7 +27,6 @@ export class NativeAuthGuard implements CanActivate {
       cache: {
         getValue: async function <T>(key: string): Promise<T | undefined> {
           if (key === 'block:timestamp:latest') {
-             
             // @ts-ignore
             return new Date().getTime() / 1000;
           }
@@ -131,7 +130,7 @@ export class NativeAuthGuard implements CanActivate {
         }
         return false;
       }
-        throw error;
+      throw error;
     }
   }
 }
