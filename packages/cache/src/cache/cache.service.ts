@@ -440,7 +440,6 @@ export class CacheService {
 
             return result;
           },
-
           setter: async elements => {
             for (const key of Object.keys(elements)) {
               this.setLocal(key, elements[key], ttl);
