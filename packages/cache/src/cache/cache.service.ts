@@ -426,7 +426,6 @@ export class CacheService {
       cacheKeyFunc,
       [
         {
-
           getter: async elements => {
             const result: { [key: string]: TOUT; } = {};
 
