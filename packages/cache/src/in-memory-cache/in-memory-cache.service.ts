@@ -1,16 +1,16 @@
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { Injectable, Inject, Optional } from '@nestjs/common';
 import { IN_MEMORY_CACHE_OPTIONS, LRU_CACHE_MAX_ITEMS } from './entities/common.constants';
 import { InMemoryCacheOptions } from './entities/in-memory-cache-options.interface';
 
 @Injectable()
 export class InMemoryCacheService {
-  private static localCache: LRU<any, any>;
+  private static localCache: LRUCache<any, any>;
   constructor(
     @Optional() @Inject(IN_MEMORY_CACHE_OPTIONS) private readonly inMemoryCacheOptions?: InMemoryCacheOptions
   ) {
     if (!InMemoryCacheService.localCache) {
-      InMemoryCacheService.localCache = new LRU({
+      InMemoryCacheService.localCache = new LRUCache({
         max: this.inMemoryCacheOptions?.maxItems ?? LRU_CACHE_MAX_ITEMS,
         allowStale: false,
         updateAgeOnGet: false,

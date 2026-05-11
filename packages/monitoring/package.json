@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-nestjs-monitoring",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "description": "Multiversx SDK Nestjs monitoring package",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,18 +25,18 @@
   "author": "MultiversX",
   "license": "MIT",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.16.0",
-    "eslint": "^8.9.0",
-    "typescript": "^4.3.5"
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "eslint": "^10.2.1",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
-    "prom-client": "^14.0.1",
-    "winston": "^3.7.2",
-    "winston-daily-rotate-file": "^4.6.1"
+    "prom-client": "^15.1.3",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "peerDependencies": {
-    "@nestjs/common": "^10.x"
+    "@nestjs/common": "^11.x"
   },
   "publishConfig": {
     "access": "public"

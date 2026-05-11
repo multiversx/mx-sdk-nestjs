@@ -383,14 +383,22 @@ export class CacheService {
       .filter((element) => element !== false)
       .map(element => element as number);
 
-    let values: OUT[] = [];
+    const values: OUT[] = new Array(missing.length);
 
     if (missing.length) {
-      values = await asyncPool(
+      const missingEntries = missing.map((index, position) => ({ index, position }));
+      const pool = asyncPool(
         this.options?.poolLimit || 100,
-        missing.map((index) => payload[index]),
-        handler
+        missingEntries,
+        async ({ index, position }) => ({
+          position,
+          value: await handler(payload[index]),
+        })
       );
+
+      for await (const result of pool) {
+        values[result.position] = result.value;
+      }
 
       const params = {
         keys: keys.filter((_, index) => missing.includes(index)),
@@ -418,7 +426,6 @@ export class CacheService {
       cacheKeyFunc,
       [
         {
-          // eslint-disable-next-line require-await
           getter: async elements => {
             const result: { [key: string]: TOUT; } = {};
 
@@ -432,7 +439,6 @@ export class CacheService {
 
             return result;
           },
-          // eslint-disable-next-line require-await
           setter: async elements => {
             for (const key of Object.keys(elements)) {
               this.setLocal(key, elements[key], ttl);

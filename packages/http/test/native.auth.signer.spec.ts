@@ -13,7 +13,7 @@ describe("NativeAuthSigner", () => {
     const mockExpiryDate = new Date();
     mockExpiryDate.setMinutes(mockExpiryDate.getMinutes() + 5); // Token still valid
 
-    nativeAuthSigner = new NativeAuthSigner({});
+    nativeAuthSigner = new NativeAuthSigner({ expirySeconds: 60 });
     nativeAuthSigner["accessTokenInfo"] = {
       token: mockToken,
       expiryDate: mockExpiryDate,
@@ -33,7 +33,7 @@ describe("NativeAuthSigner", () => {
     const mockSignature = Buffer.from("dummySignature");
     const mockSignableToken = "dummySignableToken";
 
-    nativeAuthSigner = new NativeAuthSigner({});
+    nativeAuthSigner = new NativeAuthSigner({ expirySeconds: 60 });
     nativeAuthSigner["accessTokenInfo"] = {
       token: "expiredToken",
       expiryDate: expiredDate,
