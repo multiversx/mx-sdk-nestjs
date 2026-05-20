@@ -3,7 +3,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { MetricsService, PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { OriginLogger } from '@multiversx/sdk-nestjs-common';
 import { REDIS_CLIENT_TOKEN } from '@multiversx/sdk-nestjs-redis';
-import { promisify } from 'util';
 
 @Injectable()
 export class RedisCacheService {
@@ -1002,9 +1001,12 @@ export class RedisCacheService {
   asyncMulti = async (commands: any[]) => {
     const profiler = new PerformanceProfiler();
     const multi = this.redis.multi(commands);
-    const data = await promisify(multi.exec).call(multi);
-    this.metricsService.setRedisDuration('MULTI', profiler.duration);
-    return data;
+    try {
+      const data = await multi.exec();
+      return data;
+    } finally {
+      this.metricsService.setRedisDuration('MULTI', profiler.duration);
+    }
   };
 
 }
