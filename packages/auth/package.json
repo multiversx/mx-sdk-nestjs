@@ -43,6 +43,7 @@
     "@nestjs/common": "^11.x"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

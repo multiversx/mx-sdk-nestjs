@@ -11,7 +11,8 @@ on:
           - beta
 
 permissions:
-  contents: write
+  contents: read
+  id-token: write
 
 jobs:
   publish-npm:
@@ -43,6 +44,4 @@ jobs:
           gh release create --prerelease $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes
 
       - name: Publish to npmjs
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         run: npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}

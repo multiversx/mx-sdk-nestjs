@@ -15,7 +15,8 @@ on:
         required: false
 
 permissions:
-  contents: write
+  contents: read
+  id-token: write
 
 jobs:
   publish-npm:
@@ -48,8 +49,6 @@ jobs:
           fi
 
       - name: Publish to npmjs
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -z "${{ github.event.inputs.package_name }}" ]; then
             echo "Publishing all changed packages..."
