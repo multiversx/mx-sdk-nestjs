@@ -49,8 +49,6 @@ jobs:
           fi
 
       - name: Publish to npmjs
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -z "${{ github.event.inputs.package_name }}" ]; then
             echo "Publishing all changed packages..."
