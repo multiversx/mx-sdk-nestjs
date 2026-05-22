@@ -15,7 +15,8 @@ on:
         required: false
 
 permissions:
-  contents: write
+  contents: read
+  id-token: write
 
 jobs:
   publish-npm:

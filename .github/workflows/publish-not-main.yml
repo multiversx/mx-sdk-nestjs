@@ -11,7 +11,8 @@ on:
           - beta
 
 permissions:
-  contents: write
+  contents: read
+  id-token: write
 
 jobs:
   publish-npm:
