@@ -46,6 +46,7 @@
     "@nestjs/swagger": "^11.x"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }
