@@ -4,16 +4,16 @@ import { BinaryUtils } from "./binary.utils";
 
 export class AddressUtils {
   static bech32Encode(publicKey: string) {
-    return Address.fromHex(publicKey).bech32();
+    return Address.newFromHex(publicKey).toBech32();
   }
 
   static bech32Decode(address: string) {
-    return Address.fromBech32(address).hex();
+    return Address.newFromBech32(address).toHex();
   }
 
   static isAddressValid(address: string): boolean {
     try {
-      Address.fromBech32(address);
+      Address.newFromBech32(address);
       return true;
     } catch (error) {
       return false;
@@ -23,7 +23,7 @@ export class AddressUtils {
 
   static isValidHexAddress(address: string): boolean {
     try {
-      Address.fromHex(address);
+      Address.newFromHex(address);
       return true;
     } catch (error) {
       return false;
@@ -65,7 +65,7 @@ export class AddressUtils {
     }
 
     try {
-      return new Address(address).isContractAddress();
+      return new Address(address).isSmartContract();
     } catch (error) {
       const logger = new Logger(AddressUtils.name);
       logger.error(`Error when determining whether address '${address}' is a smart contract address`);

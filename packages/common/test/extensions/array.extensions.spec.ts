@@ -107,7 +107,7 @@ describe('Array Extensions', () => {
 
     expect(array.first((x) => x.a !== undefined)).toEqual({ a: 'a' });
     expect(array.first((x) => x.a === 'b')).toEqual({ a: 'b' });
-    expect(() => array.first((x) => x.a === 'c')).toThrowError();
+    expect(() => array.first((x) => x.a === 'c')).toThrow();
     expect(array.first()).toEqual({
       a: 'a',
     });
@@ -155,7 +155,7 @@ describe('Array Extensions', () => {
 
     expect(array.last((x) => x.a !== undefined)).toEqual({ a: 'b' });
     expect(array.last((x) => x.a === 'b')).toEqual({ a: 'b' });
-    expect(() => array.last((x) => x.a === 'c')).toThrowError();
+    expect(() => array.last((x) => x.a === 'c')).toThrow();
     expect(array.last()).toEqual({
       c: 'c',
     });
@@ -163,8 +163,8 @@ describe('Array Extensions', () => {
 
   describe('Single', () => {
     expect([1].single()).toEqual(1);
-    expect(() => [1, 2, 3, 4].single()).toThrowError();
-    expect(() => [1, 2, 3, 4].single(x => x > 2)).toThrowError();
+    expect(() => [1, 2, 3, 4].single()).toThrow();
+    expect(() => [1, 2, 3, 4].single(x => x > 2)).toThrow();
     expect([1, 2, 3, 4].single(x => x > 3)).toEqual(4);
   });
 

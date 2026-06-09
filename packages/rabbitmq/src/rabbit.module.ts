@@ -12,7 +12,7 @@ import { SwappableSettingsModule, SwappableSettingsService, SwappableSettingsSto
 export class RabbitModule {
   static forRoot(rabbitOptions: RabbitModuleOptions, rabbitStorageSettings?: SwappableSettingsStorageInterface, auxOptions?: OptionsInterface): DynamicModule {
 
-    const imports = [RabbitMQModule.forRoot(RabbitMQModule, rabbitOptions)];
+    const imports = [RabbitMQModule.forRoot(rabbitOptions)];
     const providers: Provider[] = [
       RabbitPublisherService,
       {
@@ -38,7 +38,7 @@ export class RabbitModule {
 
   static forRootAsync(rabbitAsyncOptions: RabbitModuleAsyncOptions, rabbitAsyncStorageSettings?: SwappableSettingsAsyncOptions, auxOptions?: OptionsInterface): DynamicModule {
 
-    const imports = [RabbitMQModule.forRootAsync(RabbitMQModule, rabbitAsyncOptions)];
+    const imports = [RabbitMQModule.forRootAsync(rabbitAsyncOptions)];
     const providers: Provider[] = [
       RabbitPublisherService,
       {

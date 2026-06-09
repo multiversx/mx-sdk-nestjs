@@ -1,7 +1,9 @@
-import { createParamDecorator } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { ExecutionContextUtils } from '@multiversx/sdk-nestjs-common';
 
-export const NativeAuth = createParamDecorator((key, req) => {
-  const nativeAuth = req.args[0].nativeAuth;
+export const NativeAuth = createParamDecorator((key, ctx: ExecutionContext) => {
+  const nativeAuth = ExecutionContextUtils.getRequest(ctx)?.nativeAuth;
+
   if (!nativeAuth) {
     return undefined;
   }

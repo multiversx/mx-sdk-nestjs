@@ -17,10 +17,10 @@ describe('ParseAddressPipe', () => {
     });
 
     describe('when validation fails', () => {
-        // eslint-disable-next-line require-await
-        it('should throw an error', async () => {
-            return expect(target.transform('invalidAddress', {} as ArgumentMetadata)).rejects.toThrowError();
-        });
+       
+      it('should throw an error', async () => {
+        return expect(target.transform('invalidAddress', {} as ArgumentMetadata)).rejects.toThrow();
+      });
     });
   });
 });

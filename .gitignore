@@ -7,3 +7,4 @@ tsconfig.tsbuildinfo
 .npmrc
 *.log
 *.tsbuildinfo
+storage

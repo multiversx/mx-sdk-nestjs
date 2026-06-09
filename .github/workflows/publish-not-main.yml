@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   publish-npm:
@@ -20,15 +21,20 @@ jobs:
       run:
         working-directory: ./
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 16
-          registry-url: https://registry.npmjs.org/
-          cache-dependency-path: ./package-lock.json
+      - uses: actions/checkout@v4
 
-      - run: npx lerna@6 bootstrap
-      - run: npx lerna@6 run build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npx lerna run build
 
       - name: Create release
         env:
@@ -38,6 +44,4 @@ jobs:
           gh release create --prerelease $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG" --generate-notes
 
       - name: Publish to npmjs
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         run: npx lerna publish from-package --yes --dist-tag ${{ github.event.inputs.channel }} --pre-dist-tag ${{ github.event.inputs.channel }}

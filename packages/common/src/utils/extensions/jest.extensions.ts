@@ -1,3 +1,5 @@
+import { expect } from '@jest/globals';
+
 expect.extend({
   toHaveStructure(received: any, keys: string[]) {
     const objectSortedKeys = JSON.stringify(Object.keys(received).sort());
@@ -35,7 +37,7 @@ expect.extend({
   },
 });
 
-interface Matchers<R> {
+export interface Matchers<R> {
   toHaveStructure(received: any, keys: string[]): R;
   toHaveProperties(received: any, args: any[]): R;
 }

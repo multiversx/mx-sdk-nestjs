@@ -15,19 +15,19 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [24.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: ./package-lock.json
-      - run: npx lerna@6 bootstrap
-      - run: npx lerna@6 run build
-      - run: npx lerna@6 run test
+      - run: npm ci
+      - run: npx lerna run build
+      - run: npx lerna run test
         env:
           CI: true

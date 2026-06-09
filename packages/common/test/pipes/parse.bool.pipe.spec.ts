@@ -20,7 +20,7 @@ describe('ParseOptionalBoolPipe', () => {
 
     describe('when validation fails', () => {
       it('shoul throw an error', () => {
-        return expect(target.transform('abc123', {} as ArgumentMetadata)).rejects.toThrowError();
+        return expect(target.transform('abc123', {} as ArgumentMetadata)).rejects.toThrow();
       });
     });
   });

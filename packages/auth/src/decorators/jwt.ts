@@ -1,7 +1,8 @@
-import { createParamDecorator } from "@nestjs/common";
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { ExecutionContextUtils } from "@multiversx/sdk-nestjs-common";
 
-export const Jwt = createParamDecorator((field, req) => {
-  const jwt = req.args[0].jwt;
+export const Jwt = createParamDecorator((field, ctx: ExecutionContext) => {
+  const jwt = ExecutionContextUtils.getRequest(ctx)?.jwt;
 
   if (jwt && field) {
     const fieldsChain = field.split('.');
