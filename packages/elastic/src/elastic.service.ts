@@ -70,14 +70,13 @@ export class ElasticService {
     }
 
     const elasticQueryJson: any = elasticQuery.toJson();
-    this.ensureUuidTieBreaker(elasticQueryJson);
+
     const result = await this.post(url, elasticQueryJson);
     return result.data.hits.hits;
   }
 
   private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, searchAfter: any[]) {
     const elasticQueryJson: any = elasticQuery.toJson();
-    this.ensureUuidTieBreaker(elasticQueryJson);
 
     elasticQueryJson.search_after = searchAfter;
 
@@ -110,30 +109,9 @@ export class ElasticService {
     }
   }
 
-  private ensureUuidTieBreaker(elasticQueryJson: any): void {
-    const sorts: any[] = elasticQueryJson.sort;
-    if (!Array.isArray(sorts) || sorts.length === 0) {
-      return;
-    }
-
-    const hasUuidTieBreaker = sorts.some((sort) => Object.keys(sort)[0] === 'uuid.keyword');
-    if (hasUuidTieBreaker) {
-      return;
-    }
-
-    const lastSortKey = Object.keys(sorts[sorts.length - 1])[0];
-    const lastSortOrder = sorts[sorts.length - 1][lastSortKey]?.order ?? 'desc';
-    sorts.push({
-      'uuid.keyword': {
-        order: lastSortOrder,
-      },
-    });
-  }
-
   async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string, searchAfter?: string | any[]): Promise<any[]> {
     const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
 
-    // attempt to get scroll settings
     const profiler = new PerformanceProfiler();
 
     const documents = await this.getListResult(url, elasticQuery, searchAfter);
