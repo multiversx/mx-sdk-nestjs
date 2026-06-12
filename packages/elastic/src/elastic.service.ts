@@ -78,7 +78,9 @@ export class ElasticService {
   private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, searchAfter: any[]) {
     const elasticQueryJson: any = elasticQuery.toJson();
 
+    // search_after replaces offset pagination; ES rejects from > 0 alongside it
     elasticQueryJson.search_after = searchAfter;
+    delete elasticQueryJson.from;
 
     const queryResult = await this.post(url, elasticQueryJson);
     return queryResult.data.hits.hits;
