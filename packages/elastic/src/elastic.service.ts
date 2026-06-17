@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ApiService } from "@multiversx/sdk-nestjs-http";
 import { MetricsService, ElasticMetricType, PerformanceProfiler } from "@multiversx/sdk-nestjs-monitoring";
 import { ElasticQuery } from "./entities/elastic.query";
@@ -11,7 +11,7 @@ export class ElasticService {
     @Inject(forwardRef(() => ApiService))
     private readonly apiService: ApiService,
     @Inject(forwardRef(() => MetricsService))
-    private readonly metricsService: MetricsService
+    private readonly metricsService: MetricsService,
   ) { }
 
   async getCount(collection: string, elasticQuery: ElasticQuery | undefined = undefined) {
@@ -51,26 +51,78 @@ export class ElasticService {
   }
 
   private formatItem(document: any, key: string) {
-    const { _id, _source } = document;
+    const { _id, _source, sort } = document;
     const item: any = {};
     item[key] = _id;
 
-    return { ...item, ..._source };
+    const result = { ...item, ..._source };
+
+    if (sort !== undefined) {
+      result.searchAfter = this.encodeCursor(sort);
+    }
+
+    return result;
   }
 
-  async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string): Promise<any[]> {
+  private async getListResult(url: string, elasticQuery: ElasticQuery, searchAfter?: string | any[]) {
+    if (searchAfter) {
+      return this.getScrollAfterResult(url, elasticQuery, this.decodeCursor(searchAfter));
+    }
+
+    const elasticQueryJson: any = elasticQuery.toJson();
+
+    const result = await this.post(url, elasticQueryJson);
+    return result.data.hits.hits;
+  }
+
+  private async getScrollAfterResult(url: string, elasticQuery: ElasticQuery, searchAfter: any[]) {
+    const elasticQueryJson: any = elasticQuery.toJson();
+
+    // search_after replaces offset pagination; ES rejects from > 0 alongside it
+    elasticQueryJson.search_after = searchAfter;
+    delete elasticQueryJson.from;
+
+    const queryResult = await this.post(url, elasticQueryJson);
+    return queryResult.data.hits.hits;
+  }
+
+  private formatDocuments(documents: any[], key: string): any[] {
+    return documents.map((document: any) => this.formatItem(document, key));
+  }
+
+  private encodeCursor(sort: any[]): string {
+    return Buffer.from(JSON.stringify(sort), 'utf8').toString('base64');
+  }
+
+  private decodeCursor(searchAfter: string | any[]): any[] {
+    if (Array.isArray(searchAfter)) {
+      return searchAfter;
+    }
+
+    try {
+      const decoded = JSON.parse(Buffer.from(searchAfter, 'base64').toString('utf8'));
+      if (!Array.isArray(decoded)) {
+        throw new Error('Invalid cursor payload');
+      }
+
+      return decoded;
+    } catch {
+      throw new BadRequestException('Invalid searchAfter');
+    }
+  }
+
+  async getList(collection: string, key: string, elasticQuery: ElasticQuery, overrideUrl?: string, searchAfter?: string | any[]): Promise<any[]> {
     const url = `${overrideUrl ?? this.options.url}/${collection}/_search`;
 
     const profiler = new PerformanceProfiler();
 
-    const result = await this.post(url, elasticQuery.toJson());
+    const documents = await this.getListResult(url, elasticQuery, searchAfter);
 
     profiler.stop();
 
     this.metricsService.setElasticDuration(collection, ElasticMetricType.list, profiler.duration);
 
-    const documents = result.data.hits.hits;
-    return documents.map((document: any) => this.formatItem(document, key));
+    return this.formatDocuments(documents, key);
   }
 
   async getScrollableList(collection: string, key: string, elasticQuery: ElasticQuery, action: (items: any[]) => Promise<void>, options?: { scrollTimeout?: string, delayBetweenScrolls?: number }): Promise<void> {

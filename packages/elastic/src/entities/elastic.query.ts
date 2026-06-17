@@ -18,7 +18,12 @@ function buildElasticIndexerSort(sorts: ElasticSortProperty[]): any[] {
     return [];
   }
 
-  return sorts.map((sortProp: ElasticSortProperty) => ({ [sortProp.name]: { order: sortProp.order } }));
+  return sorts.map((sortProp: ElasticSortProperty) => ({
+    [sortProp.name]: {
+      order: sortProp.order,
+      ...(sortProp.missing !== undefined && { missing: sortProp.missing })
+    }
+  }));
 }
 
 export class ElasticQuery {
