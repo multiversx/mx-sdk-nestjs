@@ -89,6 +89,22 @@ export class ElasticQuery {
     return this.withMustNotCondition(QueryType.Exists(key));
   }
 
+  withMustPrefixCondition(key: string, value: string | undefined): ElasticQuery {
+    if (value === undefined) {
+      return this;
+    }
+
+    return this.withMustCondition(QueryType.Prefix(key, value.toLowerCase()));
+  }
+
+  withMustNotPrefixCondition(key: string, value: string | undefined): ElasticQuery {
+    if (value === undefined) {
+      return this;
+    }
+
+    return this.withMustNotCondition(QueryType.Prefix(key, value.toLowerCase()));
+  }
+
   withMustCondition(queries: AbstractQuery[] | AbstractQuery): ElasticQuery {
     return this.withCondition(QueryConditionOptions.must, queries);
   }

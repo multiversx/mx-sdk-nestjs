@@ -10,6 +10,7 @@ import { ShouldQuery } from "./should.query";
 import { WildcardQuery } from "./wildcard.query";
 import { StringQuery } from "./string.query";
 import { NestedShouldQuery } from "./nested.should.query";
+import { PrefixQuery } from './prefix.query';
 import { ScriptQuery } from "./script.query";
 
 export class QueryType {
@@ -27,6 +28,10 @@ export class QueryType {
 
   static Wildcard = (key: string, value: string): WildcardQuery => {
     return new WildcardQuery(key, value);
+  };
+
+  static Prefix = (key: string, value: string): PrefixQuery => {
+    return new PrefixQuery(key, value);
   };
 
   static Nested = (key: string, value: MatchQuery[]): NestedQuery => {
