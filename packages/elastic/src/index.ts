@@ -26,3 +26,4 @@ export * from './entities/range.query';
 export * from './entities/should.query';
 export * from './entities/terms.query';
 export * from './entities/wildcard.query';
+export * from './entities/prefix.query';

@@ -6,6 +6,7 @@ import { RangeLowerThanOrEqual } from "../src/entities/range.lower.than.or.equal
 import { TermsQuery } from "../src/entities/terms.query";
 import { ElasticQuery } from "../src/entities/elastic.query";
 import { AbstractQuery } from "../lib/entities/abstract.query";
+import { PrefixQuery } from "../src/entities/prefix.query";
 
 describe('Elastic Query', () => {
   describe('Create Elastic Query', () => {
@@ -119,5 +120,52 @@ describe('Elastic Query', () => {
     expect(elasticQuery.toJson().query.bool.must[2].nested.query.bool.should[0].wildcard).toBeDefined();
     expect(elasticQuery.toJson().query.bool.must[2].nested.query.bool.should[0].wildcard["data.name"].value).toBe('*day one*');
     expect(elasticQuery.toJson().query.bool.must[2].nested.query.bool.should[1].wildcard["data.token"].value).toBe('*day one*');
+  });
+
+  describe('Prefix Query', () => {
+    it('should create a prefix query', () => {
+      const query = new PrefixQuery('user', 'ki');
+      expect(query.getQuery()).toEqual({
+        prefix: {
+          user: {
+            value: 'ki',
+            case_insensitive: true,
+          },
+        },
+      });
+    });
+  
+    it('should create a prefix query and add it to elastic query', () => {
+      const elasticQuery = ElasticQuery.create();
+      elasticQuery.withCondition(QueryConditionOptions.must, [new PrefixQuery('user', 'ki')]);
+
+      expect(elasticQuery.condition.must.length).toEqual(1);
+      expect(elasticQuery.condition.must[0].getQuery()).toMatchObject({
+        prefix: {
+          user: {
+            value: 'ki',
+            case_insensitive: true,
+          },
+        },
+      });
+      expect(elasticQuery.toJson().query.bool.must).toBeDefined();
+
+      expect(elasticQuery.toJson()).toEqual({
+        query: {
+          bool: {
+            must: [
+              {
+                prefix: {
+                  user: {
+                    value: 'ki',
+                    case_insensitive: true,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
   });
 });
