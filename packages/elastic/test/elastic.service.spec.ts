@@ -78,4 +78,16 @@ describe('ElasticService security hardening', () => {
     await expect(service.setCustomValue('index', 'id', '__proto__', 'value')).rejects.toBeInstanceOf(BadRequestException);
     await expect(service.setCustomValue('index', 'id', 'nested.field', 'value')).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it('rejects a dotted custom field that would previously have reached Elasticsearch for a write operation', async () => {
+    const service = createService();
+
+    await expect(
+      service.setCustomValues('index', 'id', {
+        'profile.isAdmin': true as any,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(apiService.post).not.toHaveBeenCalled();
+  });
 });
