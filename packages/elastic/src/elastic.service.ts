@@ -14,30 +14,58 @@ export class ElasticService {
     private readonly metricsService: MetricsService,
   ) { }
 
+  private encodePathSegment(segment: string): string {
+    return encodeURIComponent(segment).replace(/%2C/g, ',');
+  }
+
   private buildElasticUrl(baseUrl: string, pathSegments: string[], queryParams?: Record<string, string | number | boolean | undefined>): string {
-    // Build URLs through the URL API so path segments are encoded instead of concatenated raw.
-    const parsedUrl = new URL(baseUrl);
+    const encodedPath = pathSegments.map(segment => this.encodePathSegment(segment)).join('/');
+    const appendPath = (basePath: string) => {
+      if (!encodedPath) {
+        return basePath;
+      }
 
-    const basePath = parsedUrl.pathname.endsWith('/') ? parsedUrl.pathname.slice(0, -1) : parsedUrl.pathname;
-    const encodedPath = pathSegments.map(segment => encodeURIComponent(segment)).join('/');
+      if (!basePath) {
+        return `/${encodedPath}`;
+      }
 
-    parsedUrl.pathname = [basePath, encodedPath].filter(Boolean).join('/');
-    parsedUrl.search = '';
-    parsedUrl.hash = '';
+      return basePath.endsWith('/') ? `${basePath}${encodedPath}` : `${basePath}/${encodedPath}`;
+    };
+
+    if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) {
+      const parsedUrl = new URL(baseUrl);
+      parsedUrl.pathname = appendPath(parsedUrl.pathname);
+
+      if (queryParams) {
+        for (const [key, value] of Object.entries(queryParams)) {
+          if (value !== undefined) {
+            parsedUrl.searchParams.set(key, String(value));
+          }
+        }
+      }
+
+      return parsedUrl.toString();
+    }
+
+    const queryIndex = baseUrl.indexOf('?');
+    const basePath = queryIndex >= 0 ? baseUrl.slice(0, queryIndex) : baseUrl;
+    const existingQuery = queryIndex >= 0 ? baseUrl.slice(queryIndex + 1) : '';
+    const searchParams = new URLSearchParams(existingQuery);
 
     if (queryParams) {
       for (const [key, value] of Object.entries(queryParams)) {
         if (value !== undefined) {
-          parsedUrl.searchParams.set(key, String(value));
+          searchParams.set(key, String(value));
         }
       }
     }
 
-    return parsedUrl.toString();
+    const query = searchParams.toString();
+    return `${appendPath(basePath)}${query ? `?${query}` : ''}`;
   }
 
-  private assertSafeFieldName(fieldName: string, fieldContext: string): string {
-    // Reject names that could turn into prototype pollution or nested field injection.
+  private assertSafeWriteFieldName(fieldName: string, fieldContext: string): string {
+    // Reject names that could turn into prototype pollution or nested field injection on write.
     if (!fieldName) {
       throw new BadRequestException(`${fieldContext} must not be empty`);
     }
@@ -227,8 +255,7 @@ export class ElasticService {
     const url = this.buildElasticUrl(this.options.url, [collection, '_search']);
 
     const profiler = new PerformanceProfiler();
-    // The final stored field name is still validated after prefixing to avoid unsafe mapping keys.
-    const fullAttribute = this.assertSafeFieldName(customValuePrefix + '_' + this.assertSafeFieldName(attribute, 'Attribute'), 'Custom value field');
+    const fullAttribute = `${customValuePrefix}_${attribute}`;
 
     const payload = {
       query: {
@@ -267,7 +294,7 @@ export class ElasticService {
     // Use a null-prototype object so malicious keys cannot inherit Object.prototype behavior.
     const doc: Record<string, T> = Object.create(null) as Record<string, T>;
     for (const [key, value] of Object.entries(dict)) {
-      const fullAttribute = this.assertSafeFieldName(customValuePrefix + '_' + this.assertSafeFieldName(key, 'Custom value key'), 'Custom value field');
+      const fullAttribute = `${customValuePrefix}_${this.assertSafeWriteFieldName(key, 'Custom value key')}`;
       doc[fullAttribute] = value;
     }
 
@@ -289,7 +316,7 @@ export class ElasticService {
 
     const profiler = new PerformanceProfiler();
     // The single-field update uses the same validation as the bulk update path.
-    const fullAttribute = this.assertSafeFieldName(customValuePrefix + '_' + this.assertSafeFieldName(attribute, 'Attribute'), 'Custom value field');
+    const fullAttribute = `${customValuePrefix}_${this.assertSafeWriteFieldName(attribute, 'Attribute')}`;
 
     const payload = {
       doc: Object.create(null) as Record<string, T>,

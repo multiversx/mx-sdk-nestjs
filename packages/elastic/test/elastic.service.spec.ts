@@ -47,6 +47,48 @@ describe('ElasticService security hardening', () => {
     expect(Object.getPrototypeOf(apiService.post.mock.calls[0][1].doc)).toBeNull();
   });
 
+  it('preserves comma-separated multi-index collections in the built URL', async () => {
+    apiService.post.mockResolvedValueOnce({
+      data: {
+        count: 0,
+      },
+    });
+
+    const service = createService();
+
+    await service.getCount('idx-a,idx-b');
+
+    expect(apiService.post).toHaveBeenCalledWith(
+      'https://elastic.example.com/base/idx-a,idx-b/_count',
+      undefined,
+    );
+  });
+
+  it('supports scheme-less configured base URLs without dropping request paths', async () => {
+    apiService.post.mockResolvedValueOnce({
+      data: {
+        hits: {
+          hits: [],
+        },
+      },
+    });
+
+    const service = createService('localhost:9200');
+
+    await service.getItem('index', 'id', '123');
+
+    expect(apiService.post).toHaveBeenCalledWith(
+      'localhost:9200/index/_search',
+      {
+        query: {
+          term: {
+            _id: '123',
+          },
+        },
+      },
+    );
+  });
+
   it('uses a search body instead of a query string for item lookups', async () => {
     apiService.post.mockResolvedValueOnce({
       data: {
@@ -89,5 +131,64 @@ describe('ElasticService security hardening', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
 
     expect(apiService.post).not.toHaveBeenCalled();
+  });
+
+  it('allows dotted custom fields on reads so existing stored data stays reachable', async () => {
+    apiService.post.mockResolvedValueOnce({
+      data: {
+        hits: {
+          hits: [
+            {
+              _source: {
+                'meta_profile.role': 'admin',
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const service = createService();
+
+    await expect(service.getCustomValue('index', 'id', 'profile.role')).resolves.toBe('admin');
+
+    expect(apiService.post).toHaveBeenCalledWith(
+      'https://elastic.example.com/base/index/_search',
+      {
+        query: {
+          term: {
+            _id: 'id',
+          },
+        },
+        _source: 'meta_profile.role',
+      },
+    );
+  });
+
+  it('builds bulk update payloads with a null prototype and prefixed keys', async () => {
+    apiService.post.mockResolvedValueOnce({
+      data: {
+        result: 'updated',
+      },
+    });
+
+    const service = createService();
+
+    await service.setCustomValues('index', 'id', {
+      status: 'ok',
+      version: 2,
+    });
+
+    expect(apiService.post).toHaveBeenCalledWith(
+      'https://elastic.example.com/base/index/_update/id',
+      {
+        doc: expect.any(Object),
+      },
+    );
+
+    const doc = apiService.post.mock.calls[0][1].doc;
+    expect(doc.meta_status).toBe('ok');
+    expect(doc.meta_version).toBe(2);
+    expect(Object.getPrototypeOf(doc)).toBeNull();
   });
 });
