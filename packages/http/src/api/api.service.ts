@@ -98,6 +98,7 @@ export class ApiService {
       auth: settings.auth,
       params: settings.params,
       headers,
+      maxContentLength: settings.maxContentLength,
     };
 
     if (settings.validateStatus) {
