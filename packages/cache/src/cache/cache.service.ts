@@ -291,12 +291,56 @@ export class CacheService {
     inMemoryTtl: number = ttl,
     cacheNullable: boolean = true
   ): Promise<T> {
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
-    const getOrAddFromRedisFunc = async (): Promise<T> => {
-      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl, cacheNullable);
-    };
+    const localValue = this.inMemoryCacheService.get<T>(key);
+    if (localValue !== undefined) {
+      return localValue;
+    }
 
-    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl, cacheNullable);
+    const { value: remoteValue, remainingTtl } = await this.getRemoteWithRemainingTtl<T>(key);
+    if (remoteValue !== undefined) {
+      // do not keep the value locally longer than it still lives in redis
+      const localTtl = remainingTtl !== undefined ? Math.min(inMemoryTtl, remainingTtl) : inMemoryTtl;
+      this.inMemoryCacheService.set<T>(key, remoteValue, localTtl, cacheNullable);
+      return remoteValue;
+    }
+
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
+    const value = await internalCreateValueFunc();
+    await this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
+    this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
+    return value;
+  }
+
+  /**
+   * Reads a value from redis together with its remaining ttl (in seconds), in a single round-trip.
+   * remainingTtl is undefined when the key has no expiration.
+   */
+  private async getRemoteWithRemainingTtl<T>(key: string): Promise<{ value: T | undefined, remainingTtl: number | undefined }> {
+    try {
+      const results = await this.redisCacheService.asyncMulti([['get', key], ['pttl', key]]);
+      const [getResult, pttlResult] = results ?? [];
+      const [getError, data] = getResult ?? [];
+      const [pttlError, pttl] = pttlResult ?? [];
+
+      if (getError || !data) {
+        return { value: undefined, remainingTtl: undefined };
+      }
+
+      const value = JSON.parse(data as string) as T;
+      if (pttlError || typeof pttl !== 'number' || pttl < 0) {
+        return { value, remainingTtl: undefined };
+      }
+
+      return { value, remainingTtl: pttl / 1000 };
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('Caching - An error occurred while trying to get value and ttl from redis cache.', {
+          cacheKey: key,
+          error: error?.toString(),
+        });
+      }
+      return { value: undefined, remainingTtl: undefined };
+    }
   }
 
   async setOrUpdate<T>(
