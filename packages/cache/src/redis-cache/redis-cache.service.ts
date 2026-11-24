@@ -59,6 +59,91 @@ export class RedisCacheService {
     }
   }
 
+  /**
+   * Reads a value together with its remaining ttl (in seconds), in a single round-trip.
+   * remainingTtl is undefined when the key is missing or has no expiration.
+   */
+  async getWithRemainingTtl<T>(
+    key: string,
+  ): Promise<{ value: T | undefined, remainingTtl: number | undefined }> {
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const results = await this.redis.multi().get(key).pttl(key).exec();
+      const [[getError, data], [pttlError, pttl]] = results ?? [[null, null], [null, null]];
+      if (getError) {
+        throw getError;
+      }
+
+      if (!data) {
+        return { value: undefined, remainingTtl: undefined };
+      }
+
+      return {
+        value: JSON.parse(data as string) as T,
+        remainingTtl: pttlError ? undefined : this.toRemainingTtl(pttl),
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('RedisCache - An error occurred while trying to get value and ttl from redis cache.', {
+          cacheKey: key,
+          error: error?.toString(),
+        });
+      }
+      return { value: undefined, remainingTtl: undefined };
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('GET_WITH_TTL', performanceProfiler.duration);
+    }
+  }
+
+  /**
+   * Reads many values together with their remaining ttls (in seconds), in a single round-trip.
+   * Missing keys have value null; remainingTtl is undefined when the key is missing or has no expiration.
+   * On error all keys are returned as missing, so values stay aligned with keys.
+   */
+  async getManyWithRemainingTtl<T>(
+    keys: string[],
+  ): Promise<{ values: (T | null)[], remainingTtls: (number | undefined)[] }> {
+    if (keys.length === 0) {
+      return { values: [], remainingTtls: [] };
+    }
+
+    const performanceProfiler = new PerformanceProfiler();
+    try {
+      const multi = this.redis.multi().mget(keys);
+      for (const key of keys) {
+        multi.pttl(key);
+      }
+
+      const [[mgetError, items], ...pttlResults] = await multi.exec() ?? [[null, null]];
+      if (mgetError || !Array.isArray(items)) {
+        throw mgetError ?? new Error('Invalid mget result');
+      }
+
+      return {
+        values: items.map(item => item ? JSON.parse(item) as T : null),
+        remainingTtls: keys.map((_, index) => {
+          const [pttlError, pttl] = pttlResults[index] ?? [null, null];
+          return pttlError ? undefined : this.toRemainingTtl(pttl);
+        }),
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error('RedisCache - An error occurred while trying to get many keys and ttls from redis cache.', {
+          cacheKeys: keys,
+          error: error?.toString(),
+        });
+      }
+      return {
+        values: keys.map(() => null),
+        remainingTtls: keys.map(() => undefined),
+      };
+    } finally {
+      performanceProfiler.stop();
+      this.metricsService.setRedisDuration('MGET_WITH_TTL', performanceProfiler.duration);
+    }
+  }
+
   async setnx<T>(
     key: string,
     value: T,
@@ -977,6 +1062,13 @@ export class RedisCacheService {
       this.metricsService.setRedisDuration('LPOP', performanceProfiler.duration);
     }
     return items;
+  }
+
+  /**
+   * Converts a PTTL result (milliseconds; -1 no expiration, -2 missing key) to seconds.
+   */
+  private toRemainingTtl(pttl: unknown): number | undefined {
+    return typeof pttl === 'number' && pttl >= 0 ? pttl / 1000 : undefined;
   }
 
   private buildInternalCreateValueFunc<T>(

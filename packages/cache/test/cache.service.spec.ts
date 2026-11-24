@@ -4,13 +4,14 @@ import { RedisCacheService } from '../src/redis-cache/redis-cache.service';
 
 describe('CacheService', () => {
   let inMemoryCacheService: InMemoryCacheService;
-  let redisCacheService: jest.Mocked<Pick<RedisCacheService, 'asyncMulti' | 'set'>>;
+  let redisCacheService: jest.Mocked<Pick<RedisCacheService, 'getWithRemainingTtl' | 'getManyWithRemainingTtl' | 'set'>>;
   let cacheService: CacheService;
 
   beforeEach(() => {
     inMemoryCacheService = new InMemoryCacheService();
     redisCacheService = {
-      asyncMulti: jest.fn(),
+      getWithRemainingTtl: jest.fn(),
+      getManyWithRemainingTtl: jest.fn(),
       set: jest.fn().mockResolvedValue(undefined),
     };
     cacheService = new CacheService(
@@ -27,7 +28,7 @@ describe('CacheService', () => {
   describe('getOrSet', () => {
     it('should cache locally only for the remaining redis ttl when it is lower than the in-memory ttl', async () => {
       const key = 'key-low-remaining-ttl';
-      redisCacheService.asyncMulti.mockResolvedValue([[null, JSON.stringify({ a: 1 })], [null, 1000]]);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: { a: 1 }, remainingTtl: 1 });
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
       const createValueFunc = jest.fn();
 
@@ -40,7 +41,7 @@ describe('CacheService', () => {
 
     it('should cache locally for the in-memory ttl when the remaining redis ttl is higher', async () => {
       const key = 'key-high-remaining-ttl';
-      redisCacheService.asyncMulti.mockResolvedValue([[null, JSON.stringify('value')], [null, 60000]]);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: 'value', remainingTtl: 60 });
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
 
       await cacheService.getOrSet(key, jest.fn(), 30, 10);
@@ -50,7 +51,7 @@ describe('CacheService', () => {
 
     it('should cache locally for the in-memory ttl when the redis key has no expiration', async () => {
       const key = 'key-no-expiration';
-      redisCacheService.asyncMulti.mockResolvedValue([[null, JSON.stringify('value')], [null, -1]]);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: 'value', remainingTtl: undefined });
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
 
       await cacheService.getOrSet(key, jest.fn(), 10);
@@ -60,7 +61,7 @@ describe('CacheService', () => {
 
     it('should create the value and set it in both caches when missing from redis', async () => {
       const key = 'key-missing';
-      redisCacheService.asyncMulti.mockResolvedValue([[null, null], [null, -2]]);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: undefined, remainingTtl: undefined });
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
       const createValueFunc = jest.fn().mockResolvedValue('created');
 
@@ -79,12 +80,12 @@ describe('CacheService', () => {
       const result = await cacheService.getOrSet(key, jest.fn(), 10);
 
       expect(result).toEqual('local');
-      expect(redisCacheService.asyncMulti).not.toHaveBeenCalled();
+      expect(redisCacheService.getWithRemainingTtl).not.toHaveBeenCalled();
     });
 
-    it('should fall back to creating the value when redis fails', async () => {
+    it('should create the value when redis returns nothing', async () => {
       const key = 'key-redis-error';
-      redisCacheService.asyncMulti.mockRejectedValue(new Error('redis down'));
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: undefined, remainingTtl: undefined });
       const createValueFunc = jest.fn().mockResolvedValue('created');
 
       const result = await cacheService.getOrSet(key, createValueFunc, 10);
@@ -97,7 +98,7 @@ describe('CacheService', () => {
   describe('refreshLocal', () => {
     it('should cache locally only for the remaining redis ttl when it is lower than the given ttl', async () => {
       const key = 'refresh-low-remaining-ttl';
-      redisCacheService.asyncMulti.mockResolvedValue([[null, JSON.stringify('value')], [null, 2000]]);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: 'value', remainingTtl: 2 });
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
 
       const result = await cacheService.refreshLocal(key, 10);
@@ -109,7 +110,7 @@ describe('CacheService', () => {
     it('should delete the local key when missing from redis', async () => {
       const key = 'refresh-missing';
       inMemoryCacheService.set(key, 'local', 10);
-      redisCacheService.asyncMulti.mockResolvedValue([[null, null], [null, -2]]);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: undefined, remainingTtl: undefined });
 
       const result = await cacheService.refreshLocal(key, 10);
 
@@ -122,12 +123,10 @@ describe('CacheService', () => {
     it('should cache redis values locally for at most their remaining redis ttl', async () => {
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
       const batchSetSpy = jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
-      redisCacheService.asyncMulti.mockResolvedValue([
-        [null, [JSON.stringify('a-remote'), JSON.stringify('b-remote'), null]],
-        [null, 1000],
-        [null, -1],
-        [null, -2],
-      ]);
+      redisCacheService.getManyWithRemainingTtl.mockResolvedValue({
+        values: ['a-remote', 'b-remote', null],
+        remainingTtls: [1, undefined, undefined],
+      });
       const getter = jest.fn().mockResolvedValue({ 'batch-c': 'c-created' });
 
       const result = await cacheService.batchGet(['a', 'b', 'c'], element => `batch-${element}`, getter, 10);
@@ -139,9 +138,9 @@ describe('CacheService', () => {
       expect(batchSetSpy).toHaveBeenCalledWith(['batch-c'], ['c-created'], [10]);
     });
 
-    it('should fall back to the getter when redis fails', async () => {
+    it('should fall back to the getter when redis returns nothing', async () => {
       jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
-      redisCacheService.asyncMulti.mockRejectedValue(new Error('redis down'));
+      redisCacheService.getManyWithRemainingTtl.mockResolvedValue({ values: [null], remainingTtls: [undefined] });
       const getter = jest.fn().mockResolvedValue({ 'batch-x': 'x-created' });
 
       const result = await cacheService.batchGet(['x'], element => `batch-${element}`, getter, 10);

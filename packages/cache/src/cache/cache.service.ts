@@ -296,7 +296,7 @@ export class CacheService {
       return localValue;
     }
 
-    const { value: remoteValue, remainingTtl } = await this.getRemoteWithRemainingTtl<T>(key);
+    const { value: remoteValue, remainingTtl } = await this.redisCacheService.getWithRemainingTtl<T>(key);
     if (remoteValue !== undefined) {
       this.inMemoryCacheService.set<T>(key, remoteValue, this.capTtlToRemainingTtl(inMemoryTtl, remainingTtl), cacheNullable);
       return remoteValue;
@@ -309,75 +309,14 @@ export class CacheService {
     return value;
   }
 
-  /**
-   * Reads a value from redis together with its remaining ttl (in seconds), in a single round-trip.
-   * remainingTtl is undefined when the key has no expiration.
-   */
-  private async getRemoteWithRemainingTtl<T>(key: string): Promise<{ value: T | undefined, remainingTtl: number | undefined }> {
-    try {
-      const results = await this.redisCacheService.asyncMulti([['get', key], ['pttl', key]]);
-      const [getResult, pttlResult] = results ?? [];
-      const [getError, data] = getResult ?? [];
-      const [pttlError, pttl] = pttlResult ?? [];
-
-      if (getError || !data) {
-        return { value: undefined, remainingTtl: undefined };
-      }
-
-      const value = JSON.parse(data as string) as T;
-      if (pttlError || typeof pttl !== 'number' || pttl < 0) {
-        return { value, remainingTtl: undefined };
-      }
-
-      return { value, remainingTtl: pttl / 1000 };
-    } catch (error) {
-      if (error instanceof Error) {
-        this.logger.error('Caching - An error occurred while trying to get value and ttl from redis cache.', {
-          cacheKey: key,
-          error: error?.toString(),
-        });
-      }
-      return { value: undefined, remainingTtl: undefined };
-    }
-  }
-
-  /**
-   * Same as batchGetManyRemote, but also returns the remaining ttl (in seconds) of each key, in a single round-trip per chunk.
-   * remainingTtl is undefined when the key has no expiration or could not be read.
-   */
-  private async batchGetManyRemoteWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | undefined | null)[], remainingTtls: (number | undefined)[] }> {
-    const values: (T | undefined | null)[] = [];
+  private async batchGetManyRemoteWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | null)[], remainingTtls: (number | undefined)[] }> {
+    const values: (T | null)[] = [];
     const remainingTtls: (number | undefined)[] = [];
 
     for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, 100)) {
-      try {
-        const results = await this.redisCacheService.asyncMulti([
-          ['mget', ...chunkKeys],
-          ...chunkKeys.map(key => ['pttl', key]),
-        ]);
-        const [mgetResult, ...pttlResults] = results ?? [];
-        const [mgetError, items] = mgetResult ?? [];
-        if (mgetError || !Array.isArray(items)) {
-          throw mgetError ?? new Error('Invalid mget result');
-        }
-
-        values.push(...items.map(item => item ? JSON.parse(item) as T : null));
-        remainingTtls.push(...chunkKeys.map((_, index) => {
-          const [pttlError, pttl] = pttlResults[index] ?? [];
-          return !pttlError && typeof pttl === 'number' && pttl >= 0 ? pttl / 1000 : undefined;
-        }));
-      } catch (error) {
-        if (error instanceof Error) {
-          this.logger.error('Caching - An error occurred while trying to get many keys and ttls from redis cache.', {
-            cacheKeys: chunkKeys,
-            error: error?.toString(),
-          });
-        }
-
-        // treat the whole chunk as missing, keeping values aligned with keys
-        values.push(...chunkKeys.map(() => null));
-        remainingTtls.push(...chunkKeys.map(() => undefined));
-      }
+      const chunkResult = await this.redisCacheService.getManyWithRemainingTtl<T>(chunkKeys);
+      values.push(...chunkResult.values);
+      remainingTtls.push(...chunkResult.remainingTtls);
     }
 
     return { values, remainingTtls };
@@ -406,7 +345,7 @@ export class CacheService {
   }
 
   async refreshLocal<T>(key: string, ttl: number = this.getCacheTtl()): Promise<T | undefined> {
-    const { value, remainingTtl } = await this.getRemoteWithRemainingTtl<T>(key);
+    const { value, remainingTtl } = await this.redisCacheService.getWithRemainingTtl<T>(key);
     if (value) {
       this.setLocal<T>(key, value, this.capTtlToRemainingTtl(ttl, remainingTtl));
     } else {
