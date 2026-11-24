@@ -93,4 +93,61 @@ describe('CacheService', () => {
       expect(createValueFunc).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('refreshLocal', () => {
+    it('should cache locally only for the remaining redis ttl when it is lower than the given ttl', async () => {
+      const key = 'refresh-low-remaining-ttl';
+      redisCacheService.asyncMulti.mockResolvedValue([[null, JSON.stringify('value')], [null, 2000]]);
+      const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
+
+      const result = await cacheService.refreshLocal(key, 10);
+
+      expect(result).toEqual('value');
+      expect(setLocalSpy).toHaveBeenCalledWith(key, 'value', 2, true);
+    });
+
+    it('should delete the local key when missing from redis', async () => {
+      const key = 'refresh-missing';
+      inMemoryCacheService.set(key, 'local', 10);
+      redisCacheService.asyncMulti.mockResolvedValue([[null, null], [null, -2]]);
+
+      const result = await cacheService.refreshLocal(key, 10);
+
+      expect(result).toBeUndefined();
+      expect(inMemoryCacheService.get(key)).toBeUndefined();
+    });
+  });
+
+  describe('batchGet', () => {
+    it('should cache redis values locally for at most their remaining redis ttl', async () => {
+      const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
+      const batchSetSpy = jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
+      redisCacheService.asyncMulti.mockResolvedValue([
+        [null, [JSON.stringify('a-remote'), JSON.stringify('b-remote'), null]],
+        [null, 1000],
+        [null, -1],
+        [null, -2],
+      ]);
+      const getter = jest.fn().mockResolvedValue({ 'batch-c': 'c-created' });
+
+      const result = await cacheService.batchGet(['a', 'b', 'c'], element => `batch-${element}`, getter, 10);
+
+      expect(result).toEqual({ 'batch-a': 'a-remote', 'batch-b': 'b-remote', 'batch-c': 'c-created' });
+      expect(getter).toHaveBeenCalledWith(['c']);
+      expect(setLocalSpy).toHaveBeenCalledWith('batch-a', 'a-remote', 1, true);
+      expect(setLocalSpy).toHaveBeenCalledWith('batch-b', 'b-remote', 10, true);
+      expect(batchSetSpy).toHaveBeenCalledWith(['batch-c'], ['c-created'], [10]);
+    });
+
+    it('should fall back to the getter when redis fails', async () => {
+      jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
+      redisCacheService.asyncMulti.mockRejectedValue(new Error('redis down'));
+      const getter = jest.fn().mockResolvedValue({ 'batch-x': 'x-created' });
+
+      const result = await cacheService.batchGet(['x'], element => `batch-${element}`, getter, 10);
+
+      expect(result).toEqual({ 'batch-x': 'x-created' });
+      expect(getter).toHaveBeenCalledWith(['x']);
+    });
+  });
 });

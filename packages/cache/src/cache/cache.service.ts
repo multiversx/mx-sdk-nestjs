@@ -298,9 +298,7 @@ export class CacheService {
 
     const { value: remoteValue, remainingTtl } = await this.getRemoteWithRemainingTtl<T>(key);
     if (remoteValue !== undefined) {
-      // do not keep the value locally longer than it still lives in redis
-      const localTtl = remainingTtl !== undefined ? Math.min(inMemoryTtl, remainingTtl) : inMemoryTtl;
-      this.inMemoryCacheService.set<T>(key, remoteValue, localTtl, cacheNullable);
+      this.inMemoryCacheService.set<T>(key, remoteValue, this.capTtlToRemainingTtl(inMemoryTtl, remainingTtl), cacheNullable);
       return remoteValue;
     }
 
@@ -343,6 +341,55 @@ export class CacheService {
     }
   }
 
+  /**
+   * Same as batchGetManyRemote, but also returns the remaining ttl (in seconds) of each key, in a single round-trip per chunk.
+   * remainingTtl is undefined when the key has no expiration or could not be read.
+   */
+  private async batchGetManyRemoteWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | undefined | null)[], remainingTtls: (number | undefined)[] }> {
+    const values: (T | undefined | null)[] = [];
+    const remainingTtls: (number | undefined)[] = [];
+
+    for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, 100)) {
+      try {
+        const results = await this.redisCacheService.asyncMulti([
+          ['mget', ...chunkKeys],
+          ...chunkKeys.map(key => ['pttl', key]),
+        ]);
+        const [mgetResult, ...pttlResults] = results ?? [];
+        const [mgetError, items] = mgetResult ?? [];
+        if (mgetError || !Array.isArray(items)) {
+          throw mgetError ?? new Error('Invalid mget result');
+        }
+
+        values.push(...items.map(item => item ? JSON.parse(item) as T : null));
+        remainingTtls.push(...chunkKeys.map((_, index) => {
+          const [pttlError, pttl] = pttlResults[index] ?? [];
+          return !pttlError && typeof pttl === 'number' && pttl >= 0 ? pttl / 1000 : undefined;
+        }));
+      } catch (error) {
+        if (error instanceof Error) {
+          this.logger.error('Caching - An error occurred while trying to get many keys and ttls from redis cache.', {
+            cacheKeys: chunkKeys,
+            error: error?.toString(),
+          });
+        }
+
+        // treat the whole chunk as missing, keeping values aligned with keys
+        values.push(...chunkKeys.map(() => null));
+        remainingTtls.push(...chunkKeys.map(() => undefined));
+      }
+    }
+
+    return { values, remainingTtls };
+  }
+
+  /**
+   * Do not keep a value locally longer than it still lives in redis.
+   */
+  private capTtlToRemainingTtl(ttl: number, remainingTtl: number | undefined): number {
+    return remainingTtl !== undefined ? Math.min(ttl, remainingTtl) : ttl;
+  }
+
   async setOrUpdate<T>(
     key: string,
     createValueFunc: () => Promise<T>,
@@ -359,9 +406,9 @@ export class CacheService {
   }
 
   async refreshLocal<T>(key: string, ttl: number = this.getCacheTtl()): Promise<T | undefined> {
-    const value = await this.getRemote<T>(key);
+    const { value, remainingTtl } = await this.getRemoteWithRemainingTtl<T>(key);
     if (value) {
-      this.setLocal<T>(key, value, ttl);
+      this.setLocal<T>(key, value, this.capTtlToRemainingTtl(ttl, remainingTtl));
     } else {
       this.logger.log(`Deleting local cache key '${key}'`);
       this.deleteLocal(key);
@@ -465,6 +512,8 @@ export class CacheService {
     ttl: number,
     chunkSize: number = 100,
   ): Promise<{ [key: string]: TOUT; }> {
+    const remoteRemainingTtls: Map<string, number> = new Map();
+
     return await BatchUtils.batchGet<TIN, TOUT>(
       elements,
       cacheKeyFunc,
@@ -485,7 +534,7 @@ export class CacheService {
           },
           setter: async elements => {
             for (const key of Object.keys(elements)) {
-              this.setLocal(key, elements[key], ttl);
+              this.setLocal(key, elements[key], this.capTtlToRemainingTtl(ttl, remoteRemainingTtls.get(key)));
             }
           },
         },
@@ -494,11 +543,17 @@ export class CacheService {
             const result: { [key: string]: TOUT; } = {};
             const keys = elements.map(element => cacheKeyFunc(element));
 
-            const getResults = await this.batchGetManyRemote<TOUT>(keys);
+            const { values: getResults, remainingTtls } = await this.batchGetManyRemoteWithRemainingTtl<TOUT>(keys);
 
             for (const [index, element] of elements.entries()) {
               if (getResults[index] !== null) {
-                result[cacheKeyFunc(element)] = getResults[index] as TOUT;
+                const key = cacheKeyFunc(element);
+                result[key] = getResults[index] as TOUT;
+
+                const remainingTtl = remainingTtls[index];
+                if (remainingTtl !== undefined) {
+                  remoteRemainingTtls.set(key, remainingTtl);
+                }
               }
             }
 
