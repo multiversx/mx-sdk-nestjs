@@ -138,6 +138,29 @@ describe('CacheService', () => {
       expect(batchSetSpy).toHaveBeenCalledWith(['batch-c'], ['c-created'], [10]);
     });
 
+    it('should keep values aligned with keys when one redis chunk fails and chunkSize > 100', async () => {
+      jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
+      const ids = Array.from({ length: 150 }, (_, index) => `aligned-${index}`);
+      redisCacheService.getManyWithRemainingTtl.mockImplementation(async (keys: string[]) => {
+        // first chunk fails (all missing), second chunk is found
+        const failed = keys.includes('aligned-0');
+        return {
+          values: keys.map(key => failed ? null : `remote-${key}`) as any[],
+          remainingTtls: keys.map(() => undefined),
+        };
+      });
+      const getter = jest.fn().mockImplementation(async (elements: string[]) =>
+        Object.fromEntries(elements.map(element => [element, `created-${element}`])));
+
+      const result = await cacheService.batchGet(ids, element => element, getter, 10, 150);
+
+      expect(redisCacheService.getManyWithRemainingTtl.mock.calls.map(([keys]) => keys.length)).toEqual([100, 50]);
+      expect(getter).toHaveBeenCalledWith(ids.slice(0, 100));
+      for (const [index, id] of ids.entries()) {
+        expect(result[id]).toEqual(index < 100 ? `created-${id}` : `remote-${id}`);
+      }
+    });
+
     it('should fall back to the getter when redis returns nothing', async () => {
       jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
       redisCacheService.getManyWithRemainingTtl.mockResolvedValue({ values: [null], remainingTtls: [undefined] });

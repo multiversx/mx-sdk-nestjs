@@ -61,7 +61,7 @@ export class RedisCacheService {
 
   /**
    * Reads a value together with its remaining ttl (in seconds), in a single round-trip.
-   * remainingTtl is undefined when the key is missing or has no expiration.
+   * remainingTtl is undefined when the key is missing, has no expiration or its ttl could not be read.
    */
   async getWithRemainingTtl<T>(
     key: string,
@@ -98,7 +98,7 @@ export class RedisCacheService {
 
   /**
    * Reads many values together with their remaining ttls (in seconds), in a single round-trip.
-   * Missing keys have value null; remainingTtl is undefined when the key is missing or has no expiration.
+   * Missing keys have value null; remainingTtl is undefined when the key is missing, has no expiration or its ttl could not be read.
    * On error all keys are returned as missing, so values stay aligned with keys.
    */
   async getManyWithRemainingTtl<T>(

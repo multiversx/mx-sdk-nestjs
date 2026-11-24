@@ -309,26 +309,6 @@ export class CacheService {
     return value;
   }
 
-  private async batchGetManyRemoteWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | null)[], remainingTtls: (number | undefined)[] }> {
-    const values: (T | null)[] = [];
-    const remainingTtls: (number | undefined)[] = [];
-
-    for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, 100)) {
-      const chunkResult = await this.redisCacheService.getManyWithRemainingTtl<T>(chunkKeys);
-      values.push(...chunkResult.values);
-      remainingTtls.push(...chunkResult.remainingTtls);
-    }
-
-    return { values, remainingTtls };
-  }
-
-  /**
-   * Do not keep a value locally longer than it still lives in redis.
-   */
-  private capTtlToRemainingTtl(ttl: number, remainingTtl: number | undefined): number {
-    return remainingTtl !== undefined ? Math.min(ttl, remainingTtl) : ttl;
-  }
-
   async setOrUpdate<T>(
     key: string,
     createValueFunc: () => Promise<T>,
@@ -368,6 +348,19 @@ export class CacheService {
     }
 
     return result;
+  }
+
+  private async batchGetManyRemoteWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | null)[], remainingTtls: (number | undefined)[] }> {
+    const values: (T | null)[] = [];
+    const remainingTtls: (number | undefined)[] = [];
+
+    for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, 100)) {
+      const chunkResult = await this.redisCacheService.getManyWithRemainingTtl<T>(chunkKeys);
+      values.push(...chunkResult.values);
+      remainingTtls.push(...chunkResult.remainingTtls);
+    }
+
+    return { values, remainingTtls };
   }
 
   async batchProcess<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {
@@ -678,6 +671,13 @@ export class CacheService {
       ttl,
       chunkSize,
     );
+  }
+
+  /**
+   * Do not keep a value locally longer than it still lives in redis.
+   */
+  private capTtlToRemainingTtl(ttl: number, remainingTtl: number | undefined): number {
+    return remainingTtl !== undefined ? Math.min(ttl, remainingTtl) : ttl;
   }
 
   private spreadTtl(ttl: number): number {
