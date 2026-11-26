@@ -8,7 +8,7 @@
     "lib/**/*"
   ],
   "scripts": {
-    "test": "jest --config=../../jest.config.json --passWithNoTests monitoring/*",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config=../../jest.config.json --passWithNoTests monitoring/*",
     "build": "tsc",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
@@ -36,7 +36,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "peerDependencies": {
-    "@nestjs/common": "^11.x"
+    "@nestjs/common": "^12.x"
   },
   "publishConfig": {
     "access": "public",

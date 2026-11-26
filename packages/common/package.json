@@ -8,7 +8,7 @@
     "lib/**/*"
   ],
   "scripts": {
-    "test": "jest --config=../../jest.config.json --passWithNoTests common/*",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config=../../jest.config.json --passWithNoTests common/*",
     "build": "tsc",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
@@ -32,16 +32,16 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^15.4.0",
+    "@multiversx/sdk-core": "^16.1.0",
     "nest-winston": "^2.0.0",
     "winston": "^3.19.0"
   },
   "peerDependencies": {
     "@multiversx/sdk-nestjs-monitoring": "^7.0.0",
-    "@nestjs/common": "^11.x",
-    "@nestjs/config": "^4.x",
-    "@nestjs/core": "^11.x",
-    "@nestjs/swagger": "^11.x"
+    "@nestjs/common": "^12.x",
+    "@nestjs/config": "^12.x",
+    "@nestjs/core": "^12.x",
+    "@nestjs/swagger": "^12.x"
   },
   "publishConfig": {
     "access": "public",

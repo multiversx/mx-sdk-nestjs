@@ -8,7 +8,7 @@
     "lib/**/*"
   ],
   "scripts": {
-    "test": "jest --config=../../jest.config.json --passWithNoTests cache/*",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config=../../jest.config.json --passWithNoTests cache/*",
     "build": "tsc",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
@@ -41,8 +41,8 @@
     "@multiversx/sdk-nestjs-common": "^7.0.0",
     "@multiversx/sdk-nestjs-monitoring": "^7.0.0",
     "@multiversx/sdk-nestjs-redis": "^7.0.0",
-    "@nestjs/common": "^11.x",
-    "@nestjs/core": "^11.x"
+    "@nestjs/common": "^12.x",
+    "@nestjs/core": "^12.x"
   },
   "publishConfig": {
     "access": "public",
