@@ -49,6 +49,22 @@ describe('RedisCacheService', () => {
       expect(result).toEqual({ value: undefined, remainingTtl: undefined });
     });
 
+    it('should return undefined when the get command fails', async () => {
+      exec.mockResolvedValue([[new Error('get failed'), null], [null, 1000]]);
+
+      const result = await redisCacheService.getWithRemainingTtl('key');
+
+      expect(result).toEqual({ value: undefined, remainingTtl: undefined });
+    });
+
+    it('should return the value without remaining ttl when the pttl command fails', async () => {
+      exec.mockResolvedValue([[null, JSON.stringify('value')], [new Error('pttl failed'), null]]);
+
+      const result = await redisCacheService.getWithRemainingTtl('key');
+
+      expect(result).toEqual({ value: 'value', remainingTtl: undefined });
+    });
+
     it('should return undefined when redis fails', async () => {
       exec.mockRejectedValue(new Error('redis down'));
 
@@ -71,6 +87,22 @@ describe('RedisCacheService', () => {
 
       expect(commands).toEqual([['mget', ['a', 'b', 'c']], ['pttl', 'a'], ['pttl', 'b'], ['pttl', 'c']]);
       expect(result).toEqual({ values: ['a', null, 'c'], remainingTtls: [1, undefined, undefined] });
+    });
+
+    it('should return all keys as missing when the mget command fails', async () => {
+      exec.mockResolvedValue([[new Error('mget failed'), null], [null, 1000], [null, 1000]]);
+
+      const result = await redisCacheService.getManyWithRemainingTtl(['a', 'b']);
+
+      expect(result).toEqual({ values: [null, null], remainingTtls: [undefined, undefined] });
+    });
+
+    it('should return an undefined remaining ttl only for keys whose pttl command fails', async () => {
+      exec.mockResolvedValue([[null, [JSON.stringify('a'), JSON.stringify('b')]], [new Error('pttl failed'), null], [null, 2000]]);
+
+      const result = await redisCacheService.getManyWithRemainingTtl(['a', 'b']);
+
+      expect(result).toEqual({ values: ['a', 'b'], remainingTtls: [undefined, 2] });
     });
 
     it('should return all keys as missing when redis fails', async () => {

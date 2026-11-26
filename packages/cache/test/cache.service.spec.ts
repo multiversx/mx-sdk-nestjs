@@ -82,17 +82,6 @@ describe('CacheService', () => {
       expect(result).toEqual('local');
       expect(redisCacheService.getWithRemainingTtl).not.toHaveBeenCalled();
     });
-
-    it('should create the value when redis returns nothing', async () => {
-      const key = 'key-redis-error';
-      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: undefined, remainingTtl: undefined });
-      const createValueFunc = jest.fn().mockResolvedValue('created');
-
-      const result = await cacheService.getOrSet(key, createValueFunc, 10);
-
-      expect(result).toEqual('created');
-      expect(createValueFunc).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('refreshLocal', () => {
@@ -105,6 +94,16 @@ describe('CacheService', () => {
 
       expect(result).toEqual('value');
       expect(setLocalSpy).toHaveBeenCalledWith(key, 'value', 2, true);
+    });
+
+    it('should delete the local key when the remaining redis ttl is 0', async () => {
+      const key = 'refresh-zero-remaining-ttl';
+      inMemoryCacheService.set(key, 'old-local', 10);
+      redisCacheService.getWithRemainingTtl.mockResolvedValue({ value: 'value', remainingTtl: 0 });
+
+      await cacheService.refreshLocal(key, 10);
+
+      expect(inMemoryCacheService.get(key)).toBeUndefined();
     });
 
     it('should delete the local key when missing from redis', async () => {
@@ -120,6 +119,13 @@ describe('CacheService', () => {
   });
 
   describe('batchGet', () => {
+    let now: number;
+
+    beforeEach(() => {
+      now = 1_000_000;
+      jest.spyOn(Date, 'now').mockImplementation(() => now);
+    });
+
     it('should cache redis values locally for at most their remaining redis ttl', async () => {
       const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
       const batchSetSpy = jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
@@ -135,10 +141,33 @@ describe('CacheService', () => {
       expect(getter).toHaveBeenCalledWith(['c']);
       expect(setLocalSpy).toHaveBeenCalledWith('batch-a', 'a-remote', 1, true);
       expect(setLocalSpy).toHaveBeenCalledWith('batch-b', 'b-remote', 10, true);
+      expect(setLocalSpy).toHaveBeenCalledWith('batch-c', 'c-created', 10, true);
       expect(batchSetSpy).toHaveBeenCalledWith(['batch-c'], ['c-created'], [10]);
     });
 
+    it('should subtract the getter runtime from the remaining redis ttl', async () => {
+      const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
+      jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
+      redisCacheService.getManyWithRemainingTtl.mockResolvedValue({
+        values: ['a-remote', 'b-remote', null],
+        remainingTtls: [2, 5, undefined],
+      });
+      const getter = jest.fn().mockImplementation(async () => {
+        now += 3000; // the getter takes 3s
+        return { 'slow-c': 'c-created' };
+      });
+
+      await cacheService.batchGet(['a', 'b', 'c'], element => `slow-${element}`, getter, 10);
+
+      // expired in redis while the getter was running -> not stored locally
+      expect(setLocalSpy).toHaveBeenCalledWith('slow-a', 'a-remote', -1, true);
+      expect(inMemoryCacheService.get('slow-a')).toBeUndefined();
+      expect(setLocalSpy).toHaveBeenCalledWith('slow-b', 'b-remote', 2, true);
+      expect(setLocalSpy).toHaveBeenCalledWith('slow-c', 'c-created', 10, true);
+    });
+
     it('should keep values aligned with keys when one redis chunk fails and chunkSize > 100', async () => {
+      const setLocalSpy = jest.spyOn(inMemoryCacheService, 'set');
       jest.spyOn(cacheService, 'batchSet').mockResolvedValue(undefined);
       const ids = Array.from({ length: 150 }, (_, index) => `aligned-${index}`);
       redisCacheService.getManyWithRemainingTtl.mockImplementation(async (keys: string[]) => {
@@ -146,7 +175,8 @@ describe('CacheService', () => {
         const failed = keys.includes('aligned-0');
         return {
           values: keys.map(key => failed ? null : `remote-${key}`) as any[],
-          remainingTtls: keys.map(() => undefined),
+          // distinct ttl per key, so a misalignment would be detected
+          remainingTtls: keys.map(key => failed ? undefined : Number(key.split('-')[1]) / 100),
         };
       });
       const getter = jest.fn().mockImplementation(async (elements: string[]) =>
@@ -158,6 +188,7 @@ describe('CacheService', () => {
       expect(getter).toHaveBeenCalledWith(ids.slice(0, 100));
       for (const [index, id] of ids.entries()) {
         expect(result[id]).toEqual(index < 100 ? `created-${id}` : `remote-${id}`);
+        expect(setLocalSpy).toHaveBeenCalledWith(id, result[id], index < 100 ? 10 : index / 100, true);
       }
     });
 

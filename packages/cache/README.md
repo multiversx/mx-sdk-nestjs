@@ -183,6 +183,18 @@ export class ConfigService {
   - `ttl`: Time-to-live for the cached item in seconds.
   - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`
 
+#### `getWithRemainingTtl<T>(key: string): Promise<{ value: T | undefined, remainingTtl: number | undefined }>`
+
+- **Parameters:**
+  - `key`: The key of the item to retrieve.
+- **Returns:** A `Promise` that resolves to the cached value (or `undefined` if the key is not found) and its remaining time-to-live in seconds, read in a single round-trip. `remainingTtl` is `undefined` when the key is missing, has no expiration or its ttl could not be read.
+
+#### `getManyWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | null)[], remainingTtls: (number | undefined)[] }>`
+
+- **Parameters:**
+  - `keys`: An array of keys to retrieve.
+- **Returns:** A `Promise` that resolves to the cached values (`null` if not found) and their remaining time-to-live in seconds, aligned with the input keys and read in a single round-trip. On error, all keys are returned as not found.
+
 **Note:** These are just some of the methods available in the `RedisCacheService` class.
 
 ## Cache Service
@@ -270,7 +282,7 @@ Examples:
 #### `getOrSet<T>(key: string, createValueFunc: () => Promise<T>, ttl: number, cacheNullable?: boolean): Promise<T>`
 
 - **Parameters:**
-  - `key`: The key of the item to retrieve or create. The method first checks the local in-memory cache, and if not found, it retrieves the value from the Redis cache or creates it using the provided function.
+  - `key`: The key of the item to retrieve or create. The method first checks the local in-memory cache, and if not found, it retrieves the value from the Redis cache or creates it using the provided function. When the value is retrieved from the Redis cache, it is cached locally for at most the time it still has to live in Redis.
   - `createValueFunc`: A function that creates the new value for the key.
   - `ttl`: Time-to-live for the cached item in seconds.
   - `cacheNullable` (optional): If set to `false`, the method will not cache null or undefined values. Default: `true`

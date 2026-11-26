@@ -7,6 +7,8 @@ import { RedisCacheService } from '../redis-cache/redis-cache.service';
 import { CachingModuleOptions } from '../entities/caching.module.options';
 import { ADDITIONAL_CACHING_OPTIONS } from '../entities/common';
 
+const REDIS_BATCH_CHUNK_SIZE = 100;
+
 @Injectable()
 export class CacheService {
   private readonly pendingExecuter: PendingExecuter;
@@ -326,8 +328,9 @@ export class CacheService {
 
   async refreshLocal<T>(key: string, ttl: number = this.getCacheTtl()): Promise<T | undefined> {
     const { value, remainingTtl } = await this.redisCacheService.getWithRemainingTtl<T>(key);
-    if (value) {
-      this.setLocal<T>(key, value, this.capTtlToRemainingTtl(ttl, remainingTtl));
+    const localTtl = this.capTtlToRemainingTtl(ttl, remainingTtl);
+    if (value && localTtl > 0) {
+      this.setLocal<T>(key, value, localTtl);
     } else {
       this.logger.log(`Deleting local cache key '${key}'`);
       this.deleteLocal(key);
@@ -337,7 +340,7 @@ export class CacheService {
   }
 
   async batchGetManyRemote<T>(keys: string[]): Promise<(T | undefined | null)[]> {
-    const chunks = BatchUtils.splitArrayIntoChunks(keys, 100);
+    const chunks = BatchUtils.splitArrayIntoChunks(keys, REDIS_BATCH_CHUNK_SIZE);
 
     const result = [];
 
@@ -354,7 +357,7 @@ export class CacheService {
     const values: (T | null)[] = [];
     const remainingTtls: (number | undefined)[] = [];
 
-    for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, 100)) {
+    for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, REDIS_BATCH_CHUNK_SIZE)) {
       const chunkResult = await this.redisCacheService.getManyWithRemainingTtl<T>(chunkKeys);
       values.push(...chunkResult.values);
       remainingTtls.push(...chunkResult.remainingTtls);
@@ -444,7 +447,9 @@ export class CacheService {
     ttl: number,
     chunkSize: number = 100,
   ): Promise<{ [key: string]: TOUT; }> {
-    const remoteRemainingTtls: Map<string, number> = new Map();
+    // absolute expiration (ms) of the values found in redis; setters run only after the getter level,
+    // so the remaining ttl is computed when setting, not when reading
+    const remoteExpirations: Map<string, number> = new Map();
 
     return await BatchUtils.batchGet<TIN, TOUT>(
       elements,
@@ -466,7 +471,10 @@ export class CacheService {
           },
           setter: async elements => {
             for (const key of Object.keys(elements)) {
-              this.setLocal(key, elements[key], this.capTtlToRemainingTtl(ttl, remoteRemainingTtls.get(key)));
+              const expiration = remoteExpirations.get(key);
+              const remainingTtl = expiration !== undefined ? (expiration - Date.now()) / 1000 : undefined;
+              // a ttl <= 0 is not stored by setLocal
+              this.setLocal(key, elements[key], this.capTtlToRemainingTtl(ttl, remainingTtl));
             }
           },
         },
@@ -484,7 +492,7 @@ export class CacheService {
 
                 const remainingTtl = remainingTtls[index];
                 if (remainingTtl !== undefined) {
-                  remoteRemainingTtls.set(key, remainingTtl);
+                  remoteExpirations.set(key, Date.now() + remainingTtl * 1000);
                 }
               }
             }

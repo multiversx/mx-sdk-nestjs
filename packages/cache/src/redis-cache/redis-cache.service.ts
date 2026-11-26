@@ -92,7 +92,7 @@ export class RedisCacheService {
       return { value: undefined, remainingTtl: undefined };
     } finally {
       performanceProfiler.stop();
-      this.metricsService.setRedisDuration('GET_WITH_TTL', performanceProfiler.duration);
+      this.metricsService.setRedisDuration('GETWITHTTL', performanceProfiler.duration);
     }
   }
 
@@ -140,7 +140,7 @@ export class RedisCacheService {
       };
     } finally {
       performanceProfiler.stop();
-      this.metricsService.setRedisDuration('MGET_WITH_TTL', performanceProfiler.duration);
+      this.metricsService.setRedisDuration('MGETWITHTTL', performanceProfiler.duration);
     }
   }
 
