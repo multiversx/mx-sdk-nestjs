@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^15.4.0",
-    "nest-winston": "^1.10.2",
+    "nest-winston": "^2.0.0",
     "winston": "^3.19.0"
   },
   "peerDependencies": {

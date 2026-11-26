@@ -32,11 +32,12 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@golevelup/nestjs-rabbitmq": "9.0.0"
+    "@golevelup/nestjs-rabbitmq": "9.1.2"
   },
   "peerDependencies": {
     "@multiversx/sdk-nestjs-common": "^7.0.0",
-    "@nestjs/common": "^11.x"
+    "@nestjs/common": "^11.x",
+    "@nestjs/core": "^11.x"
   },
   "publishConfig": {
     "access": "public",

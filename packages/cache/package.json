@@ -33,7 +33,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "lru-cache": "^11.3.5",
+    "lru-cache": "^11.5.3",
     "moment": "^2.31.0",
     "tiny-async-pool": "^2.1.0"
   },
