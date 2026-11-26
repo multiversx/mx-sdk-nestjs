@@ -7,6 +7,8 @@ import { RedisCacheService } from '../redis-cache/redis-cache.service';
 import { CachingModuleOptions } from '../entities/caching.module.options';
 import { ADDITIONAL_CACHING_OPTIONS } from '../entities/common';
 
+const REDIS_BATCH_CHUNK_SIZE = 100;
+
 @Injectable()
 export class CacheService {
   private readonly pendingExecuter: PendingExecuter;
@@ -291,12 +293,22 @@ export class CacheService {
     inMemoryTtl: number = ttl,
     cacheNullable: boolean = true
   ): Promise<T> {
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
-    const getOrAddFromRedisFunc = async (): Promise<T> => {
-      return await this.redisCacheService.getOrSet<T>(key, internalCreateValueFunc, ttl, cacheNullable);
-    };
+    const localValue = this.inMemoryCacheService.get<T>(key);
+    if (localValue !== undefined) {
+      return localValue;
+    }
 
-    return await this.inMemoryCacheService.getOrSet<T>(key, getOrAddFromRedisFunc, inMemoryTtl, cacheNullable);
+    const { value: remoteValue, remainingTtl } = await this.redisCacheService.getWithRemainingTtl<T>(key);
+    if (remoteValue !== undefined) {
+      this.inMemoryCacheService.set<T>(key, remoteValue, this.capTtlToRemainingTtl(inMemoryTtl, remainingTtl), cacheNullable);
+      return remoteValue;
+    }
+
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc<T>(key, createValueFunc);
+    const value = await internalCreateValueFunc();
+    await this.redisCacheService.set<T>(key, value, ttl, cacheNullable);
+    this.inMemoryCacheService.set<T>(key, value, inMemoryTtl, cacheNullable);
+    return value;
   }
 
   async setOrUpdate<T>(
@@ -315,9 +327,10 @@ export class CacheService {
   }
 
   async refreshLocal<T>(key: string, ttl: number = this.getCacheTtl()): Promise<T | undefined> {
-    const value = await this.getRemote<T>(key);
-    if (value) {
-      this.setLocal<T>(key, value, ttl);
+    const { value, remainingTtl } = await this.redisCacheService.getWithRemainingTtl<T>(key);
+    const localTtl = this.capTtlToRemainingTtl(ttl, remainingTtl);
+    if (value && localTtl > 0) {
+      this.setLocal<T>(key, value, localTtl);
     } else {
       this.logger.log(`Deleting local cache key '${key}'`);
       this.deleteLocal(key);
@@ -327,7 +340,7 @@ export class CacheService {
   }
 
   async batchGetManyRemote<T>(keys: string[]): Promise<(T | undefined | null)[]> {
-    const chunks = BatchUtils.splitArrayIntoChunks(keys, 100);
+    const chunks = BatchUtils.splitArrayIntoChunks(keys, REDIS_BATCH_CHUNK_SIZE);
 
     const result = [];
 
@@ -338,6 +351,19 @@ export class CacheService {
     }
 
     return result;
+  }
+
+  private async batchGetManyRemoteWithRemainingTtl<T>(keys: string[]): Promise<{ values: (T | null)[], remainingTtls: (number | undefined)[] }> {
+    const values: (T | null)[] = [];
+    const remainingTtls: (number | undefined)[] = [];
+
+    for (const chunkKeys of BatchUtils.splitArrayIntoChunks(keys, REDIS_BATCH_CHUNK_SIZE)) {
+      const chunkResult = await this.redisCacheService.getManyWithRemainingTtl<T>(chunkKeys);
+      values.push(...chunkResult.values);
+      remainingTtls.push(...chunkResult.remainingTtls);
+    }
+
+    return { values, remainingTtls };
   }
 
   async batchProcess<IN, OUT>(payload: IN[], cacheKeyFunction: (element: IN) => string, handler: (generator: IN) => Promise<OUT>, ttl: number = this.getCacheTtl(), skipCache: boolean = false): Promise<OUT[]> {
@@ -421,6 +447,10 @@ export class CacheService {
     ttl: number,
     chunkSize: number = 100,
   ): Promise<{ [key: string]: TOUT; }> {
+    // absolute expiration (ms) of the values found in redis; setters run only after the getter level,
+    // so the remaining ttl is computed when setting, not when reading
+    const remoteExpirations: Map<string, number> = new Map();
+
     return await BatchUtils.batchGet<TIN, TOUT>(
       elements,
       cacheKeyFunc,
@@ -441,7 +471,10 @@ export class CacheService {
           },
           setter: async elements => {
             for (const key of Object.keys(elements)) {
-              this.setLocal(key, elements[key], ttl);
+              const expiration = remoteExpirations.get(key);
+              const remainingTtl = expiration !== undefined ? (expiration - Date.now()) / 1000 : undefined;
+              // a ttl <= 0 is not stored by setLocal
+              this.setLocal(key, elements[key], this.capTtlToRemainingTtl(ttl, remainingTtl));
             }
           },
         },
@@ -450,11 +483,17 @@ export class CacheService {
             const result: { [key: string]: TOUT; } = {};
             const keys = elements.map(element => cacheKeyFunc(element));
 
-            const getResults = await this.batchGetManyRemote<TOUT>(keys);
+            const { values: getResults, remainingTtls } = await this.batchGetManyRemoteWithRemainingTtl<TOUT>(keys);
 
             for (const [index, element] of elements.entries()) {
               if (getResults[index] !== null) {
-                result[cacheKeyFunc(element)] = getResults[index] as TOUT;
+                const key = cacheKeyFunc(element);
+                result[key] = getResults[index] as TOUT;
+
+                const remainingTtl = remainingTtls[index];
+                if (remainingTtl !== undefined) {
+                  remoteExpirations.set(key, Date.now() + remainingTtl * 1000);
+                }
               }
             }
 
@@ -640,6 +679,13 @@ export class CacheService {
       ttl,
       chunkSize,
     );
+  }
+
+  /**
+   * Do not keep a value locally longer than it still lives in redis.
+   */
+  private capTtlToRemainingTtl(ttl: number, remainingTtl: number | undefined): number {
+    return remainingTtl !== undefined ? Math.min(ttl, remainingTtl) : ttl;
   }
 
   private spreadTtl(ttl: number): number {
