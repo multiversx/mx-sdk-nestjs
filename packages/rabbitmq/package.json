@@ -26,15 +26,13 @@
   "license": "MIT",
   "devDependencies": {
     "@types/amqplib": "^0.10.8",
-    "@types/uuid": "^8.3.2",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
     "eslint": "^10.2.1",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@golevelup/nestjs-rabbitmq": "9.0.0",
-    "uuid": "^8.3.2"
+    "@golevelup/nestjs-rabbitmq": "9.0.0"
   },
   "peerDependencies": {
     "@multiversx/sdk-nestjs-common": "^7.0.0",

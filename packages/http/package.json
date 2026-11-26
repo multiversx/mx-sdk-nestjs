@@ -36,7 +36,7 @@
     "@multiversx/sdk-core": "^15.4.0",
     "@multiversx/sdk-native-auth-client": "^2.0.1",
     "agentkeepalive": "^4.6.0",
-    "axios": "^1.16.0"
+    "axios": "^1.20.0"
   },
   "peerDependencies": {
     "@multiversx/sdk-nestjs-common": "^7.0.0",
