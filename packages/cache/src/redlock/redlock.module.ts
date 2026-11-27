@@ -10,7 +10,7 @@ export class RedlockModule {
   static forRoot(...redisOptionsArray: RedlockConnectionOptions[]): DynamicModule {
     const redisProviders: Provider[] = redisOptionsArray.map((option, index) => ({
       provide: `REDIS_CLIENT_${index}`,
-      useFactory: () => new Redis(option),
+      useFactory: () => RedlockModule.createClient(option),
     }));
 
     const redisClientsProvider: Provider = {
@@ -42,7 +42,7 @@ export class RedlockModule {
       provide: 'REDIS_CLIENTS',
       useFactory: async (...args: any[]): Promise<Redis[]> => {
         const optionsArray = await asyncOptions.useFactory(...args);
-        return optionsArray.map(options => new Redis(options));
+        return optionsArray.map(options => RedlockModule.createClient(options));
       },
       inject: asyncOptions.inject || [],
     }];
@@ -65,4 +65,10 @@ export class RedlockModule {
     };
   }
 
+  /**
+   * ioredis 6 defaults to RESP3; keep the RESP2 wire protocol used by ioredis 5 unless `protocol` is set explicitly.
+   */
+  private static createClient(options: RedlockConnectionOptions): Redis {
+    return new Redis({ protocol: 2, ...options });
+  }
 }

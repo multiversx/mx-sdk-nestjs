@@ -1,13 +1,13 @@
 import { ComplexityNode } from "./complexity.node";
 import { ParentNodeNotFoundException } from "./exceptions/parent.node.not.found.exception";
 
-import * as uuid from "uuid";
+import { randomUUID } from "crypto";
 
 export class ComplexityTree {
   root: ComplexityNode;
 
   constructor() {
-    this.root = new ComplexityNode("root", 1, uuid.v4());
+    this.root = new ComplexityNode("root", 1, randomUUID());
   }
 
   public addChildNode(identifier: string, complexity: number, parent: string, group?: string): void {
@@ -19,7 +19,7 @@ export class ComplexityTree {
       queue.shift();
 
       if (currentNode.identifier === parent) {
-        currentNode.addChild(identifier, complexity, `${parent}|${group ?? uuid.v4()}`);
+        currentNode.addChild(identifier, complexity, `${parent}|${group ?? randomUUID()}`);
         return;
       }
 

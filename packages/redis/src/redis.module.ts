@@ -12,7 +12,7 @@ export class RedisModule {
       providers: [
         {
           provide: customClientToken || REDIS_CLIENT_TOKEN,
-          useValue: new Redis(connectionOptions.config),
+          useValue: RedisModule.createClient(connectionOptions),
         },
       ],
       exports: [customClientToken || REDIS_CLIENT_TOKEN],
@@ -28,7 +28,7 @@ export class RedisModule {
     const clientProvider = {
       inject: [REDIS_OPTIONS_TOKEN],
       provide: customClientToken || REDIS_CLIENT_TOKEN,
-      useFactory: (factoryOptions: RedisModuleOptions) => new Redis(factoryOptions.config),
+      useFactory: (factoryOptions: RedisModuleOptions) => RedisModule.createClient(factoryOptions),
     };
 
     return {
@@ -40,6 +40,13 @@ export class RedisModule {
       ],
       exports: [clientProvider],
     };
+  }
+
+  /**
+   * ioredis 6 defaults to RESP3; keep the RESP2 wire protocol used by ioredis 5 unless `protocol` is set explicitly.
+   */
+  private static createClient(options: RedisModuleOptions): Redis {
+    return new Redis({ protocol: 2, ...options.config });
   }
 
   private static createConnectOptionsProviders(
